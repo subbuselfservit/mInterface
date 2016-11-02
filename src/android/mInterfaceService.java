@@ -54,8 +54,8 @@ public class mInterffaceService extends Service {
 	
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-		private LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-		private LocationListener mlocListener = new MyLocationListener(locationManager);
+		LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+		LocationListener mlocListener = new MyLocationListener(locationManager);
         locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER , 30000, 0, mlocListener);
         return START_STICKY;
     }
