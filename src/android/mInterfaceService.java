@@ -34,15 +34,15 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-public class mInterffaceService extends Service {
-    public mInterffaceService() {
+public class mInterfaceService extends Service {
+    public mInterfaceService() {
 		//constructor
     }
 	
