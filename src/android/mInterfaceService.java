@@ -87,12 +87,12 @@ public class mInterffaceService extends Service {
         }
     }
 
-    private class PostGpsData extends AsyncTask<String, Void, String> {
+    /*private class PostGpsData extends AsyncTask<String, Void, String> {
 
         private String objLon;
         private String objLat;
 
-       /* public PostGpsData(String lat, String lon) {
+        public PostGpsData(String lat, String lon) {
             this.objLon = lon;
             this.objLat = lat;
         }
