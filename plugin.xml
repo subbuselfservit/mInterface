@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    id="cordova-plugin-minterface"
+    version="1.3.11">
+    <name>mInterface</name>
+    <description>This plugin establishes the connection to the native interface and performs the requested task.</description>
+    <author>selfservit@gmail.com</author>
+    <keywords>mInterface</keywords>
+    <license>Apache 2.0 License</license>
+    <repo></repo>
+    <issue></issue>
+    <!-- android -->
+    <platform name="android">
+        <config-file target="res/xml/config.xml" parent="/*">
+            <feature name="mInterface" >
+                <param name="android-package" value="com.selfservit.util.mInterface"/>
+            </feature>
+        </config-file>
+		<config-file target="AndroidManifest.xml" parent="/manifest">
+			<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+			<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+			<uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+			<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+			<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+			<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+			<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+			<uses-permission android:name="android.permission.READ_PHONE_STATE" />
+		</config-file>
+		<config-file target="AndroidManifest.xml" parent="/manifest/application">
+			<service android:name="com.selfservit.util.mInterfaceService" android:enabled="true"
+            android:exported="true"/>
+			<receiver android:name="com.selfservit.util.mInterfaceReceiver" android:enabled="true"
+            android:exported="true">
+				<intent-filter>     
+					<action android:name="android.intent.action.BOOT_COMPLETED"/>  
+				</intent-filter>  
+			</receiver>
+		</config-file>
+		
+		<js-module src="www/mInterface.js" name="mInterface">
+        <clobbers target="mInterface" />
+		</js-module>
+		<source-file src="src/android/mInterfaceService.java" target-dir="src/com/selfservit/util/" />
+		<source-file src="src/android/mInterfaceReceiver.java" target-dir="src/com/selfservit/util/" />
+		<source-file src="src/android/mInterface.java" target-dir="src/com/selfservit/util/" />
+    </platform>
+</plugin>
