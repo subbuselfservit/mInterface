@@ -20,7 +20,7 @@ public class mInterface extends CordovaPlugin{
 	
 	@Override
 	public boolean execute(final String action, JSONArray args, final CallbackContext callbackContext) throws JSONException {
-		if(action == "TrackLocation"){
+		if(action.equals("TrackLocation")){
 			if(!isServiceRunning(mInterfaceService.class)) {
 				Intent serviceIntent = new Intent(cordova.getActivity().getApplicationContext(), mInterfaceService.class);
 				cordova.getActivity().startService(serviceIntent);
