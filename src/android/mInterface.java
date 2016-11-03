@@ -20,12 +20,40 @@ public class mInterface extends CordovaPlugin{
 	
 	@Override
 	public boolean execute(final String action, JSONArray args, final CallbackContext callbackContext) throws JSONException {
-		if(action.equals("TrackLocation")){
+		if(action.equals("StartService")){
 			if(!isServiceRunning(mInterfaceService.class)) {
 				Intent serviceIntent = new Intent(cordova.getActivity().getApplicationContext(), mInterfaceService.class);
 				cordova.getActivity().startService(serviceIntent);
 				callbackContext.success("Success");
 			}
+		}else if(action.equals("GetLocation")){
+			LocationManager locationManager = (LocationManager) cordova.getActivity().getApplicationContext().getSystemService(cordova.getActivity().getApplicationContext().LOCATION_SERVICE);
+			LocationListener locationListener = new LocationListener() {
+				@Override
+				public void onLocationChanged(Location location) {
+
+				}
+
+				@Override
+				public void onStatusChanged(String provider, int status, Bundle extras) {
+
+				}
+
+				@Override
+				public void onProviderEnabled(String provider) {
+
+				}
+
+				@Override
+				public void onProviderDisabled(String provider) {
+
+				}
+			};
+			locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
+
+	       		double latitude = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER).getLatitude();
+    	   	        double longitude=locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER).getLongitude();
+			callbackContext.success("{\"lat\":"+"\""+latitude+"\""+",\"lon\":"+"\""+longitude+"\"}");
 		}
 		return true;
 	}	
