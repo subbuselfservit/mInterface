@@ -58,7 +58,7 @@ public class mInterface extends CordovaPlugin{
 			boolean location_enabled=false;
 			LocationManager locationManager = (LocationManager) cordova.getActivity().getApplicationContext().getSystemService(cordova.getActivity().getApplicationContext().LOCATION_SERVICE);
 			location_enabled=locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-			callbackContext.success(location_service);
+			callbackContext.success(location_enabled);
 		}
 		return true;
 	}	
