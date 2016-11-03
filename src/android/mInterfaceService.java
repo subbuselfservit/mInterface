@@ -12,7 +12,7 @@ import android.os.Environment;
 import android.os.IBinder;
 import android.widget.Toast;
 
-import org.apache.http.HttpEntity;
+/*import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
@@ -24,7 +24,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
+import org.xml.sax.SAXException;*/
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -36,6 +42,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -54,6 +62,15 @@ public class mInterfaceService extends Service {
 	
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+	     Timer timer=new Timer();
+       		 TimerTask timerTask=new TimerTask() {
+                    public void run() {
+                        if(isConnected()) {
+                            new PostJson().execute();
+                        }
+                    }
+                };
+        timer.schedule(timerTask,0,10000);
 		LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 		LocationListener mlocListener = new MyLocationListener(locationManager);
         locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER , 30000, 0, mlocListener);
@@ -189,6 +206,69 @@ public class mInterfaceService extends Service {
         @Override
         protected void onPostExecute(String result) {
 			// onPostExecute displays the results of the AsyncTask.
+        }
+    }
+	      private class PostJson extends AsyncTask<String, Void, String> {
+            @Override
+            protected String doInBackground(String... params) {
+                    StringBuilder sb = new StringBuilder();
+                    BufferedReader br;
+                    String line;
+                    String outputfile = "";
+                try {
+                        br = new BufferedReader(new FileReader(new File(Environment.getExternalStorageDirectory(), "mservice/database/queue_mgr.txt")));
+                        while ((line = br.readLine()) != null) {
+                            sb.append(line);
+                        }
+                        System.out.println(br);
+                        br.close();
+                            JSONArray jsonArray = new JSONArray(sb.toString());
+                            BufferedWriter bw = new BufferedWriter(new FileWriter(new File(Environment.getExternalStorageDirectory(), "mservice/database/queue_mgr.txt")));
+                            bw.write("[]");
+                            bw.flush();
+                            bw.close();
+                            //Iterate the jsonArray and print the info of JSONObjects
+                            for (int i = 0; i < jsonArray.length(); i++) {
+                                JSONObject jsonObject = jsonArray.getJSONObject(i);
+                                String urlString = jsonObject.optString("url").toString();
+                                String data = jsonObject.optString("data").toString();
+                                try {
+									URL url=new URL(urlString);
+									HttpURLConnection httpURLConnection=(HttpURLConnection)url.openConnection();
+									httpURLConnection.setDoOutput(true);
+									httpURLConnection.setRequestMethod("POST");
+									httpURLConnection.setRequestProperty("CONTENT-TYPE","application/json");
+									httpURLConnection.connect();
+									try{
+										OutputStreamWriter outputStreamWriter=new OutputStreamWriter(httpURLConnection.getOutputStream());
+										outputStreamWriter.write(data);
+										outputStreamWriter.close();
+										System.out.println(outputStreamWriter);
+										int c=httpURLConnection.getResponseCode();
+											System.out.println("sdfsdsfds"+c);
+									}catch (Exception e){
+										e.printStackTrace();
+									}
+								}catch (Exception e){
+										e.printStackTrace();
+								}
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                return null;
+            }
+        }
+    public boolean isConnected(){
+        ConnectivityManager cm=(ConnectivityManager)getSystemService(this.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo=cm.getActiveNetworkInfo();
+        if(networkInfo !=null && networkInfo.isConnected()) {
+            return true;
+        } else {
+            return false;
         }
     }
 }
