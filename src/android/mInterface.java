@@ -2,6 +2,9 @@ package com.selfservit.util;
 
 import org.apache.cordova.CordovaInterface;
 import android.util.Log;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.provider.Settings;
 import android.widget.Toast;
 import org.json.JSONArray;
