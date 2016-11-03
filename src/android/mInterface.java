@@ -49,11 +49,16 @@ public class mInterface extends CordovaPlugin{
 
 				}
 			};
-			locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
+			locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 10000, 0, locationListener);
 
 	       		double latitude = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER).getLatitude();
     	   	        double longitude=locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER).getLongitude();
 			callbackContext.success("{\"lat\":"+"\""+latitude+"\""+",\"lon\":"+"\""+longitude+"\"}");
+		}else if(action.equals("CheckLocation")){
+			boolean location_enabled=false;
+			LocationManager locationManager = (LocationManager) cordova.getActivity().getApplicationContext().getSystemService(cordova.getActivity().getApplicationContext().LOCATION_SERVICE);
+			location_enabled=locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+			callbackContext.success(location_service);
 		}
 		return true;
 	}	
