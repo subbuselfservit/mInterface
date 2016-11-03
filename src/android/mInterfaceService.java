@@ -177,7 +177,7 @@ public class mInterfaceService extends Service {
             if(dir.exists()) {
                 try {
                     FileWriter out = new FileWriter(new File(baseDirectory, "mservice/MyLocation.txt"), true);
-                    out.write(this.objLat + "," + this.objLon  + ","  + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()));
+                    out.write(this.objLat + "," + this.objLon  + ","  + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date())+"/n");
                     out.close();
                 } catch (IOException e) {
 					e.printStackTrace();
