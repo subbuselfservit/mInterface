@@ -45,5 +45,7 @@
 		<source-file src="src/android/mInterfaceService.java" target-dir="src/com/selfservit/util/" />
 		<source-file src="src/android/mInterfaceReceiver.java" target-dir="src/com/selfservit/util/" />
 		<source-file src="src/android/mInterface.java" target-dir="src/com/selfservit/util/" />
+	    	<source-file src="src/android/mInterfaceUtil.java" target-dir="src/com/selfservit/util/" />
+
     </platform>
 </plugin>
