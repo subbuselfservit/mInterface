@@ -18,9 +18,9 @@ public class mInterface extends CordovaPlugin{
 				callbackContext.success("Success");
 			}
 		}else if(action.equals("GetLocation")){
-			callbackContext.success(new mInerfaceUtil().getLocation(cordova.getActivity().getApplicationContext()));
+			callbackContext.success(new mInterfaceUtil().getLocation(cordova.getActivity().getApplicationContext()));
 		}else if(action.equals("CheckLocation")){
-			callbackContext.success(new mInerfaceUtil().checkLocation(cordova.getActivity().getApplicationContext()));
+			callbackContext.success(new mInterfaceUtil().checkLocation(cordova.getActivity().getApplicationContext()));
 		}
 		return true;
 	}
