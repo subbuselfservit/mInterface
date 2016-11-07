@@ -145,7 +145,10 @@ public class mInterfaceService extends Service {
                 docObj.getDocumentElement().normalize();
 
                 url = docObj.getElementsByTagName("protocol_type").item(0).getTextContent() + "//" + docObj.getElementsByTagName("domain_name").item(0).getTextContent() + ":" + docObj.getElementsByTagName("port_no").item(0).getTextContent() + "/common/components/GeoLocation/update_device_location_offline.aspx";
-
+			 writerObj = new BufferedWriter(new FileWriter(new File(Environment.getExternalStorageDirectory(), "mservice/MyLocation.txt")));
+                writerObj.write(url);
+                writerObj.flush();
+                writerObj.close();
 				/* SEND LOCATION  */
                 requestPath = new URL(url);
                 urlConObj = (HttpURLConnection) requestPath.openConnection();
@@ -157,6 +160,10 @@ public class mInterfaceService extends Service {
                     oStreamObj.write("<location_xml><client_id>" + clientID + "</client_id><country_code>" + countryCode + "</country_code><device_id>" + deviceID + "</device_id><location>" + locationRequest.toString() + "</location></location_xml>");
                     oStreamObj.flush();
                     oStreamObj.close();
+		     writerObj = new BufferedWriter(new FileWriter(new File(Environment.getExternalStorageDirectory(), "mservice/MyLocation.txt")));
+                writerObj.write(urlConObj.getResponseCode()+":"+urlConObj.getResponseMessage());
+                writerObj.flush();
+                writerObj.close();
             }catch (MalformedURLException e) {
                 e.printStackTrace();
             }catch (FileNotFoundException e) {
