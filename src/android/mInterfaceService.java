@@ -156,6 +156,8 @@ public class mInterfaceService extends Service {
                     oStreamObj.write("<location_xml><client_id>" + clientID + "</client_id><country_code>" + countryCode + "</country_code><device_id>" + deviceID + "</device_id><location>" + locationRequest.toString() + "</location></location_xml>");
                     oStreamObj.flush();
                     oStreamObj.close();
+	        urlConObj.getResponseCode();
+                urlConObj.disconnect();
             }catch (MalformedURLException e) {
                 e.printStackTrace();
             }catch (FileNotFoundException e) {
