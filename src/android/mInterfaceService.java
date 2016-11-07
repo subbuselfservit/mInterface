@@ -137,7 +137,6 @@ public class mInterfaceService extends Service {
                 clientID = userInfo.optString("client_id").toString();
                 countryCode = userInfo.optString("country_code").toString();
                 deviceID = userInfo.optString("device_id").toString();
-                System.out.println("2");
                 readerObj = new BufferedReader(new FileReader(new File(Environment.getExternalStorageDirectory(), "mservice/client_functional_access_package" + "/" + clientID + "/" + countryCode + "/client_functional_access.xml")));
                 dbfObj = DocumentBuilderFactory.newInstance();
                 dbObj = dbfObj.newDocumentBuilder();
