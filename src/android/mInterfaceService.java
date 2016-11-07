@@ -1,6 +1,6 @@
 package com.selfservit.util;
 
-import android.app.Service;
+import android.app.Service;;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
@@ -12,38 +12,27 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.IBinder;
-import android.widget.Toast;
 
-/*import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.protocol.HTTP;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;*/
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import org.xml.sax.SAXException;
 
 import java.io.BufferedWriter;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Timer;
@@ -54,222 +43,261 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 public class mInterfaceService extends Service {
-    public mInterfaceService() {
-//constructor
-    }
+    LocationManager locationManager;
+    LocationListener locationListener;
 
     @Override
     public IBinder onBind(Intent intent) {
-// TODO: Return the communication channel to the service.
+        // TODO: Return the communication channel to the service.
         throw new UnsupportedOperationException("Not yet implemented");
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Timer timer=new Timer();
-        TimerTask timerTask=new TimerTask() {
+        Timer timerObj = new Timer();
+        TimerTask timerTaskObj = new TimerTask() {
             public void run() {
-                if(isConnected()) {
-                    new PostJson().execute();
+                if (isConnected()) {
+                    new DespatchQueue().execute();
                 }
             }
         };
-        timer.schedule(timerTask,0,10000);
-        LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        LocationListener mlocListener = new MyLocationListener(locationManager);
-        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER , 30000, 0, mlocListener);
+        timerObj.schedule(timerTaskObj, 0, 15000);
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        locationListener = new MyLocationListener(locationManager);
+        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 30000, 0, locationListener);
         return START_STICKY;
     }
-
     private class MyLocationListener implements LocationListener {
         public MyLocationListener(LocationManager locationManager) {
-//constructor
         }
 
         @Override
         public void onLocationChanged(Location location) {
-            new WriteGpsData(Double.toString(location.getLatitude()), Double.toString(location.getLongitude())).execute(" ");
-//new PostGpsData(Double.toString(location.getLatitude()), Double.toString(location.getLongitude())).execute(" ");
+            new UpdateLocation(Double.toString(location.getLatitude()), Double.toString(location.getLongitude())).execute("");
+            if(isConnected()) {
+                new SendLocation().execute();
+            }
         }
 
         @Override
         public void onStatusChanged(String provider, int status, Bundle extras) {
-//Called when the provider status changes
+
         }
 
         @Override
         public void onProviderEnabled(String provider) {
-//Called when the provider is enabled by the user
+
         }
 
         @Override
         public void onProviderDisabled(String provider) {
-//Called when the provider is disabled by the user
+
         }
     }
 
-/*private class PostGpsData extends AsyncTask<String, Void, String> {
+    private class SendLocation extends AsyncTask<String, Void, String> {
+        @Override
+        protected String doInBackground(String... urls) {
+            StringBuilder locationRequest, userProfile;
+            BufferedReader readerObj;
+            BufferedWriter writerObj;
+            String line, clientID, countryCode, deviceID, url;
+            JSONObject userInfo;
+            DocumentBuilderFactory dbfObj;
+            DocumentBuilder dbObj;
+            Document docObj;
+            URL requestPath;
+            HttpURLConnection urlConObj;
+            OutputStreamWriter oStreamObj;
 
-private String objLon;
-private String objLat;
+            try {
+				/* GETTING THE LOCATION POINTS TO BE SENT TO THE SERVER */
+                locationRequest = new StringBuilder();
+                readerObj = new BufferedReader(new FileReader(new File(Environment.getExternalStorageDirectory(), "mservice/MyLocation.txt")));
+                while ((line = readerObj.readLine()) != null) {
+                    locationRequest.append(line + "\n");
+                }
+                readerObj.close();
+				
+				/* CLEARING THE LOCATION POINTS */
+                writerObj = new BufferedWriter(new FileWriter(new File(Environment.getExternalStorageDirectory(), "mservice/MyLocation.txt")));
+                writerObj.write("");
+                writerObj.flush();
+                writerObj.close();
 
-public PostGpsData(String lat, String lon) {
-this.objLon = lon;
-this.objLat = lat;
-}
+				/* GETTING THE USER INFO */
+                userProfile = new StringBuilder();
+                readerObj = new BufferedReader(new FileReader(new File(Environment.getExternalStorageDirectory(), "mservice/user.txt")));
+                while ((line = readerObj.readLine()) != null) {
+                    userProfile.append(line);
+                }
+                readerObj.close();
+                userInfo = new JSONObject(userProfile.toString());
+                clientID = userInfo.optString("client_id").toString();
+                countryCode = userInfo.optString("country_code").toString();
+                deviceID = userInfo.optString("device_id").toString();
+                System.out.println("2");
+                readerObj = new BufferedReader(new FileReader(new File(Environment.getExternalStorageDirectory(), "mservice/client_functional_access_package" + "/" + clientID + "/" + countryCode + "/client_functional_access.xml")));
+                dbfObj = DocumentBuilderFactory.newInstance();
+                dbObj = dbfObj.newDocumentBuilder();
+                docObj = dbObj.parse(new InputSource(readerObj));
+                docObj.getDocumentElement().normalize();
 
-@Override
-protected String doInBackground(String... urls) {
-File baseDirectory = Environment.getExternalStorageDirectory();
-BufferedReader fileReader;
-StringBuilder user_profile;
-String ClientID = "";
-String CountryCode = "";
-String DeviceID = "";
-try {
-user_profile = new StringBuilder();
-fileReader = new BufferedReader(new FileReader(new File(baseDirectory,"mservice/user.txt")));
-String line;
-while ((line = fileReader.readLine()) != null) {
-user_profile.append(line);
-}
-fileReader.close();
-if(user_profile.toString() != "") {
-JSONArray args = new JSONArray("["+user_profile.toString()+"]");
-JSONObject arg_object = args.getJSONObject(0);
+                url = docObj.getElementsByTagName("protocol_type").item(0).getTextContent() + "//" + docObj.getElementsByTagName("domain_name").item(0).getTextContent() + ":" + docObj.getElementsByTagName("port_no").item(0).getTextContent() + "/common/components/GeoLocation/update_device_location_offline.aspx";
 
-ClientID = arg_object.getString("client_id");
-CountryCode = arg_object.getString("country_code");
-DeviceID = arg_object.getString("device_id");
-
-fileReader = new BufferedReader(new FileReader(new File(baseDirectory,"mservice/client_functional_access_package" + "/" + ClientID + "/" + CountryCode + "/client_functional_access.xml" )));
-DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-DocumentBuilder db = dbf.newDocumentBuilder();
-Document doc = db.parse(new InputSource(fileReader));
-doc.getDocumentElement().normalize();
-
-String Protocol = doc.getElementsByTagName("protocol_type").item(0).getTextContent();
-String Domain = doc.getElementsByTagName("domain_name").item(0).getTextContent();
-String Port = doc.getElementsByTagName("port_no").item(0).getTextContent();
-String url = Protocol + "//" + Domain + ":" + Port + "/common/components/GeoLocation/update_device_location.aspx";
-
-HttpClient httpclient = new DefaultHttpClient();
-HttpPost httppost = new HttpPost(url);
-StringEntity reqloc = new StringEntity("<location_xml><client_id>" + ClientID + "</client_id>" + "<country_code>" + CountryCode + "</country_code>" + "<device_id>" + DeviceID + "</device_id>" + "<latitude>" + this.objLat + "</latitude>" + "<longitude>" + this.objLon + "</longitude>" + "</location_xml>",HTTP.UTF_8);
-reqloc.setContentType("text/xml");
-httppost.setEntity(reqloc);
-HttpResponse response = httpclient.execute(httppost);
-HttpEntity httpEntity = response.getEntity();
-}
-}
-catch (IOException e) {
-e.printStackTrace();
-} catch (JSONException e) {
-e.printStackTrace();
-} catch (ParserConfigurationException e) {
-e.printStackTrace();
-} catch (SAXException e) {
-e.printStackTrace();
-} catch (Exception e) {
-e.printStackTrace();
-}
-return null;
-}
-
-@Override
-protected void onPostExecute(String result) {
-// onPostExecute displays the results of the AsyncTask.
-}
-}*/
-
-    private class WriteGpsData extends AsyncTask<String, Void, String> {
-
+				/* SEND LOCATION  */
+                requestPath = new URL(url);
+                urlConObj = (HttpURLConnection) requestPath.openConnection();
+                urlConObj.setDoOutput(true);
+                urlConObj.setRequestMethod("POST");
+                urlConObj.setRequestProperty("CONTENT-TYPE", "text/xml");
+                urlConObj.connect();
+                    oStreamObj = new OutputStreamWriter(urlConObj.getOutputStream());
+                    oStreamObj.write("<location_xml><client_id>" + clientID + "</client_id><country_code>" + countryCode + "</country_code><device_id>" + deviceID + "</device_id><location>" + locationRequest.toString() + "</location></location_xml>");
+                    oStreamObj.flush();
+                    oStreamObj.close();
+            }catch (MalformedURLException e) {
+                e.printStackTrace();
+            }catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (ParserConfigurationException e) {
+                e.printStackTrace();
+            } catch (SAXException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+    }
+    private class UpdateLocation extends AsyncTask<String, Void, String> {
         private String objLat, objLon;
 
-        public WriteGpsData(String lat, String lon) {
+        public UpdateLocation(String lat, String lon) {
             this.objLat = lat;
             this.objLon = lon;
         }
 
         @Override
         protected String doInBackground(String... urls) {
-            File baseDirectory = Environment.getExternalStorageDirectory();
-            File dir = new File (baseDirectory.getAbsolutePath() + "/mservice");
-            if(dir.exists()) {
+            File baseDirectory, appDirectory;
+            FileWriter writerObj;
+
+            baseDirectory = Environment.getExternalStorageDirectory();
+            appDirectory = new File(baseDirectory.getAbsolutePath() + "/mservice");
+            if (appDirectory.exists()) {
                 try {
-                    FileWriter out = new FileWriter(new File(baseDirectory, "mservice/MyLocation.txt"), true);
-                    out.write(this.objLat + "," + this.objLon + "," + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date())+"\n");
-                    out.close();
+                    writerObj = new FileWriter(new File(baseDirectory, "mservice/MyLocation.txt"), true);
+                    writerObj.write(this.objLat + "," + this.objLon + "," + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()) + "\n");
+                    writerObj.close();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
             return null;
         }
-
-        @Override
-        protected void onPostExecute(String result) {
-// onPostExecute displays the results of the AsyncTask.
-        }
     }
-    private class PostJson extends AsyncTask<String, Void, String> {
+
+    private class DespatchQueue extends AsyncTask<String, Void, String> {
         @Override
         protected String doInBackground(String... params) {
-            StringBuilder sb = new StringBuilder();
-            BufferedReader br;
-            String line;
-            String outputfile = "";
+            StringBuilder queueRequest,queueResponse;
+            BufferedReader readerObj,readerresponseObj;
+            BufferedWriter writerObj;
+            JSONArray queueList;
+            JSONObject queueObj;
+            String line, requesturl, sendData, responseline, receiveData = "";
+            URL requestPath;
+            HttpURLConnection urlConObj;
+            OutputStreamWriter oStreamObj;
+            File baseDirectory,appDirectory,fileName;
+            FileWriter responseObj;
+
+            /* READING A QUEUE_MGR FILE FROM INTERNAL STORAGE */
             try {
-                br = new BufferedReader(new FileReader(new File(Environment.getExternalStorageDirectory(), "mservice/database/queue_mgr.txt")));
-                while ((line = br.readLine()) != null) {
-                    sb.append(line);
+                queueRequest = new StringBuilder();
+                readerObj = new BufferedReader(new FileReader(new File(Environment.getExternalStorageDirectory(), "mservice/database/queue_mgr.txt")));
+                while ((line = readerObj.readLine()) != null) {
+                    queueRequest.append(line);
                 }
-                br.close();
-                JSONArray jsonArray = new JSONArray(sb.toString());
-                BufferedWriter bw = new BufferedWriter(new FileWriter(new File(Environment.getExternalStorageDirectory(), "mservice/database/queue_mgr.txt")));
-                bw.write("[]");
-                bw.flush();
-                bw.close();
-//Iterate the jsonArray and print the info of JSONObjects
-                for (int i = 0; i < jsonArray.length(); i++) {
-                    JSONObject jsonObject = jsonArray.getJSONObject(i);
-                    String urlString = jsonObject.optString("url").toString();
-                    String data = jsonObject.optString("data").toString();
+                readerObj.close();
+
+                /* CNVERT A QUEUE_MGR FILE DATA INTO JSONARRAY */
+                queueList = new JSONArray(queueRequest.toString());
+                writerObj = new BufferedWriter(new FileWriter(new File(Environment.getExternalStorageDirectory(), "mservice/database/queue_mgr.txt")));
+                writerObj.write("[]");
+                writerObj.flush();
+                writerObj.close();
+                for (int i = 0; i < queueList.length(); i++) {
+                    queueObj = queueList.getJSONObject(i);
+                    requesturl = queueObj.optString("url").toString();
+                    sendData = queueObj.optString("data").toString();
+
+                        /* SEND JSON DATA TO SERVER*/
+                        requestPath = new URL(requesturl);
+                        urlConObj = (HttpURLConnection) requestPath.openConnection();
+                        urlConObj.setDoOutput(true);
+                        urlConObj.setRequestMethod("POST");
+                        urlConObj.setRequestProperty("CONTENT-TYPE", "application/json");
+                        urlConObj.connect();
+                        oStreamObj = new OutputStreamWriter(urlConObj.getOutputStream());
+                        oStreamObj.write(sendData);
+                        oStreamObj.flush();
+                        oStreamObj.close();
+
+                        /* GET RESPONSE FROM SERVER*/
+                        queueResponse = new StringBuilder();
+                        readerresponseObj = new BufferedReader(new InputStreamReader(urlConObj.getInputStream()));
+                        while ((responseline = readerresponseObj.readLine()) != null){
+                            queueResponse.append(responseline + "\n");
+                         }
+                        receiveData += "Time:" + new SimpleDateFormat("HH:mm:ss").format(new Date()) + "\n";
+                        receiveData += "url:" + requesturl + "\n";
+                        receiveData += "data:"+ sendData + "\n";
+                        receiveData += "response:" + queueResponse.toString() + "\n";
+                        receiveData += "------------------\n";
+                        readerresponseObj.close();
+                        urlConObj.disconnect();
+                }
+
+                /* WRITE RESPONSE DATA TO INTERNAL STORAGE */
+                baseDirectory =Environment.getExternalStorageDirectory();
+                appDirectory =new File(baseDirectory.getAbsolutePath()+"/mservice/database/process");
+                fileName =new File(appDirectory, new SimpleDateFormat("yyyyMMdd").format(new Date())+ ".txt");
+                if(appDirectory.exists()){
                     try {
-                        URL url = new URL(urlString);
-                        HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
-                        httpURLConnection.setDoOutput(true);
-                        httpURLConnection.setRequestMethod("POST");
-                        httpURLConnection.setRequestProperty("CONTENT-TYPE", "application/json");
-                        httpURLConnection.connect();
-                        try {
-                            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(httpURLConnection.getOutputStream());
-                            outputStreamWriter.write(data);
-                            outputStreamWriter.close();
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    } catch (Exception e) {
+                        responseObj = new FileWriter(fileName, true);
+                        responseObj.write(receiveData);
+                        responseObj.flush();
+                        responseObj.close();
+                    }catch (IOException e){
                         e.printStackTrace();
                     }
+                }else{
+                    appDirectory.mkdir();
                 }
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                return null;
+            }catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        }
-        public boolean isConnected(){
-            ConnectivityManager cm=(ConnectivityManager)getSystemService(this.CONNECTIVITY_SERVICE);
-            NetworkInfo networkInfo=cm.getActiveNetworkInfo();
-            if(networkInfo !=null && networkInfo.isConnected()) {
-                return true;
-            } else {
-                return false;
-            }
+            return null;
         }
     }
+    public boolean isConnected(){
+        ConnectivityManager cm = (ConnectivityManager)getSystemService(this.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = cm.getActiveNetworkInfo();
+        if(networkInfo != null && networkInfo.isConnected()) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+}
