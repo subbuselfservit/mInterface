@@ -6,7 +6,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 
-public class mInerfaceUtil {
+public class mInterfaceUtil {
 
     public String getLocation(Context context) {
         LocationManager locationManager = (LocationManager) context.getSystemService(context.LOCATION_SERVICE);
