@@ -1,0 +1,22 @@
+{
+  "name": "cordova-plugin-minterface",
+  "version": "2.1.11",
+  "description": "This plugin establishes the connection to the native interface and performs the requested task.",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/selfservit/mInterface.git"
+  },
+  "keywords": [
+    "minterface"
+  ],
+  "author": "selfservit@gmail.com",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/selfservit/mInterface/issues"
+  },
+  "homepage": "https://github.com/selfservit/mInterface#readme"
+}
