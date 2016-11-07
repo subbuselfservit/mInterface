@@ -143,8 +143,8 @@ public class mInterfaceService extends Service {
                 dbObj = dbfObj.newDocumentBuilder();
                 docObj = dbObj.parse(new InputSource(readerObj));
                 docObj.getDocumentElement().normalize();
+                url = docObj.getElementsByTagName("protocol_type").item(0).getTextContent() + "//" + docObj.getElementsByTagName("domain_name").item(0).getTextContent() + ":" + docObj.getElementsByTagName("port_no").item(0).getTextContent() + "/common/components/GeoLocation/update_device_location_offline.aspx";
 
-                url = docObj.getElementsByTagName("protocol_type").item(0).getTextContent() + "//" + docObj.getElementsByTagName("domain_name").item(0).getTextContent() + ":" + docObj.getElementsByTagName("port_no").item(0).getTextContent() + "/common/components/GeoLocation/update_device_location_offline.aspx";	 
 				/* SEND LOCATION  */
                 requestPath = new URL(url);
                 urlConObj = (HttpURLConnection) requestPath.openConnection();
