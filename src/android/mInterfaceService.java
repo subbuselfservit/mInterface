@@ -230,6 +230,7 @@ public class mInterfaceService extends Service {
             /* READING A QUEUE_MGR FILE FROM INTERNAL STORAGE */
             try {
                 queueRequest = new StringBuilder();
+		baseDirectory =Environment.getExternalStorageDirectory();
                 readerObj = new BufferedReader(new FileReader(new File(Environment.getExternalStorageDirectory(), "mservice/database/queue_mgr.txt")));
                 while ((line = readerObj.readLine()) != null) {
                     queueRequest.append(line);
