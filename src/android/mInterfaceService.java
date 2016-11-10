@@ -30,6 +30,8 @@ import java.net.URL;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.DataOutputStream;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -210,12 +212,20 @@ public class mInterfaceService extends Service {
             BufferedWriter writerObj;
             JSONArray queueList;
             JSONObject queueObj;
-            String line, requesturl, sendData, responseline, receiveData = "";
+            String line, requesturl, sendData, responseline,fileType,sendFileName,requestfilepath,sendFileBasePath,receiveData = "";
+	    int bytesRead, bytesAvailable, bufferSize;
+            byte[] buffer;
+            int maxBufferSize = 1 * 1024 * 1024;
             URL requestPath;
             HttpURLConnection urlConObj;
             OutputStreamWriter oStreamObj;
             File baseDirectory,appDirectory,fileName;
             FileWriter responseObj;
+	    FileInputStream fileInputStream;
+	    DataOutputStream dos;
+            String lineEnd = "\r\n";
+            String twoHyphens = "--";
+            String boundary = "*****";
 
             /* READING A QUEUE_MGR FILE FROM INTERNAL STORAGE */
             try {
@@ -236,7 +246,59 @@ public class mInterfaceService extends Service {
                     queueObj = queueList.getJSONObject(i);
                     requesturl = queueObj.optString("url").toString();
                     sendData = queueObj.optString("data").toString();
+		    fileType = queueObj.optString("type").toString();
+                    sendFileBasePath = queueObj.optString("filepath").toString();
+                    sendFileName = queueObj.optString("filename").toString();
+			
+			/* UPLOAD FILE TO SERVER */
+                    if (fileType.equals("file")) {
+                        requestfilepath = baseDirectory + "/" + sendFileBasePath + "/" + sendFileName;
 
+                        fileInputStream = new FileInputStream(new File(requestfilepath));
+                        requestPath = new URL(requesturl + "&filename=" + sendFileName);
+                        // Open a HTTP  connection to  the URL
+                        urlConObj = (HttpURLConnection) requestPath.openConnection();
+                        urlConObj.setDoInput(true); // Allow Inputs
+                        urlConObj.setDoOutput(true); // Allow Outputs
+                        urlConObj.setUseCaches(false); // Don't use a Cached Copy
+                        urlConObj.setRequestMethod("POST");
+                        urlConObj.setRequestProperty("Connection", "Keep-Alive");
+                        urlConObj.setRequestProperty("ENCTYPE", "multipart/form-data");
+                        urlConObj.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
+                        urlConObj.setRequestProperty("uploaded_file", sendFileName);
+
+                        dos = new DataOutputStream(urlConObj.getOutputStream());
+                        dos.writeBytes(twoHyphens + boundary + lineEnd);
+                        dos.writeBytes("Content-Disposition: form-data; name=\"uploaded_file\";filename=\""
+                                + sendFileName + "\"" + lineEnd);
+                        dos.writeBytes(lineEnd);
+                        // create a buffer of  maximum size
+                        bytesAvailable = fileInputStream.available();
+
+                        bufferSize = Math.min(bytesAvailable, maxBufferSize);
+                        buffer = new byte[bufferSize];
+
+                        // read file and write it into form...
+                        bytesRead = fileInputStream.read(buffer, 0, bufferSize);
+
+                        while (bytesRead > 0) {
+                            dos.write(buffer, 0, bufferSize);
+                            bytesAvailable = fileInputStream.available();
+                            bufferSize = Math.min(bytesAvailable, maxBufferSize);
+                            bytesRead = fileInputStream.read(buffer, 0, bufferSize);
+
+                        }
+                        // send multipart form data necesssary after file data...
+                        dos.writeBytes(lineEnd);
+                        dos.writeBytes(twoHyphens + boundary + twoHyphens + lineEnd);
+                        urlConObj.getResponseCode();
+                        //close the streams //
+                        fileInputStream.close();
+                        dos.flush();
+                        dos.close();
+                        urlConObj.disconnect();
+
+                    }else {
                         /* SEND JSON DATA TO SERVER*/
                         requestPath = new URL(requesturl);
                         urlConObj = (HttpURLConnection) requestPath.openConnection();
@@ -262,6 +324,7 @@ public class mInterfaceService extends Service {
                         receiveData += "------------------\n";
                         readerresponseObj.close();
                         urlConObj.disconnect();
+		    }
                 }
 
                 /* WRITE RESPONSE DATA TO INTERNAL STORAGE */
