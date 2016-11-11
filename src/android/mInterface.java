@@ -5,19 +5,25 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Build;
+import android.provider.MediaStore;
 import android.provider.Settings;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.apache.cordova.*;
+import org.json.JSONObject;
+
+import java.io.File;
 
 public class mInterface extends CordovaPlugin{
 	private static final int PICK_FILE_REQUEST= 1;
 	CallbackContext callback;
 	@TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
 	@Override
-	public boolean execute(final String action, JSONArray args, final CallbackContext callbackContext) throws JSONException {
+	public boolean execute(final String action, JSONArray args,  CallbackContext callbackContext) throws JSONException {
 		if(action.equals("StartService")){
 			if(!isServiceRunning(mInterfaceService.class)) {
 				Intent serviceIntent = new Intent(cordova.getActivity().getApplicationContext(), mInterfaceService.class);
@@ -49,7 +55,6 @@ public class mInterface extends CordovaPlugin{
 		intent.setType("*/*");
 		intent.addCategory(Intent.CATEGORY_OPENABLE);
 		intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
-
 		Intent chooser = Intent.createChooser(intent, "Select File");
 		cordova.startActivityForResult(this, chooser, PICK_FILE_REQUEST);
 
@@ -62,9 +67,44 @@ public class mInterface extends CordovaPlugin{
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (requestCode == PICK_FILE_REQUEST && callback != null) {
 			if (resultCode == Activity.RESULT_OK) {
-				String filePath = data.getData().getPath();
+				String fileName,getfilePath,filePath,fileExtension,fileType,fileSize=null;
+				long getSize;
+				Uri uri = data.getData();
+				fileType =this.cordova.getActivity().getContentResolver().getType(uri);
+				File getFileName;
+				if(fileType != null) {
+					fileExtension = "."+fileType.substring(fileType.lastIndexOf("/") + 1);
+					getfilePath = data.getData().getPath()+fileExtension;
+					filePath = getfilePath.substring(0,getfilePath.lastIndexOf(File.separator));
+					getFileName = new File(getfilePath);
+					fileName = getFileName.getName();
+					String[] projection = {MediaStore.Images.Media.SIZE};
+					Cursor cursor = this.cordova.getActivity().getContentResolver().query(uri, projection, null, null, null);
+					if (cursor.moveToFirst()) {
+						int index1 = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.SIZE);
+						fileSize = cursor.getString(index1);
+					}
+				}else{
+						getfilePath =data.getData().getPath();
+						filePath = getfilePath.substring(0, getfilePath.lastIndexOf(File.separator));
+						getFileName = new File(getfilePath);
+						fileName =getFileName.getName();
+						fileExtension ="."+ getfilePath.substring(getfilePath.lastIndexOf(".") + 1);
+						getSize =getFileName.length();
+						fileSize = String.valueOf(getSize);
+
+				}
+				JSONObject jsonObject = new JSONObject();
+				try {
+					jsonObject.put("filePath",filePath);
+					jsonObject.put("fileName",fileName);
+					jsonObject.put("fileSize",fileSize);
+					jsonObject.put("fileExtension",fileExtension);
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
 				if (filePath != null) {
-					callback.success(filePath);
+					callback.success(jsonObject);
 				} else {
 					callback.error("File uri was null");
 				}
@@ -76,7 +116,6 @@ public class mInterface extends CordovaPlugin{
 			}
 		}
 	}
-
 	private boolean isServiceRunning(Class<?> serviceClass) {
 		ActivityManager manager = (ActivityManager)cordova.getActivity().getApplicationContext().getSystemService(Context.ACTIVITY_SERVICE);
 		for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
