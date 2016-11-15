@@ -1,3 +1,3 @@
-window.minterface = function(task,success,error) {
-	cordova.exec(success, error, "mInterface", task, []);
+window.minterface = function(task,args,success,error) {
+	cordova.exec(success, error, "mInterface", task, args);
 };
