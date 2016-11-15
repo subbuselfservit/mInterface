@@ -17,6 +17,10 @@ import org.apache.cordova.*;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 public class mInterface extends CordovaPlugin{
 	private static final int PICK_FILE_REQUEST= 1;
@@ -47,6 +51,31 @@ public class mInterface extends CordovaPlugin{
 		}else if(action.equals("FileChooser")){
 			chooseFile(callbackContext);
 			return true;
+		}else if(action.equals("CopyFile")){
+			String source =args.getString(0);
+			String destination =args.getString(1);
+			File sourcePath = new File(source);
+			File destinationPath = new File (destination);
+			try {
+				if(sourcePath.exists()){
+					InputStream in = new FileInputStream(sourcePath);
+					OutputStream out = new FileOutputStream(destinationPath);
+					byte[] buf = new byte[1024];
+					int len;
+					while ((len = in.read(buf)) > 0) {
+						out.write(buf, 0, len);
+					}
+					in.close();
+					out.close();
+					callbackContext.success("success");
+				}else{
+					callbackContext.success("failure");
+				}
+			} catch (NullPointerException e) {
+				e.printStackTrace();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 		return true;
 	}
@@ -67,21 +96,21 @@ public class mInterface extends CordovaPlugin{
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (requestCode == PICK_FILE_REQUEST && callback != null) {
 			if (resultCode == Activity.RESULT_OK) {
-				String fileName,getfilePath,filePath,fileExtension,fileType,fileSize=null;
+				String fileName = null,getfilePath,filePath = null,fileExtension = null,fileType,fileSize=null;
 				long getSize;
 				Uri uri = data.getData();
 				fileType =this.cordova.getActivity().getContentResolver().getType(uri);
 				File getFileName;
 				if(fileType != null) {
-					fileExtension = "."+fileType.substring(fileType.lastIndexOf("/") + 1);
-					getfilePath = data.getData().getPath()+fileExtension;
-					filePath = getfilePath.substring(0,getfilePath.lastIndexOf(File.separator));
-					getFileName = new File(getfilePath);
-					fileName = getFileName.getName();
-					String[] projection = {MediaStore.Images.Media.SIZE};
+					String[] projection = {MediaStore.Images.Media.DATA,MediaStore.Images.Media.SIZE};
 					Cursor cursor = this.cordova.getActivity().getContentResolver().query(uri, projection, null, null, null);
 					if (cursor.moveToFirst()) {
 						int index1 = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.SIZE);
+						int actual_image_column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+						getfilePath = cursor.getString(actual_image_column_index);
+						filePath =getfilePath.substring(0,getfilePath.lastIndexOf(File.separator));
+						fileName = getfilePath.substring(getfilePath.lastIndexOf("/")+1);
+						fileExtension = "."+fileName.substring(fileName.lastIndexOf(".")+1);
 						fileSize = cursor.getString(index1);
 					}
 				}else{
