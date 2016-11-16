@@ -52,31 +52,45 @@ public class mInterface extends CordovaPlugin{
 			chooseFile(callbackContext);
 			return true;
 		}else if(action.equals("CopyFile")){
-			String source =args.getString(0);
-			String destination =args.getString(1);
-			File sourcePath = new File(source);
-			File destinationPath = new File (destination);
-			try {
-				if(sourcePath.exists()){
-					InputStream in = new FileInputStream(sourcePath);
-					OutputStream out = new FileOutputStream(destinationPath);
-					byte[] buf = new byte[1024];
-					int len;
-					while ((len = in.read(buf)) > 0) {
-						out.write(buf, 0, len);
+			JSONObject fileObj;
+			String srcPath,srcFile,desPath,desFile;
+			File srcPathObj,desPathObj,sourceFile,destinationFile;
+				 fileObj = args.getJSONObject(0);
+				 srcPath = fileObj.optString("srcPath").toString();
+				 srcFile = fileObj.optString("srcFile").toString();
+				 desPath = fileObj.optString("desPath").toString();
+				 desFile = fileObj.optString("desFile").toString();
+				 srcPathObj = new File(srcPath);
+				 desPathObj = new File(desPath);
+				 sourceFile = new File(srcPath + "/" +srcFile);
+				 destinationFile = new File (desPath + "/" +desFile);
+					try {
+						if(!srcPathObj.exists()){
+							callbackContext.success("failure");
+						}
+						if(!desPathObj.exists()){
+							desPathObj.mkdir();
+						}
+						if(sourceFile.exists()){
+							InputStream in = new FileInputStream(sourceFile);
+							OutputStream out = new FileOutputStream(destinationFile);
+							byte[] buf = new byte[1024];
+							int len;
+							while ((len = in.read(buf)) > 0) {
+								out.write(buf, 0, len);
+							}
+							in.close();
+							out.close();
+							callbackContext.success("success");
+						}else{
+							callbackContext.success("failure");
+						}
+					} catch (NullPointerException e) {
+						e.printStackTrace();
+					} catch (Exception e) {
+						e.printStackTrace();
 					}
-					in.close();
-					out.close();
-					callbackContext.success("success");
-				}else{
-					callbackContext.success("failure");
 				}
-			} catch (NullPointerException e) {
-				e.printStackTrace();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
 		return true;
 	}
 	public void chooseFile(CallbackContext callbackContext) {
@@ -135,7 +149,7 @@ public class mInterface extends CordovaPlugin{
 				if (filePath != null) {
 					callback.success(jsonObject);
 				} else {
-					callback.error("File uri was null");
+					callback.error("File path was null");
 				}
 			} else if (resultCode == Activity.RESULT_CANCELED) {
 				// TODO NO_RESULT or error callback?
