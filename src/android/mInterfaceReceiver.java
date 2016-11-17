@@ -6,10 +6,10 @@ import android.content.Intent;
 
 public class mInterfaceReceiver extends BroadcastReceiver {
     public mInterfaceReceiver() {
-		//constructor
+        //constructor
     }
 
-    @Override
+    @ Override
     public void onReceive(Context context, Intent intent) {
         if (intent.getAction().equalsIgnoreCase(Intent.ACTION_BOOT_COMPLETED)) {
             Intent serviceIntent = new Intent(context, mInterfaceService.class);
