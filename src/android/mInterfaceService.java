@@ -58,7 +58,6 @@ public class mInterfaceService extends Service {
 
     @ Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        long timeInterval = 15000;
         Timer timerObj = new Timer();
         TimerTask timerTaskObj = new TimerTask() {
             public void run() {
