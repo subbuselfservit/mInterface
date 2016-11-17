@@ -361,7 +361,7 @@ public class mInterfaceService extends Service {
                             queueResponse.append(responseline + "\n");
                         }
                         receiveData += "Time:" + new SimpleDateFormat("HH:mm:ss").format(new Date()) + "\n";
-                        receiveData += "url:" + requesturl + "\n";
+                        receiveData += "url:" + requestPath + "\n";
                         receiveData += "------------------\n";
                         readerresponseObj.close();
                         urlConObj.disconnect();
