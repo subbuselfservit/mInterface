@@ -58,6 +58,7 @@ public class mInterfaceService extends Service {
 
     @ Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        long timeInterval = 15000;
         Timer timerObj = new Timer();
         TimerTask timerTaskObj = new TimerTask() {
             public void run() {
@@ -354,6 +355,15 @@ public class mInterfaceService extends Service {
                         fileInputStream.close();
                         dos.flush();
                         dos.close();
+                        queueResponse = new StringBuilder();
+                        readerresponseObj = new BufferedReader(new InputStreamReader(urlConObj.getInputStream()));
+                        while ((responseline = readerresponseObj.readLine()) != null) {
+                            queueResponse.append(responseline + "\n");
+                        }
+                        receiveData += "Time:" + new SimpleDateFormat("HH:mm:ss").format(new Date()) + "\n";
+                        receiveData += "url:" + requesturl + "\n";
+                        receiveData += "------------------\n";
+                        readerresponseObj.close();
                         urlConObj.disconnect();
 
                     } else {
@@ -426,4 +436,5 @@ public class mInterfaceService extends Service {
         }
     }
 }
+
 
