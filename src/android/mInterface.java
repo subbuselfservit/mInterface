@@ -110,6 +110,7 @@ public class mInterface extends CordovaPlugin {
 						fileType,
 						fileSize = null;
 				long getSize;
+				try{
 				Uri uri = data.getData();
 				fileType = this.cordova.getActivity().getContentResolver().getType(uri);
 				File getFileName;
@@ -137,6 +138,9 @@ public class mInterface extends CordovaPlugin {
 					getSize = getFileName.length();
 					fileSize = String.valueOf(getSize);
 
+				}
+				}catch(Exception e){
+					callback.error("File path was null");
 				}
 				JSONObject jsonObject = new JSONObject();
 				try {
