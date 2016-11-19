@@ -88,7 +88,7 @@ public class mInterface extends CordovaPlugin {
 	}
 	public void chooseFile(CallbackContext callbackContext) {
 		Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-		intent.setType("file/*");
+		intent.setType("*/*");
 		intent.addCategory(Intent.CATEGORY_OPENABLE);
 		intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
 		Intent chooser = Intent.createChooser(intent, "Select File");
