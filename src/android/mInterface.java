@@ -6,7 +6,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.MediaStore;
+import android.provider.OpenableColumns;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -87,13 +89,12 @@ public class mInterface extends CordovaPlugin {
 		return true;
 	}
 	public void chooseFile(CallbackContext callbackContext) {
-		Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-		intent.setType("*/*");
-		intent.addCategory(Intent.CATEGORY_OPENABLE);
-		intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
-		Intent chooser = Intent.createChooser(intent, "Select File");
-		cordova.startActivityForResult(this, chooser, PICK_FILE_REQUEST);
-
+			Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+			intent.setType("*/*");
+			intent.addCategory(Intent.CATEGORY_OPENABLE);
+			intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
+			Intent chooser = Intent.createChooser(intent, "Select File");
+			cordova.startActivityForResult(this, chooser, PICK_FILE_REQUEST);
 		PluginResult pluginResult = new PluginResult(PluginResult.Status.NO_RESULT);
 		pluginResult.setKeepCallback(true);
 		callback = callbackContext;
@@ -109,38 +110,62 @@ public class mInterface extends CordovaPlugin {
 						fileExtension = null,
 						fileType,
 						fileSize = null;
+				Cursor cursor;
 				long getSize;
-				try{
 				Uri uri = data.getData();
 				fileType = this.cordova.getActivity().getContentResolver().getType(uri);
 				File getFileName;
-				if (fileType != null) {
-					String[]projection = {
-							MediaStore.Images.Media.DATA,
-							MediaStore.Images.Media.SIZE
-					};
-					Cursor cursor = this.cordova.getActivity().getContentResolver().query(uri, projection, null, null, null);
-					if (cursor.moveToFirst()) {
-						int index1 = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.SIZE);
-						int actual_image_column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-						getfilePath = cursor.getString(actual_image_column_index);
-						filePath = getfilePath.substring(0, getfilePath.lastIndexOf(File.separator));
-						fileName = getfilePath.substring(getfilePath.lastIndexOf("/") + 1);
-						fileExtension = "." + fileName.substring(fileName.lastIndexOf(".") + 1);
-						fileSize = cursor.getString(index1);
-					}
-				} else {
-					getfilePath = data.getData().getPath();
+				if(Build.VERSION.SDK_INT >19){
+					getfilePath =uri.getPath();
 					filePath = getfilePath.substring(0, getfilePath.lastIndexOf(File.separator));
-					getFileName = new File(getfilePath);
-					fileName = getFileName.getName();
-					fileExtension = "." + getfilePath.substring(getfilePath.lastIndexOf(".") + 1);
-					getSize = getFileName.length();
-					fileSize = String.valueOf(getSize);
+					cursor = cordova.getActivity().getContentResolver()
+							.query(uri, null, null, null, null, null);
 
-				}
-				}catch(Exception e){
-					callback.error("File path was null");
+					try {
+						if (cursor != null && cursor.moveToFirst()) {
+							fileName = cursor.getString(
+									cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+							fileExtension = "." + fileName.substring(fileName.lastIndexOf(".") + 1);
+							int sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE);
+							if (!cursor.isNull(sizeIndex)) {
+								fileSize = cursor.getString(sizeIndex);
+							} else {
+								fileSize = "Unknown";
+							}
+						}
+					} finally {
+						cursor.close();
+					}
+				}else{
+					if (fileType != null) {
+						String[] projection = {
+								MediaStore.Images.Media.DATA,
+								MediaStore.Images.Media.SIZE,
+								MediaStore.Images.Media.DISPLAY_NAME
+						};
+						cursor = this.cordova.getActivity().getContentResolver().query(uri, projection, null, null, null);
+						if (cursor.moveToFirst()) {
+							int index1 = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.SIZE);
+							int name = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME);
+							int actual_image_column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+							getfilePath = cursor.getString(actual_image_column_index);
+							filePath = getfilePath.substring(0, getfilePath.lastIndexOf(File.separator));
+							fileName = cursor.getString(name);
+							fileExtension = "." + fileName.substring(fileName.lastIndexOf(".") + 1);
+							fileSize = cursor.getString(index1);
+						}
+						cursor.close();
+
+					} else {
+						getfilePath = data.getData().getPath();
+						filePath = getfilePath.substring(0, getfilePath.lastIndexOf(File.separator));
+						getFileName = new File(getfilePath);
+						fileName = getFileName.getName();
+						fileExtension = "." + getfilePath.substring(getfilePath.lastIndexOf(".") + 1);
+						getSize = getFileName.length();
+						fileSize = String.valueOf(getSize);
+
+					}
 				}
 				JSONObject jsonObject = new JSONObject();
 				try {
@@ -164,6 +189,7 @@ public class mInterface extends CordovaPlugin {
 			}
 		}
 	}
+
 	private boolean isServiceRunning(Class <  ?  > serviceClass) {
 		ActivityManager manager = (ActivityManager)cordova.getActivity().getApplicationContext().getSystemService(Context.ACTIVITY_SERVICE);
 		for (ActivityManager.RunningServiceInfo service: manager.getRunningServices(Integer.MAX_VALUE)) {
