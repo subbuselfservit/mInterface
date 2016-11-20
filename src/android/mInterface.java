@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -89,12 +90,19 @@ public class mInterface extends CordovaPlugin {
 		return true;
 	}
 	public void chooseFile(CallbackContext callbackContext) {
+		if(Build.MANUFACTURER.equals("samsang")){
+			//Toast.makeText(cordova.getActivity().getApplicationContext(),Build.MANUFACTURER,Toast.LENGTH_LONG).show();
+			Intent intent = new Intent("com.sec.android.app.myfiles.PICK_DATA");
+			intent.putExtra("CONTENT_TYPE","*/*");
+			cordova.getActivity().startActivityForResult(intent, PICK_FILE_REQUEST);
+		}else {
 			Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
 			intent.setType("*/*");
 			intent.addCategory(Intent.CATEGORY_OPENABLE);
 			intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
 			Intent chooser = Intent.createChooser(intent, "Select File");
 			cordova.startActivityForResult(this, chooser, PICK_FILE_REQUEST);
+		}
 		PluginResult pluginResult = new PluginResult(PluginResult.Status.NO_RESULT);
 		pluginResult.setKeepCallback(true);
 		callback = callbackContext;
@@ -115,9 +123,18 @@ public class mInterface extends CordovaPlugin {
 				Uri uri = data.getData();
 				fileType = this.cordova.getActivity().getContentResolver().getType(uri);
 				File getFileName;
-				if(Build.VERSION.SDK_INT >19){
-					getfilePath =uri.getPath();
-					filePath = getfilePath.substring(0, getfilePath.lastIndexOf(File.separator));
+				if (Build.VERSION.SDK_INT > 19) {
+					try {
+						String[]projection = {
+								MediaStore.Images.Media.DATA,
+						};
+						cursor = cordova.getActivity().getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, null, null, null, null, null);
+						cursor.moveToFirst();
+
+						filePath = cursor.getString(cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA));
+					} catch (Exception e) {
+						callback.error("failer Exception");
+					}
 					cursor = cordova.getActivity().getContentResolver()
 							.query(uri, null, null, null, null, null);
 
@@ -133,12 +150,13 @@ public class mInterface extends CordovaPlugin {
 								fileSize = "Unknown";
 							}
 						}
-					} finally {
+					}
+					finally {
 						cursor.close();
 					}
-				}else{
+				} else {
 					if (fileType != null) {
-						String[] projection = {
+						String[]projection = {
 								MediaStore.Images.Media.DATA,
 								MediaStore.Images.Media.SIZE,
 								MediaStore.Images.Media.DISPLAY_NAME
@@ -200,5 +218,3 @@ public class mInterface extends CordovaPlugin {
 		return false;
 	}
 }
-
-
