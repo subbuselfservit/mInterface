@@ -91,9 +91,9 @@ public class mInterface extends CordovaPlugin {
 	}
 	public void chooseFile(CallbackContext callbackContext) {
 		if(Build.MANUFACTURER.equals("samsang")){
-			//Toast.makeText(cordova.getActivity().getApplicationContext(),Build.MANUFACTURER,Toast.LENGTH_LONG).show();
+			Toast.makeText(cordova.getActivity().getApplicationContext(),Build.MANUFACTURER,Toast.LENGTH_LONG).show();
 			Intent intent = new Intent("com.sec.android.app.myfiles.PICK_DATA");
-			intent.putExtra("CONTENT_TYPE","*/*");
+			intent.putExtra("CONTENT_TYPE", "*/*");
 			cordova.getActivity().startActivityForResult(intent, PICK_FILE_REQUEST);
 		}else {
 			Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
@@ -123,7 +123,7 @@ public class mInterface extends CordovaPlugin {
 				Uri uri = data.getData();
 				fileType = this.cordova.getActivity().getContentResolver().getType(uri);
 				File getFileName;
-				if (Build.VERSION.SDK_INT > 19) {
+				if (Build.VERSION.SDK_INT > 19 && !Build.MANUFACTURER.equals("samsung")) {
 					try {
 						String[]projection = {
 								MediaStore.Images.Media.DATA,
@@ -131,7 +131,8 @@ public class mInterface extends CordovaPlugin {
 						cursor = cordova.getActivity().getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, null, null, null, null, null);
 						cursor.moveToFirst();
 
-						filePath = cursor.getString(cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA));
+						getfilePath = cursor.getString(cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA));
+						filePath = getfilePath.substring(0, getfilePath.lastIndexOf(File.separator));
 					} catch (Exception e) {
 						callback.error("failer Exception");
 					}
