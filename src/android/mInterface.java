@@ -25,7 +25,15 @@ import java.io.OutputStream;
 public class mInterface extends CordovaPlugin {
 	private static final int PICK_FILE_REQUEST = 1;
 	CallbackContext callback;
-	@ Override
+	 @ Override
+	public void onResume(boolean multitasking) {
+		super.onResume(multitasking);
+		if (!isServiceRunning(mInterfaceService.class)) {
+			Intent serviceIntent = new Intent(cordova.getActivity().getApplicationContext(), mInterfaceService.class);
+			cordova.getActivity().startService(serviceIntent);
+		}
+	}
+	 @ Override
 	public boolean execute(final String action, JSONArray args, CallbackContext callbackContext)throws JSONException {
 		if (action.equals("StartService")) {
 			if (!isServiceRunning(mInterfaceService.class)) {
@@ -43,13 +51,13 @@ public class mInterface extends CordovaPlugin {
 		} else if (action.equals("CopyFile")) {
 			JSONObject fileObj;
 			String srcPath,
-					srcFile,
-					desPath,
-					desFile;
+			srcFile,
+			desPath,
+			desFile;
 			File srcPathObj,
-					desPathObj,
-					sourceFile,
-					destinationFile;
+			desPathObj,
+			sourceFile,
+			destinationFile;
 			fileObj = args.getJSONObject(0);
 			srcPath = fileObj.optString("srcPath").toString();
 			srcFile = fileObj.optString("srcFile").toString();
@@ -90,12 +98,12 @@ public class mInterface extends CordovaPlugin {
 		return true;
 	}
 	public void chooseFile(CallbackContext callbackContext) {
-		if(Build.MANUFACTURER.equals("samsang")){
-			Toast.makeText(cordova.getActivity().getApplicationContext(),Build.MANUFACTURER,Toast.LENGTH_LONG).show();
+		if (Build.MANUFACTURER.equals("samsung")) {
 			Intent intent = new Intent("com.sec.android.app.myfiles.PICK_DATA");
 			intent.putExtra("CONTENT_TYPE", "*/*");
-			cordova.getActivity().startActivityForResult(intent, PICK_FILE_REQUEST);
-		}else {
+			Intent chooser = Intent.createChooser(intent, "Select File");
+			cordova.startActivityForResult(this, chooser, PICK_FILE_REQUEST);
+		} else {
 			Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
 			intent.setType("*/*");
 			intent.addCategory(Intent.CATEGORY_OPENABLE);
@@ -108,16 +116,16 @@ public class mInterface extends CordovaPlugin {
 		callback = callbackContext;
 		callbackContext.sendPluginResult(pluginResult);
 	}
-	@ Override
+	 @ Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (requestCode == PICK_FILE_REQUEST && callback != null) {
 			if (resultCode == Activity.RESULT_OK) {
 				String fileName = null,
-						getfilePath,
-						filePath = null,
-						fileExtension = null,
-						fileType,
-						fileSize = null;
+				getfilePath,
+				filePath = null,
+				fileExtension = null,
+				fileType,
+				fileSize = null;
 				Cursor cursor;
 				long getSize;
 				Uri uri = data.getData();
@@ -126,7 +134,7 @@ public class mInterface extends CordovaPlugin {
 				if (Build.VERSION.SDK_INT > 19 && !Build.MANUFACTURER.equals("samsung")) {
 					try {
 						String[]projection = {
-								MediaStore.Images.Media.DATA,
+							MediaStore.Images.Media.DATA,
 						};
 						cursor = cordova.getActivity().getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, null, null, null, null, null);
 						cursor.moveToFirst();
@@ -137,7 +145,7 @@ public class mInterface extends CordovaPlugin {
 						callback.error("failer Exception");
 					}
 					cursor = cordova.getActivity().getContentResolver()
-							.query(uri, null, null, null, null, null);
+						.query(uri, null, null, null, null, null);
 
 					try {
 						if (cursor != null && cursor.moveToFirst()) {
@@ -158,11 +166,11 @@ public class mInterface extends CordovaPlugin {
 				} else {
 					if (fileType != null) {
 						String[]projection = {
-								MediaStore.Images.Media.DATA,
-								MediaStore.Images.Media.SIZE,
-								MediaStore.Images.Media.DISPLAY_NAME
+							MediaStore.Images.Media.DATA,
+							MediaStore.Images.Media.SIZE,
+							MediaStore.Images.Media.DISPLAY_NAME
 						};
-						cursor = this.cordova.getActivity().getContentResolver().query(uri, projection, null, null, null);
+						cursor = cordova.getActivity().getContentResolver().query(uri, projection, null, null, null);
 						if (cursor.moveToFirst()) {
 							int index1 = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.SIZE);
 							int name = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME);
