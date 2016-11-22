@@ -1,12 +1,18 @@
 package com.selfservit.util;
 
+import android.Manifest;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Environment;
+import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 import android.widget.Toast;
@@ -24,7 +30,9 @@ import java.io.OutputStream;
 
 public class mInterface extends CordovaPlugin {
 	private static final int PICK_FILE_REQUEST = 1;
+	private static final int PERMISSION_DENIED_ERROR = 1;
 	CallbackContext callback;
+	private static JSONArray arguments = null;
 	 @ Override
 	public void onResume(boolean multitasking) {
 		super.onResume(multitasking);
@@ -46,59 +54,79 @@ public class mInterface extends CordovaPlugin {
 		} else if (action.equals("CheckLocation")) {
 			callbackContext.success(new mInterfaceUtil().checkLocation(cordova.getActivity().getApplicationContext()));
 		} else if (action.equals("FileChooser")) {
-			chooseFile(callbackContext);
-			return true;
-		} else if (action.equals("CopyFile")) {
-			JSONObject fileObj;
-			String srcPath,
-			srcFile,
-			desPath,
-			desFile;
-			File srcPathObj,
-			desPathObj,
-			sourceFile,
-			destinationFile;
-			fileObj = args.getJSONObject(0);
-			srcPath = fileObj.optString("srcPath").toString();
-			srcFile = fileObj.optString("srcFile").toString();
-			desPath = fileObj.optString("desPath").toString();
-			desFile = fileObj.optString("desFile").toString();
-			srcPathObj = new File(srcPath);
-			desPathObj = new File(desPath);
-			sourceFile = new File(srcPath + "/" + srcFile);
-			destinationFile = new File(desPath + "/" + desFile);
-			try {
-				if (!srcPathObj.exists()) {
-					callbackContext.success("failure");
-				}
-				if (!desPathObj.exists()) {
-					desPathObj.mkdirs();
-				}
-				if (sourceFile.exists()) {
-					InputStream in = new FileInputStream(sourceFile);
-					OutputStream out = new FileOutputStream(destinationFile);
-					byte[]buf = new byte[1024];
-					int len;
-					while ((len = in.read(buf)) > 0) {
-						out.write(buf, 0, len);
-					}
-					in.close();
-					out.close();
-					callbackContext.success("success");
-				} else {
-					callbackContext.success("failure");
-				}
-			} catch (NullPointerException e) {
-				e.printStackTrace();
+			callback = callbackContext;
+			if (cordova.hasPermission(Manifest.permission.READ_EXTERNAL_STORAGE)) {
+				chooseFile(callbackContext);
+				return true;
+			} else {
+				cordova.requestPermission(this, 0, Manifest.permission.READ_EXTERNAL_STORAGE);
 			}
-			catch (Exception e) {
-				e.printStackTrace();
+		} else if (action.equals("CopyFile")) {
+			arguments = args;
+			if (cordova.hasPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+				copyFile(callbackContext);
+			} else {
+				cordova.requestPermission(this, 1, Manifest.permission.WRITE_EXTERNAL_STORAGE);
 			}
 		}
 		return true;
 	}
+
+	private void copyFile(CallbackContext callbackContext) {
+		JSONObject fileObj = null;
+		String srcPath,
+		srcFile,
+		desPath,
+		desFile;
+		File srcPathObj,
+		desPathObj,
+		sourceFile,
+		destinationFile;
+		try {
+			fileObj = arguments.getJSONObject(0);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		srcPath = fileObj.optString("srcPath").toString();
+		srcFile = fileObj.optString("srcFile").toString();
+		desPath = fileObj.optString("desPath").toString();
+		desFile = fileObj.optString("desFile").toString();
+		srcPathObj = new File(srcPath);
+		desPathObj = new File(desPath);
+		sourceFile = new File(srcPath + "/" + srcFile);
+		destinationFile = new File(desPath + "/" + desFile);
+		try {
+			if (!srcPathObj.exists()) {
+				callbackContext.success("srcPath not found");
+			}
+			if (!desPathObj.exists()) {
+				desPathObj.mkdirs();
+			}
+			if (sourceFile.exists()) {
+				InputStream in = new FileInputStream(sourceFile);
+				OutputStream out = new FileOutputStream(destinationFile);
+				byte[]buf = new byte[1024];
+				int len;
+				while ((len = in.read(buf)) > 0) {
+					out.write(buf, 0, len);
+				}
+				in.close();
+				out.close();
+				callbackContext.success("success");
+			} else {
+				callbackContext.success("failure");
+			}
+		} catch (NullPointerException e) {
+			e.printStackTrace();
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+			Toast.makeText(cordova.getActivity(), e.getMessage(), Toast.LENGTH_LONG).show();
+		}
+	}
 	public void chooseFile(CallbackContext callbackContext) {
 		if (Build.MANUFACTURER.equals("samsung")) {
+			Toast.makeText(cordova.getActivity().getApplicationContext(), Build.MANUFACTURER, Toast.LENGTH_LONG).show();
 			Intent intent = new Intent("com.sec.android.app.myfiles.PICK_DATA");
 			intent.putExtra("CONTENT_TYPE", "*/*");
 			Intent chooser = Intent.createChooser(intent, "Select File");
@@ -131,18 +159,67 @@ public class mInterface extends CordovaPlugin {
 				Uri uri = data.getData();
 				fileType = this.cordova.getActivity().getContentResolver().getType(uri);
 				File getFileName;
-				if (Build.VERSION.SDK_INT > 19 && !Build.MANUFACTURER.equals("samsung")) {
+				if (Build.VERSION.SDK_INT > 19 && !Build.MANUFACTURER.equals("samsung") && DocumentsContract.isDocumentUri(cordova.getActivity(), uri)) {
 					try {
-						String[]projection = {
-							MediaStore.Images.Media.DATA,
-						};
-						cursor = cordova.getActivity().getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, null, null, null, null, null);
-						cursor.moveToFirst();
+						if (isExternalStorageDocument(uri)) { // ExternalStorageProvider
+							final String docId = DocumentsContract.getDocumentId(uri);
+							final String[]split = docId.split(":");
+							final String type = split[0];
+							String storageDefinition;
+							if ("primary".equalsIgnoreCase(type)) {
+								getfilePath = Environment.getExternalStorageDirectory() + "/" + split[1];
+								filePath = getfilePath.substring(0, getfilePath.lastIndexOf(File.separator));
+							} else {
+								if (Environment.isExternalStorageRemovable()) {
+									storageDefinition = System.getenv("EXTERNAL_STORAGE");
+								} else {
+									final int splitIndex = docId.indexOf(':', 1);
+									final String tag = docId.substring(0, splitIndex);
+									final String path = docId.substring(splitIndex + 1);
 
-						getfilePath = cursor.getString(cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA));
-						filePath = getfilePath.substring(0, getfilePath.lastIndexOf(File.separator));
+									String nonPrimaryVolume = getPathToNonPrimaryVolume(cordova.getActivity(), tag);
+									if (nonPrimaryVolume != null) {
+										storageDefinition = nonPrimaryVolume + "/" + path;
+										File file = new File(storageDefinition);
+										if (file.exists() && file.canRead()) {
+											getfilePath = storageDefinition;
+											filePath = getfilePath.substring(0, getfilePath.lastIndexOf(File.separator));
+										}
+									}
+								}
+							}
+						} else if (isDownloadsDocument(uri)) { // DownloadsProvider
+
+							final String id = DocumentsContract.getDocumentId(uri);
+							final Uri contentUri = ContentUris.withAppendedId(
+									Uri.parse("content://downloads/public_downloads"), Long.valueOf(id));
+
+							getfilePath = getDataColumn(cordova.getActivity(), contentUri, null, null);
+							filePath = getfilePath.substring(0, getfilePath.lastIndexOf(File.separator));
+
+						} else if (isMediaDocument(uri)) { // MediaProvider
+							final String docId = DocumentsContract.getDocumentId(uri);
+							final String[]split = docId.split(":");
+							final String type = split[0];
+
+							Uri contentUri = null;
+							if ("image".equals(type)) {
+								contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+							} else if ("video".equals(type)) {
+								contentUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
+							} else if ("audio".equals(type)) {
+								contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+							}
+
+							final String selection = "_id=?";
+							final String[]selectionArgs = new String[]{
+								split[1]
+							};
+							getfilePath = getDataColumn(cordova.getActivity(), contentUri, selection, selectionArgs);
+							filePath = getfilePath.substring(0, getfilePath.lastIndexOf(File.separator));
+						}
 					} catch (Exception e) {
-						callback.error("failer Exception");
+						e.printStackTrace();
 					}
 					cursor = cordova.getActivity().getContentResolver()
 						.query(uri, null, null, null, null, null);
@@ -225,5 +302,80 @@ public class mInterface extends CordovaPlugin {
 			}
 		}
 		return false;
+	}
+	 @ Override
+	public void onRequestPermissionResult(int requestCode, String[]permissions,
+		int[]grantResults)throws JSONException{
+		for (int r: grantResults) {
+			if (r == PackageManager.PERMISSION_DENIED) {
+				this.callback.sendPluginResult(new PluginResult(PluginResult.Status.ERROR, PERMISSION_DENIED_ERROR));
+				return;
+			}
+		}
+		switch (requestCode) {
+		case 0:
+			chooseFile(callback);
+			break;
+		case 1:
+			copyFile(callback);
+			break;
+		}
+	}
+	public static String getDataColumn(Context context, Uri uri, String selection, String[]selectionArgs) {
+
+		Cursor cursor = null;
+		final String column = "_data";
+		final String[]projection = {
+			column
+		};
+
+		try {
+			cursor = context.getContentResolver().query(uri, projection, selection, selectionArgs, null);
+			if (cursor != null && cursor.moveToFirst()) {
+				final int column_index = cursor.getColumnIndexOrThrow(column);
+				return cursor.getString(column_index);
+			}
+		}
+		finally {
+			if (cursor != null)
+				cursor.close();
+		}
+		return null;
+	}
+
+	public static boolean isExternalStorageDocument(Uri uri) {
+		return "com.android.externalstorage.documents".equals(uri.getAuthority());
+	}
+
+	public static boolean isDownloadsDocument(Uri uri) {
+		return "com.android.providers.downloads.documents".equals(uri.getAuthority());
+	}
+
+	public static boolean isMediaDocument(Uri uri) {
+		return "com.android.providers.media.documents".equals(uri.getAuthority());
+	}
+
+	public static boolean isGooglePhotosUri(Uri uri) {
+		return "com.google.android.apps.photos.content".equals(uri.getAuthority());
+	}
+	 @ TargetApi(Build.VERSION_CODES.KITKAT)
+	public static String getPathToNonPrimaryVolume(Context context, String tag) {
+		File[]volumes = context.getExternalCacheDirs();
+		if (volumes != null) {
+			for (File volume: volumes) {
+				if (volume != null) {
+					String path = volume.getAbsolutePath();
+					if (path != null) {
+						int index = path.indexOf(tag);
+						if (index != -1) {
+							return path.substring(0, index) + tag;
+						}
+					}
+
+				}
+			}
+		}
+
+		return null;
 	}
 }
