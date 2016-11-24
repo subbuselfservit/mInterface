@@ -409,7 +409,15 @@ public class mInterfaceService extends Service {
                         e.printStackTrace();
                     }
                 } else {
-                    appDirectory.mkdir();
+                    appDirectory.mkdirs();
+			try {
+                        responseObj = new FileWriter(fileName, true);
+                        responseObj.write(receiveData);
+                        responseObj.flush();
+                        responseObj.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
             } catch (MalformedURLException e) {
                 e.printStackTrace();
