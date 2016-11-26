@@ -9,7 +9,6 @@ import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.IBinder;
@@ -68,7 +67,7 @@ public class mInterfaceService extends Service {
                 readTimer();
             }
         };
-        timerObj.schedule(timerTaskObj, 0, 15000);
+        timerObj.schedule(timerTaskObj, 0, 1000);
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         locationListener = new MyLocationListener(locationManager);
         locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 30000, 0, locationListener);
@@ -93,8 +92,10 @@ public class mInterfaceService extends Service {
             simpleDateFormat = new SimpleDateFormat("yyyy,MM,dd,HH,mm,ss");
             calender = Calendar.getInstance();
             calender.setTime(simpleDateFormat.parse(serverTimeObj));
-            calender.add(Calendar.MILLISECOND, 15000);
+            calender.add(Calendar.MILLISECOND, 1000);
             serverTimeObj = simpleDateFormat.format(calender.getTime());
+
+            deviceTimeObj = simpleDateFormat.format(new Date());
             dateTimeObj = new JSONObject();
             try {
                 dateTimeObj.put("serverDate", serverTimeObj);
@@ -309,7 +310,7 @@ public class mInterfaceService extends Service {
                 }
                 readerObj.close();
 
-				/* CNVERT A QUEUE_MGR FILE DATA INTO JSONARRAY */
+				/* CONVERT A QUEUE_MGR FILE DATA INTO JSONARRAY */
                 queueList = new JSONArray(queueRequest.toString());
                 writerObj = new BufferedWriter(new FileWriter(new File(Environment.getExternalStorageDirectory(), "mservice/database/queue_mgr.txt")));
                 writerObj.write("[]");
