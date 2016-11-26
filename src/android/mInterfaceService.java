@@ -75,9 +75,9 @@ public class mInterfaceService extends Service {
     }
     private void readTimer() {
         StringBuilder serverTimeFile = new StringBuilder();
-        String line,serverTimeObj,deviceTimeObj;
+        String line,serverTimeObj;
         Calendar calender;
-        JSONObject timeObj,dateTimeObj;
+        JSONObject timeObj;
         SimpleDateFormat simpleDateFormat;
         try {
             BufferedReader readerServerTime = new BufferedReader(new FileReader(new File(Environment.getExternalStorageDirectory(), "mservice/time_profile.txt")));
@@ -86,7 +86,6 @@ public class mInterfaceService extends Service {
             }
                 timeObj = new JSONObject(serverTimeFile.toString());
             serverTimeObj =  timeObj.optString("serverDate").toString();
-            deviceTimeObj =  timeObj.optString("deviceDate").toString();
 
             // ******SERVER TIME ******//
             simpleDateFormat = new SimpleDateFormat("yyyy,MM,dd,HH,mm,ss");
@@ -94,18 +93,14 @@ public class mInterfaceService extends Service {
             calender.setTime(simpleDateFormat.parse(serverTimeObj));
             calender.add(Calendar.MILLISECOND, 1000);
             serverTimeObj = simpleDateFormat.format(calender.getTime());
-
-            deviceTimeObj = simpleDateFormat.format(new Date());
-            dateTimeObj = new JSONObject();
             try {
-                dateTimeObj.put("serverDate", serverTimeObj);
-                dateTimeObj.put("deviceDate", deviceTimeObj);
+                timeObj.put("serverDate", serverTimeObj);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
             readerServerTime.close();
             BufferedWriter writeServerTime = new BufferedWriter(new FileWriter(new File(Environment.getExternalStorageDirectory(), "mservice/time_profile.txt")));
-            writeServerTime.write(dateTimeObj.toString());
+            writeServerTime.write(timeObj.toString());
             writeServerTime.flush();
             writeServerTime.close();
 
