@@ -1,6 +1,6 @@
 package com.selfservit.util;
 
-import android.app.Service; ;
+import android.app.Service;;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
@@ -9,6 +9,7 @@ import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.IBinder;
@@ -50,15 +51,14 @@ public class mInterfaceService extends Service {
     LocationManager locationManager;
     LocationListener locationListener;
 
-    @ Override
+    @Override
     public IBinder onBind(Intent intent) {
         // TODO: Return the communication channel to the service.
         throw new UnsupportedOperationException("Not yet implemented");
     }
 
-    @ Override
+    @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        long timeInterval = 15000;
         Timer timerObj = new Timer();
         TimerTask timerTaskObj = new TimerTask() {
             public void run() {
@@ -69,39 +69,52 @@ public class mInterfaceService extends Service {
             }
         };
         timerObj.schedule(timerTaskObj, 0, 15000);
-        locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         locationListener = new MyLocationListener(locationManager);
         locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 30000, 0, locationListener);
         return START_STICKY;
     }
     private void readTimer() {
         StringBuilder serverTimeFile = new StringBuilder();
-        String line,
-                serverTimeSync;
+        String line,serverTimeObj,deviceTimeObj;
+        Calendar calender;
+        JSONObject timeObj,dateTimeObj;
+        SimpleDateFormat simpleDateFormat;
         try {
             BufferedReader readerServerTime = new BufferedReader(new FileReader(new File(Environment.getExternalStorageDirectory(), "mservice/time_profile.txt")));
             while ((line = readerServerTime.readLine()) != null) {
                 serverTimeFile.append(line);
             }
-            serverTimeSync = serverTimeFile.toString();
-            SimpleDateFormat serverTime = new SimpleDateFormat("yyyy,MM,dd,HH,mm,ss");
-            Calendar c = Calendar.getInstance();
-            c.setTime(serverTime.parse(serverTimeSync));
-            c.add(Calendar.MILLISECOND, 15000);
-            serverTimeSync = serverTime.format(c.getTime());
+                timeObj = new JSONObject(serverTimeFile.toString());
+            serverTimeObj =  timeObj.optString("serverDate").toString();
+            deviceTimeObj =  timeObj.optString("deviceDate").toString();
+
+            // ******SERVER TIME ******//
+            simpleDateFormat = new SimpleDateFormat("yyyy,MM,dd,HH,mm,ss");
+            calender = Calendar.getInstance();
+            calender.setTime(simpleDateFormat.parse(serverTimeObj));
+            calender.add(Calendar.MILLISECOND, 15000);
+            serverTimeObj = simpleDateFormat.format(calender.getTime());
+            dateTimeObj = new JSONObject();
+            try {
+                dateTimeObj.put("serverDate", serverTimeObj);
+                dateTimeObj.put("deviceDate", deviceTimeObj);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
             readerServerTime.close();
             BufferedWriter writeServerTime = new BufferedWriter(new FileWriter(new File(Environment.getExternalStorageDirectory(), "mservice/time_profile.txt")));
-            writeServerTime.write(serverTimeSync);
+            writeServerTime.write(dateTimeObj.toString());
             writeServerTime.flush();
             writeServerTime.close();
 
-        } catch (FileNotFoundException e) {
+        }catch (FileNotFoundException e) {
             e.printStackTrace();
-        }
-        catch (IOException e) {
+        }catch (IOException e) {
             e.printStackTrace();
-        }
-        catch (ParseException e) {
+        }catch (ParseException e) {
+            e.printStackTrace();
+        }catch (JSONException e) {
             e.printStackTrace();
         }
     }
@@ -410,7 +423,7 @@ public class mInterfaceService extends Service {
                     }
                 } else {
                     appDirectory.mkdirs();
-			try {
+                    try {
                         responseObj = new FileWriter(fileName, true);
                         responseObj.write(receiveData);
                         responseObj.flush();
