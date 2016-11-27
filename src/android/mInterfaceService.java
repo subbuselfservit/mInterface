@@ -1,6 +1,6 @@
 package com.selfservit.util;
 
-import android.app.Service;;
+import android.app.Service; ;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
@@ -50,32 +50,39 @@ public class mInterfaceService extends Service {
     LocationManager locationManager;
     LocationListener locationListener;
 
-    @Override
+    @ Override
     public IBinder onBind(Intent intent) {
         // TODO: Return the communication channel to the service.
         throw new UnsupportedOperationException("Not yet implemented");
     }
 
-    @Override
+    @ Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Timer timerObj = new Timer();
-        TimerTask timerTaskObj = new TimerTask() {
+        Timer queueMgrObj = new Timer();
+        TimerTask queueMgrTaskObj = new TimerTask() {
             public void run() {
                 if (isConnected()) {
                     new DespatchQueue().execute();
                 }
+            }
+        };
+        queueMgrObj.schedule(queueMgrTaskObj, 0, 10000);
+        Timer timerObj = new Timer();
+        TimerTask timerTaskObj = new TimerTask() {
+            public void run() {
                 readTimer();
             }
         };
-        timerObj.schedule(timerTaskObj, 0, 1000);
-        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        timerObj.schedule(timerTaskObj, 0, 60000);
+        locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
         locationListener = new MyLocationListener(locationManager);
         locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 30000, 0, locationListener);
         return START_STICKY;
     }
     private void readTimer() {
         StringBuilder serverTimeFile = new StringBuilder();
-        String line,serverTimeObj;
+        String line,
+                serverTimeObj;
         Calendar calender;
         JSONObject timeObj;
         SimpleDateFormat simpleDateFormat;
@@ -84,14 +91,14 @@ public class mInterfaceService extends Service {
             while ((line = readerServerTime.readLine()) != null) {
                 serverTimeFile.append(line);
             }
-                timeObj = new JSONObject(serverTimeFile.toString());
-            serverTimeObj =  timeObj.optString("serverDate").toString();
+            timeObj = new JSONObject(serverTimeFile.toString());
+            serverTimeObj = timeObj.optString("serverDate").toString();
 
             // ******SERVER TIME ******//
             simpleDateFormat = new SimpleDateFormat("yyyy,MM,dd,HH,mm,ss");
             calender = Calendar.getInstance();
             calender.setTime(simpleDateFormat.parse(serverTimeObj));
-            calender.add(Calendar.MILLISECOND, 1000);
+            calender.add(Calendar.MILLISECOND, 60500);
             serverTimeObj = simpleDateFormat.format(calender.getTime());
             try {
                 timeObj.put("serverDate", serverTimeObj);
@@ -104,13 +111,16 @@ public class mInterfaceService extends Service {
             writeServerTime.flush();
             writeServerTime.close();
 
-        }catch (FileNotFoundException e) {
+        } catch (FileNotFoundException e) {
             e.printStackTrace();
-        }catch (IOException e) {
+        }
+        catch (IOException e) {
             e.printStackTrace();
-        }catch (ParseException e) {
+        }
+        catch (ParseException e) {
             e.printStackTrace();
-        }catch (JSONException e) {
+        }
+        catch (JSONException e) {
             e.printStackTrace();
         }
     }
@@ -261,14 +271,10 @@ public class mInterfaceService extends Service {
             String > {
         @ Override
         protected String doInBackground(String...params) {
-            StringBuilder queueRequest,
+            StringBuilder requestString,
                     queueResponse;
-            BufferedReader readerObj,
-                    readerresponseObj;
-            BufferedWriter writerObj;
-            JSONArray queueList;
-            JSONObject queueObj;
-            String line,
+            String currentRequest = null,
+                    currentLine,
                     requesturl,
                     sendData,
                     responseline,
@@ -277,42 +283,50 @@ public class mInterfaceService extends Service {
                     requestfilepath,
                     sendFileBasePath,
                     receiveData = "";
+            BufferedReader readerObj,
+                    readerresponseObj;
+            BufferedWriter writerObj;
+            File baseDirectory,
+                    appDirectory,
+                    fileName;
+            JSONObject queueObj;
+            FileWriter responseObj;
+            FileInputStream fileInputStream;
+            URL requestPath;
+            HttpURLConnection urlConObj;
             int bytesRead,
                     bytesAvailable,
                     bufferSize;
             byte[]buffer;
             int maxBufferSize = 1 * 1024 * 1024;
-            URL requestPath;
-            HttpURLConnection urlConObj;
-            OutputStreamWriter oStreamObj;
-            File baseDirectory,
-                    appDirectory,
-                    fileName;
-            FileWriter responseObj;
-            FileInputStream fileInputStream;
             DataOutputStream dos;
             String lineEnd = "\r\n";
             String twoHyphens = "--";
             String boundary = "*****";
+            OutputStreamWriter oStreamObj;
 
-			/* READING A QUEUE_MGR FILE FROM INTERNAL STORAGE */
             try {
-                queueRequest = new StringBuilder();
+				/* FETCH CURRENT REQUEST FROM QUEUE MANAGER */
+                requestString = new StringBuilder();
                 baseDirectory = Environment.getExternalStorageDirectory();
-                readerObj = new BufferedReader(new FileReader(new File(Environment.getExternalStorageDirectory(), "mservice/database/queue_mgr.txt")));
-                while ((line = readerObj.readLine()) != null) {
-                    queueRequest.append(line);
+                readerObj = new BufferedReader(new FileReader(new File(baseDirectory, "mservice/database/queue_mgr.txt")));
+                while ((currentLine = readerObj.readLine()) != null) {
+                    if (currentRequest == null) {
+                        currentRequest = currentLine;
+                    } else {
+                        requestString.append(currentLine + "\n");
+                    }
                 }
                 readerObj.close();
 
-				/* CONVERT A QUEUE_MGR FILE DATA INTO JSONARRAY */
-                queueList = new JSONArray(queueRequest.toString());
-                writerObj = new BufferedWriter(new FileWriter(new File(Environment.getExternalStorageDirectory(), "mservice/database/queue_mgr.txt")));
-                writerObj.write("[]");
-                writerObj.flush();
-                writerObj.close();
-                for (int i = 0; i < queueList.length(); i++) {
-                    queueObj = queueList.getJSONObject(i);
+                if (isConnected() && currentRequest != null) {
+                    writerObj = new BufferedWriter(new FileWriter(new File(baseDirectory, "mservice/database/queue_mgr.txt")));
+                    writerObj.write(requestString.toString());
+                    writerObj.flush();
+                    writerObj.close();
+
+					/* FROM REQUEST OBJECT */
+                    queueObj = new JSONObject(currentRequest);
                     requesturl = queueObj.optString("url").toString();
                     sendData = queueObj.optString("data").toString();
                     fileType = queueObj.optString("type").toString();
@@ -402,30 +416,30 @@ public class mInterfaceService extends Service {
                         readerresponseObj.close();
                         urlConObj.disconnect();
                     }
-                }
 
-				/* WRITE RESPONSE DATA TO INTERNAL STORAGE */
-                baseDirectory = Environment.getExternalStorageDirectory();
-                appDirectory = new File(baseDirectory.getAbsolutePath() + "/mservice/database/process");
-                fileName = new File(appDirectory, new SimpleDateFormat("yyyyMMdd").format(new Date()) + ".txt");
-                if (appDirectory.exists()) {
-                    try {
-                        responseObj = new FileWriter(fileName, true);
-                        responseObj.write(receiveData);
-                        responseObj.flush();
-                        responseObj.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                } else {
-                    appDirectory.mkdirs();
-                    try {
-                        responseObj = new FileWriter(fileName, true);
-                        responseObj.write(receiveData);
-                        responseObj.flush();
-                        responseObj.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
+					/* WRITE RESPONSE DATA TO INTERNAL STORAGE */
+                    baseDirectory = Environment.getExternalStorageDirectory();
+                    appDirectory = new File(baseDirectory.getAbsolutePath() + "/mservice/database/process");
+                    fileName = new File(appDirectory, new SimpleDateFormat("yyyyMMdd").format(new Date()) + ".txt");
+                    if (appDirectory.exists()) {
+                        try {
+                            responseObj = new FileWriter(fileName, true);
+                            responseObj.write(receiveData);
+                            responseObj.flush();
+                            responseObj.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    } else {
+                        appDirectory.mkdirs();
+                        try {
+                            responseObj = new FileWriter(fileName, true);
+                            responseObj.write(receiveData);
+                            responseObj.flush();
+                            responseObj.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
             } catch (MalformedURLException e) {
@@ -453,5 +467,3 @@ public class mInterfaceService extends Service {
         }
     }
 }
-
-
