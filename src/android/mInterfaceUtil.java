@@ -9,7 +9,7 @@ import android.os.Bundle;
 public class mInterfaceUtil {
 
 	public String getLocation(Context context) {
-		String latitude,lontitude;
+		String latitude,longitude;
 		LocationManager locationManager = (LocationManager)context.getSystemService(context.LOCATION_SERVICE);
 		LocationListener locationListener = new LocationListener() {
 			 @ Override
@@ -27,12 +27,13 @@ public class mInterfaceUtil {
 		locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
 		latitude = String.valueOf(locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER).getLatitude());
 		lontitude = String.valueOf(locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER).getLongitude());
-		if(latitude.length() >10){
+		if(latitude.length() > 10){
 			latitude = latitude.substring(0, 10);
-		}else if(lontitude.length() >10){
-			lontitude = lontitude .substring(0,10);
 		}
-		return "{\"lat\":" + "\"" + latitude + "\"" + ",\"lon\":" + "\"" + lontitude + "\"}";
+		if(longitude.length() > 10){
+			longitude = longitude .substring(0,10);
+		}
+		return "{\"lat\":" + "\"" + latitude + "\"" + ",\"lon\":" + "\"" + longitude + "\"}";
 	}
 
 	public String checkLocation(Context context) {
