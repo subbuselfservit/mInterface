@@ -66,7 +66,7 @@ public class mInterfaceService extends Service {
                 }
             }
         };
-        queueMgrObj.schedule(queueMgrTaskObj, 0, 10000);
+        queueMgrObj.schedule(queueMgrTaskObj, 0, 1000);
         Timer timerObj = new Timer();
         TimerTask timerTaskObj = new TimerTask() {
             public void run() {
