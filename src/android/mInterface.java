@@ -159,7 +159,7 @@ public class mInterface extends CordovaPlugin {
 				Uri uri = data.getData();
 				fileType = this.cordova.getActivity().getContentResolver().getType(uri);
 				File getFileName;
-				if (Build.VERSION.SDK_INT > 19 && !Build.MANUFACTURER.equals("samsung") && DocumentsContract.isDocumentUri(cordova.getActivity(), uri)) {
+				if (Build.VERSION.SDK_INT >= 19 && !Build.MANUFACTURER.equals("samsung") && DocumentsContract.isDocumentUri(cordova.getActivity(), uri)) {
 					try {
 						if (isExternalStorageDocument(uri)) { // ExternalStorageProvider
 							final String docId = DocumentsContract.getDocumentId(uri);
