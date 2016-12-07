@@ -68,6 +68,8 @@ public class mInterface extends CordovaPlugin {
 			} else {
 				cordova.requestPermission(this, 1, Manifest.permission.WRITE_EXTERNAL_STORAGE);
 			}
+		}else if (action.equals("PlayStoreUpdate")) {
+			cordova.getActivity().startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=com.selfservit.mservice")));
 		}
 		return true;
 	}
