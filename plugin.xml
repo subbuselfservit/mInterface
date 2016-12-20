@@ -30,9 +30,9 @@
 		</config-file>
 		<config-file target="AndroidManifest.xml" parent="/manifest/application">
 			<service android:name="com.selfservit.util.mInterfaceService" android:enabled="true"
-            android:exported="true"/>
+            android:exported="true" android:process="com.process.mInterface"/>
 			<receiver android:name="com.selfservit.util.mInterfaceReceiver" android:enabled="true"
-            android:exported="true">
+            android:exported="true" android:process="com.process.mInterface">
 				<intent-filter>     
 					<action android:name="android.intent.action.BOOT_COMPLETED"/>  
 				</intent-filter>  
