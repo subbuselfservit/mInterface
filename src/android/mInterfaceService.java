@@ -324,7 +324,7 @@ public class mInterfaceService extends Service {
 						} else {
 							backUpFilePath.createNewFile();
 						}
-						queueObject = new JSONObject(currentRequest);
+						queueObject = new JSONObject(stringBuilder.toString());
 						queueObject.put(subKeyValue, stringObj.toString());
 						writerObj = new BufferedWriter(new FileWriter(backUpFilePath));
 						writerObj.write(queueObject.toString());
