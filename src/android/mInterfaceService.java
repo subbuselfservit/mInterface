@@ -39,21 +39,6 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 public class mInterfaceService extends Service {
-	LocationManager locationManager;
-	LocationListener locationListener;
-	String currentLine,
-	requesturl;
-	StringBuilder stringBuilder,
-	stringObj;
-	BufferedReader readerObj;
-	BufferedWriter writerObj;
-	URL requestPath;
-	HttpURLConnection urlConObj;
-	JSONObject queueObject;
-	FileWriter fileWriterObj;
-	OutputStreamWriter oStreamObj;
-	File appDirectory,
-	baseDirectory = Environment.getExternalStorageDirectory();
 	 @ Override
 	public IBinder onBind(Intent intent) {
 		// TODO: Return the communication channel to the service.
@@ -62,22 +47,24 @@ public class mInterfaceService extends Service {
 
 	 @ Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		Timer setInterval;
-		TimerTask setIntervalObj;
+		Timer setQueueInterval,
+		setTimerIntervel;
+		TimerTask setQueueIntervalObj,
+		setTimerIntervelObj;
 		// ****Queue Manager Interval Timer ***** //
-		setInterval = new Timer();
-		setIntervalObj = new TimerTask() {
+		setQueueInterval = new Timer();
+		setQueueIntervalObj = new TimerTask() {
 			public void run() {
 				if (isConnected()) {
 					new DespatchQueue().execute();
 				}
 			}
 		};
-		setInterval.schedule(setIntervalObj, 0, 1000);
+		setQueueInterval.schedule(setQueueIntervalObj, 0, 1000);
 
 		// **** TimeReader Interval Timer ***** //
-		setInterval = new Timer();
-		setIntervalObj = new TimerTask() {
+		setTimerIntervel = new Timer();
+		setTimerIntervelObj = new TimerTask() {
 			public void run() {
 				try {
 					timeReader();
@@ -86,9 +73,9 @@ public class mInterfaceService extends Service {
 				}
 			}
 		};
-		setInterval.schedule(setIntervalObj, 0, 60000);
-		locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
-		locationListener = new MyLocationListener(locationManager);
+		setTimerIntervel.schedule(setTimerIntervelObj, 0, 60000);
+		LocationManager locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+		LocationListener locationListener = new MyLocationListener(locationManager);
 		locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 30000, 0, locationListener);
 		return START_STICKY;
 	}
@@ -96,13 +83,20 @@ public class mInterfaceService extends Service {
 		String serverTimeObj;
 		Calendar calender;
 		SimpleDateFormat simpleDateFormat;
-		stringBuilder = new StringBuilder();
+		StringBuilder timeObj;
+		String currentLine;
+		BufferedReader readerObj;
+		JSONObject serverDateObj;
+		timeObj = new StringBuilder();
+		BufferedWriter writerObj;
+		File baseDirectory = Environment.getExternalStorageDirectory();
 		readerObj = new BufferedReader(new FileReader(new File(baseDirectory, "mservice/time_profile.txt")));
 		while ((currentLine = readerObj.readLine()) != null) {
-			stringBuilder.append(currentLine);
+			timeObj.append(currentLine);
 		}
-		queueObject = new JSONObject(stringBuilder.toString());
-		serverTimeObj = queueObject.optString("serverDate").toString();
+		readerObj.close();
+		serverDateObj = new JSONObject(timeObj.toString());
+		serverTimeObj = serverDateObj.optString("serverDate").toString();
 
 		// ******SERVER TIME ******//
 		simpleDateFormat = new SimpleDateFormat("yyyy,MM,dd,HH,mm,ss");
@@ -110,10 +104,9 @@ public class mInterfaceService extends Service {
 		calender.setTime(simpleDateFormat.parse(serverTimeObj));
 		calender.add(Calendar.MILLISECOND, 60500);
 		serverTimeObj = simpleDateFormat.format(calender.getTime());
-		queueObject.put("serverDate", serverTimeObj);
-		readerObj.close();
+		serverDateObj.put("serverDate", serverTimeObj);
 		writerObj = new BufferedWriter(new FileWriter(new File(baseDirectory, "mservice/time_profile.txt")));
-		writerObj.write(queueObject.toString());
+		writerObj.write(serverDateObj.toString());
 		writerObj.flush();
 		writerObj.close();
 	}
@@ -149,13 +142,24 @@ public class mInterfaceService extends Service {
 			DocumentBuilder dbObj;
 			Document docObj;
 			OutputStreamWriter oStreamObj;
+			StringBuilder locationData,
+			userData;
+			BufferedReader readerObj;
+			BufferedWriter writerObj;
+			String currentLine,
+			requesturl;
+			JSONObject userObj;
+			HttpURLConnection urlConObj;
+			URL requestPath;
+
+			File baseDirectory = Environment.getExternalStorageDirectory();
 
 			try {
 				/* GETTING THE LOCATION POINTS TO BE SENT TO THE SERVER */
-				stringBuilder = new StringBuilder();
+				locationData = new StringBuilder();
 				readerObj = new BufferedReader(new FileReader(new File(baseDirectory, "mservice/MyLocation.txt")));
 				while ((currentLine = readerObj.readLine()) != null) {
-					stringBuilder.append(currentLine + "\n");
+					locationData.append(currentLine + "\n");
 				}
 				readerObj.close();
 
@@ -166,16 +170,16 @@ public class mInterfaceService extends Service {
 				writerObj.close();
 
 				/* GETTING THE USER INFO */
-				stringObj = new StringBuilder();
+				userData = new StringBuilder();
 				readerObj = new BufferedReader(new FileReader(new File(baseDirectory, "mservice/user.txt")));
 				while ((currentLine = readerObj.readLine()) != null) {
-					stringObj.append(currentLine);
+					userData.append(currentLine);
 				}
 				readerObj.close();
-				queueObject = new JSONObject(stringObj.toString());
-				clientID = queueObject.optString("client_id").toString();
-				countryCode = queueObject.optString("country_code").toString();
-				deviceID = queueObject.optString("device_id").toString();
+				userObj = new JSONObject(userData.toString());
+				clientID = userObj.optString("client_id").toString();
+				countryCode = userObj.optString("country_code").toString();
+				deviceID = userObj.optString("device_id").toString();
 				readerObj = new BufferedReader(new FileReader(new File(baseDirectory, "mservice/client_functional_access_package" + "/" + clientID + "/" + countryCode + "/client_functional_access.xml")));
 				dbfObj = DocumentBuilderFactory.newInstance();
 				dbObj = dbfObj.newDocumentBuilder();
@@ -191,7 +195,7 @@ public class mInterfaceService extends Service {
 				urlConObj.setRequestProperty("CONTENT-TYPE", "text/xml");
 				urlConObj.connect();
 				oStreamObj = new OutputStreamWriter(urlConObj.getOutputStream());
-				oStreamObj.write("<location_xml><client_id>" + clientID + "</client_id><country_code>" + countryCode + "</country_code><device_id>" + deviceID + "</device_id><location>" + stringBuilder.toString() + "</location></location_xml>");
+				oStreamObj.write("<location_xml><client_id>" + clientID + "</client_id><country_code>" + countryCode + "</country_code><device_id>" + deviceID + "</device_id><location>" + locationData.toString() + "</location></location_xml>");
 				oStreamObj.flush();
 				oStreamObj.close();
 				urlConObj.getResponseCode();
@@ -215,6 +219,9 @@ public class mInterfaceService extends Service {
 
 		 @ Override
 		protected String doInBackground(String...urls) {
+			File appDirectory,
+			baseDirectory = Environment.getExternalStorageDirectory();
+			FileWriter fileWriterObj;
 			appDirectory = new File(baseDirectory.getAbsolutePath() + "/mservice");
 			if (appDirectory.exists()) {
 				try {
@@ -235,6 +242,7 @@ public class mInterfaceService extends Service {
 		 @ Override
 		protected String doInBackground(String...params) {
 			String currentRequest = null,
+			currentLine,
 			sendData,
 			fileType,
 			sendFileName,
@@ -243,9 +251,17 @@ public class mInterfaceService extends Service {
 			method,
 			keyValue,
 			subKeyValue,
+			requesturl,
 			receiveData = "";
+			StringBuilder queueData,
+			serverResponseObj,
+			backupFileData;
+			BufferedReader readerObj;
+			BufferedWriter writerObj;
 			File responseFileName,
-			backUpFilePath;
+			backUpFilePath,
+			appDirectory,
+			baseDirectory = Environment.getExternalStorageDirectory();
 			FileInputStream fileInputStream;
 			int bytesRead,
 			bytesAvailable,
@@ -256,23 +272,29 @@ public class mInterfaceService extends Service {
 			String lineEnd = "\r\n";
 			String twoHyphens = "--";
 			String boundary = "*****";
+			JSONObject queueObject,
+			backupDataObj;
+			URL requestPath;
+			HttpURLConnection urlConObj;
+			OutputStreamWriter oStreamObj;
+			FileWriter fileWriterObj;
 
 			try {
 				/* FETCH CURRENT REQUEST FROM QUEUE MANAGER */
-				stringBuilder = new StringBuilder();
+				queueData = new StringBuilder();
 				readerObj = new BufferedReader(new FileReader(new File(baseDirectory, "mservice/database/queue_mgr.txt")));
 				while ((currentLine = readerObj.readLine()) != null) {
 					if (currentRequest == null) {
 						currentRequest = currentLine;
 					} else {
-						stringBuilder.append(currentLine + "\n");
+						queueData.append(currentLine + "\n");
 					}
 				}
 				readerObj.close();
 
 				if (isConnected() && currentRequest != null) {
 					writerObj = new BufferedWriter(new FileWriter(new File(baseDirectory, "mservice/database/queue_mgr.txt")));
-					writerObj.write(stringBuilder.toString());
+					writerObj.write(queueData.toString());
 					writerObj.flush();
 					writerObj.close();
 
@@ -302,32 +324,33 @@ public class mInterfaceService extends Service {
 						oStreamObj.close();
 
 						/* GET RESPONSE FROM SERVER*/
-						stringObj = new StringBuilder();
+						serverResponseObj = new StringBuilder();
 						readerObj = new BufferedReader(new InputStreamReader(urlConObj.getInputStream()));
 						while ((currentLine = readerObj.readLine()) != null) {
-							stringObj.append(currentLine + "\n");
+							serverResponseObj.append(currentLine + "\n");
 						}
+						readerObj.close();
 						receiveData += "Time:" + new SimpleDateFormat("HH:mm:ss").format(new Date()) + "\n";
 						receiveData += "url:" + requesturl + "\n";
 						receiveData += "data:" + sendData + "\n";
-						receiveData += "response:" + stringObj.toString() + "\n";
+						receiveData += "response:" + serverResponseObj.toString() + "\n";
 						receiveData += "------------------\n";
-						readerObj.close();
 						urlConObj.disconnect();
-						stringBuilder = new StringBuilder();
+						backupFileData = new StringBuilder();
 						if (backUpFilePath.exists()) {
 							readerObj = new BufferedReader(new FileReader(backUpFilePath));
 							while ((currentLine = readerObj.readLine()) != null) {
-								stringBuilder.append(currentLine + "\n");
+								backupFileData.append(currentLine + "\n");
 							}
 							readerObj.close();
+							backupDataObj = new JSONObject(backupFileData.toString());
 						} else {
 							backUpFilePath.createNewFile();
+							backupDataObj = new JSONObject();
 						}
-						queueObject = new JSONObject(stringBuilder.toString());
-						queueObject.put(subKeyValue, stringObj.toString());
+						backupDataObj.put(subKeyValue, serverResponseObj.toString());
 						writerObj = new BufferedWriter(new FileWriter(backUpFilePath));
-						writerObj.write(queueObject.toString());
+						writerObj.write(backupDataObj.toString());
 						writerObj.flush();
 						writerObj.close();
 					} else {
@@ -374,10 +397,10 @@ public class mInterfaceService extends Service {
 							fileInputStream.close();
 							dos.flush();
 							dos.close();
-							stringObj = new StringBuilder();
+							serverResponseObj = new StringBuilder();
 							readerObj = new BufferedReader(new InputStreamReader(urlConObj.getInputStream()));
 							while ((currentLine = readerObj.readLine()) != null) {
-								stringObj.append(currentLine + "\n");
+								serverResponseObj.append(currentLine + "\n");
 							}
 							receiveData += "Time:" + new SimpleDateFormat("HH:mm:ss").format(new Date()) + "\n";
 							receiveData += "url:" + requestPath + "\n";
@@ -399,15 +422,15 @@ public class mInterfaceService extends Service {
 							oStreamObj.close();
 
 							/* GET RESPONSE FROM SERVER*/
-							stringObj = new StringBuilder();
+							serverResponseObj = new StringBuilder();
 							readerObj = new BufferedReader(new InputStreamReader(urlConObj.getInputStream()));
 							while ((currentLine = readerObj.readLine()) != null) {
-								stringObj.append(currentLine + "\n");
+								serverResponseObj.append(currentLine + "\n");
 							}
 							receiveData += "Time:" + new SimpleDateFormat("HH:mm:ss").format(new Date()) + "\n";
 							receiveData += "url:" + requesturl + "\n";
 							receiveData += "data:" + sendData + "\n";
-							receiveData += "response:" + stringObj.toString() + "\n";
+							receiveData += "response:" + serverResponseObj.toString() + "\n";
 							receiveData += "------------------\n";
 							readerObj.close();
 							urlConObj.disconnect();
