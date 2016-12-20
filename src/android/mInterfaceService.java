@@ -227,6 +227,7 @@ public class mInterfaceService extends Service {
 				try {
 					fileWriterObj = new FileWriter(new File(baseDirectory, "mservice/MyLocation.txt"), true);
 					fileWriterObj.write(this.objLat + "," + this.objLon + "," + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()) + "\n");
+					fileWriterObj.flush();
 					fileWriterObj.close();
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -402,10 +403,10 @@ public class mInterfaceService extends Service {
 							while ((currentLine = readerObj.readLine()) != null) {
 								serverResponseObj.append(currentLine + "\n");
 							}
+							readerObj.close();
 							receiveData += "Time:" + new SimpleDateFormat("HH:mm:ss").format(new Date()) + "\n";
 							receiveData += "url:" + requestPath + "\n";
 							receiveData += "------------------\n";
-							readerObj.close();
 							urlConObj.disconnect();
 
 						} else {
@@ -427,12 +428,12 @@ public class mInterfaceService extends Service {
 							while ((currentLine = readerObj.readLine()) != null) {
 								serverResponseObj.append(currentLine + "\n");
 							}
+							readerObj.close();
 							receiveData += "Time:" + new SimpleDateFormat("HH:mm:ss").format(new Date()) + "\n";
 							receiveData += "url:" + requesturl + "\n";
 							receiveData += "data:" + sendData + "\n";
 							receiveData += "response:" + serverResponseObj.toString() + "\n";
 							receiveData += "------------------\n";
-							readerObj.close();
 							urlConObj.disconnect();
 						}
 					}
