@@ -332,11 +332,6 @@ public class mInterfaceService extends Service {
 							serverResponseObj.append(currentLine);
 						}
 						readerObj.close();
-						receiveData += "Time:" + new SimpleDateFormat("HH:mm:ss").format(new Date()) + "\n";
-						receiveData += "url:" + requesturl + "\n";
-						receiveData += "data:" + sendData + "\n";
-						receiveData += "response:" + serverResponseObj.toString() + "\n";
-						receiveData += "------------------\n";
 						urlConObj.disconnect();
 						backupFileData = new StringBuilder();
 						if (backUpFilePath.exists()) {
