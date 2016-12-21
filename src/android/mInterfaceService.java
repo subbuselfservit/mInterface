@@ -351,7 +351,7 @@ public class mInterfaceService extends Service {
 						}
 						backupDataObj.put(subKeyValue, serverResponseObj.toString());
 						writerObj = new BufferedWriter(new FileWriter(backUpFilePath));
-						writerObj.write(backupDataObj.toString().substring(0,backupDataObj.length()-2));
+						writerObj.write(backupDataObj.toString().substring(0,backupDataObj.toString().length()-1));
 						writerObj.flush();
 						writerObj.close();
 					} else {
