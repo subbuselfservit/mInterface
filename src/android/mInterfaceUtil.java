@@ -1,29 +1,17 @@
 package com.selfservit.util;
 
 import android.annotation.TargetApi;
-import android.app.Activity;
-import android.app.ActivityManager;
-import android.content.ContentUris;
 import android.content.Context;
-import android.content.Intent;
 import android.database.Cursor;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
-import android.provider.DocumentsContract;
-import android.provider.MediaStore;
-import android.provider.OpenableColumns;
 
 import org.apache.cordova.CallbackContext;
-import org.apache.cordova.PluginResult;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
@@ -38,23 +26,23 @@ public class mInterfaceUtil {
 	/*FOR GETTING CURRENT LOCATION */
 	public String getLocation(Context context) {
 		String latitude,
-		longitude;
+				longitude;
 
 		/* REGISTER THE LOCATION MANAGER */
 		locationManager = (LocationManager)context.getSystemService(context.LOCATION_SERVICE);
 
 		//*** IMPLEMENT LOCATION LISTENER CLASS METHODS ****//
 		locationListener = new LocationListener() {
-			 @ Override
+			@ Override
 			public void onLocationChanged(Location location) {}
 
-			 @ Override
+			@ Override
 			public void onStatusChanged(String provider, int status, Bundle extras) {}
 
-			 @ Override
+			@ Override
 			public void onProviderEnabled(String provider) {}
 
-			 @ Override
+			@ Override
 			public void onProviderDisabled(String provider) {}
 		};
 
@@ -88,12 +76,14 @@ public class mInterfaceUtil {
 	public void copyFile(CallbackContext callbackContext, JSONArray arguments) {
 		JSONObject inputFileObj;
 		String srcFilePath,
-		srcFileName,
-		desFilePath,
-		desFileName;
+				srcFileName,
+				desFilePath,
+				desFileName;
 		InputStream srcFileReader;
 		OutputStream desFileWriter;
 		int srcFileSize;
+		byte[] buf ;
+		File sourceFileObj,desFileObj;
 		try {
 			//*** GET USER INPUT FOR SOURCE FILE AND DESTINATION PATH ***//
 			inputFileObj = arguments.getJSONObject(0);
@@ -101,20 +91,20 @@ public class mInterfaceUtil {
 			srcFileName = inputFileObj.optString("srcFile").toString();
 			desFilePath = inputFileObj.optString("desPath").toString();
 			desFileName = inputFileObj.optString("desFile").toString();
-			//*** CHECK SOURCE FILE PATH EXITS OR NOT ***//
-			if (new File(srcFilePath).exists()) {
-				//*** CHECK DESTINATION FILE PATH EXITS OR NOT ***//
+			sourceFileObj = new File(srcFilePath + "/" + srcFileName);
+			desFileObj = new File(desFilePath + "/" + desFileName);
+			//*** CHECK DESTINATION FILE PATH EXITS OR NOT ***//
 				if (!new File(desFilePath).exists()) {
 					new File(desFilePath).mkdirs();
 				}
 				//*** CHECK SOURCE FILE EXITS OR NOT ***//
-				if (new File(srcFilePath + "/" + srcFileName).exists()) {
-					srcFileReader = new FileInputStream(new File(srcFilePath + "/" + srcFileName));
-					desFileWriter = new FileOutputStream(new File(desFilePath + "/" + desFileName));
-
+				if (sourceFileObj.exists()) {
+					srcFileReader = new FileInputStream(sourceFileObj);
+					desFileWriter = new FileOutputStream(desFileObj);
+					buf = new byte[1024];
 					//*** WRITE SOURCE FILE INTO DESTINATION PATH ***//
-					while ((srcFileSize = srcFileReader.read(new byte[1024])) > 0) {
-						desFileWriter.write(new byte[1024], 0, srcFileSize);
+					while ((srcFileSize = srcFileReader.read(buf)) > 0) {
+						desFileWriter.write(buf, 0, srcFileSize);
 					}
 					srcFileReader.close();
 					desFileWriter.close();
@@ -122,9 +112,6 @@ public class mInterfaceUtil {
 				} else {
 					callbackContext.error("failure");
 				}
-			} else {
-				callbackContext.error("srcPath not found");
-			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -135,7 +122,7 @@ public class mInterfaceUtil {
 		Cursor cursor = null;
 		final String column = "_data";
 		final String[]projection = {
-			column
+				column
 		};
 
 		try {
@@ -151,7 +138,7 @@ public class mInterfaceUtil {
 		}
 		return null;
 	}
-	 @ TargetApi(Build.VERSION_CODES.KITKAT)
+	@ TargetApi(Build.VERSION_CODES.KITKAT)
 	public static String getPathToNonPrimaryVolume(Context context, String tag) {
 		File[]volumes = context.getExternalCacheDirs();
 		if (volumes != null) {
