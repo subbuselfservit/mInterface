@@ -328,7 +328,7 @@ public class mInterfaceService extends Service {
 						serverResponseObj = new StringBuilder();
 						readerObj = new BufferedReader(new InputStreamReader(urlConObj.getInputStream()));
 						while ((currentLine = readerObj.readLine()) != null) {
-							serverResponseObj.append(currentLine + "\n");
+							serverResponseObj.append(currentLine);
 						}
 						readerObj.close();
 						receiveData += "Time:" + new SimpleDateFormat("HH:mm:ss").format(new Date()) + "\n";
@@ -351,7 +351,7 @@ public class mInterfaceService extends Service {
 						}
 						backupDataObj.put(subKeyValue, serverResponseObj.toString());
 						writerObj = new BufferedWriter(new FileWriter(backUpFilePath));
-						writerObj.write(backupDataObj.toString().substring(0,backupDataObj.toString().length()-1));
+						writerObj.write(backupDataObj.toString());
 						writerObj.flush();
 						writerObj.close();
 					} else {
