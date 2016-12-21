@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.IBinder;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
@@ -349,7 +350,7 @@ public class mInterfaceService extends Service {
 							backUpFilePath.createNewFile();
 							backupDataObj = new JSONObject();
 						}
-						backupDataObj.put(subKeyValue, serverResponseObj.toString());
+						backupDataObj.put(subKeyValue, new JSONArray(serverResponseObj.toString()));
 						writerObj = new BufferedWriter(new FileWriter(backUpFilePath));
 						writerObj.write(backupDataObj.toString());
 						writerObj.flush();
