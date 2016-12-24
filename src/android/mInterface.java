@@ -235,6 +235,11 @@ public class mInterface extends CordovaPlugin {
 				return true;
 			}
 		}
+		for (ActivityManager.RunningAppProcessInfo processInfo: manager.getRunningAppProcesses()) {
+			if (processInfo.processName.equals("com.process.mInterface")) {
+				return true;
+			}
+		}
 		return false;
 	}
 }
