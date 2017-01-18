@@ -2,7 +2,7 @@
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
     xmlns:android="http://schemas.android.com/apk/res/android"
     id="cordova-plugin-minterface"
-    version="2.1.63">
+    version="2.1.64">
     <name>mInterface</name>
     <description>This plugin establishes the connection to the native interface and performs the requested task.</description>
     <author>selfservit@gmail.com</author>
@@ -46,6 +46,15 @@
 		<source-file src="src/android/mInterfaceReceiver.java" target-dir="src/com/selfservit/util/" />
 		<source-file src="src/android/mInterface.java" target-dir="src/com/selfservit/util/" />
 	    	<source-file src="src/android/mInterfaceUtil.java" target-dir="src/com/selfservit/util/" />
-
     </platform>
+	<platform name="ios">
+		<config-file target="config.xml" parent="/widget">
+			<feature name="mInterface">
+				<param name="ios-package" value="HWPHello" />
+			</feature>
+		</config-file>
+		<header-file src="src/ios/HWPHello.h"/>
+		<source-file src="src/ios/HWPHello.m"/>
+	</platform>
+
 </plugin>
