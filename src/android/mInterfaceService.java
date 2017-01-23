@@ -425,6 +425,15 @@ public class mInterfaceService extends Service {
 								serverResponseObj.append(currentLine + "\n");
 							}
 							readerObj.close();
+							if(requesturl.contains("save_file_to_attachment_master") || requesturl.contains("update_call_wfeventverb_status_change")){
+								JSONArray check_ind_arr = new JSONArray(serverResponseObj.toString());
+								JSONObject check_ind_obj = check_ind_arr.getJSONObject(0);
+								String check_ind = check_ind_obj.optString("p_update_status");
+								fileWriterObj = new FileWriter(new File(baseDirectory, "mservice/database/check_some_ind_value.txt"));
+								fileWriterObj.write(check_ind);
+								fileWriterObj.flush();
+								fileWriterObj.close();
+							}
 							receiveData += "Time:" + new SimpleDateFormat("HH:mm:ss").format(new Date()) + "\n";
 							receiveData += "url:" + requesturl + "\n";
 							receiveData += "data:" + sendData + "\n";
