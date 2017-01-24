@@ -429,7 +429,7 @@ public class mInterfaceService extends Service {
 								JSONArray check_ind_arr = new JSONArray(serverResponseObj.toString());
 								JSONObject check_ind_obj = check_ind_arr.getJSONObject(0);
 								String check_ind = check_ind_obj.optString("p_update_status");
-								fileWriterObj = new FileWriter(new File(baseDirectory, "mservice/database/check_some_ind_value.txt"));
+								fileWriterObj = new FileWriter(new File(baseDirectory, "mservice/database/checksum_ind_value.txt"));
 								fileWriterObj.write(check_ind);
 								fileWriterObj.flush();
 								fileWriterObj.close();
