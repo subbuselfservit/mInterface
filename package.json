@@ -1,6 +1,6 @@
 {
   "name": "cordova-plugin-minterface",
-  "version": "2.1.67",
+  "version": "2.1.68",
   "description": "This plugin establishes the connection to the native interface and performs the requested task.",
   "main": "index.js",
   "scripts": {
