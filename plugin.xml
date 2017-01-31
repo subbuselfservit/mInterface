@@ -2,7 +2,7 @@
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
     xmlns:android="http://schemas.android.com/apk/res/android"
     id="cordova-plugin-minterface"
-    version="2.1.66">
+    version="2.1.67">
     <name>mInterface</name>
     <description>This plugin establishes the connection to the native interface and performs the requested task.</description>
     <author>selfservit@gmail.com</author>
@@ -10,6 +10,10 @@
     <license>Apache 2.0 License</license>
     <repo></repo>
     <issue></issue>
+	<asset src="www/mInterface.js" target="js/mInterface.js"/>
+	<js-module src="www/mInterface.js" name="mInterface">
+        <clobbers target="mInterface" />
+		</js-module>
     <!-- android -->
     <platform name="android">
         <config-file target="res/xml/config.xml" parent="/*">
@@ -38,10 +42,6 @@
 				</intent-filter>  
 			</receiver>
 		</config-file>
-		
-		<js-module src="www/mInterface.js" name="mInterface">
-        <clobbers target="mInterface" />
-		</js-module>
 		<source-file src="src/android/mInterfaceService.java" target-dir="src/com/selfservit/util/" />
 		<source-file src="src/android/mInterfaceReceiver.java" target-dir="src/com/selfservit/util/" />
 		<source-file src="src/android/mInterface.java" target-dir="src/com/selfservit/util/" />
