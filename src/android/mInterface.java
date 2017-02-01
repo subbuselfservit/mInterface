@@ -28,7 +28,7 @@ public class mInterface extends CordovaPlugin {
 	 @ Override
 	public void onResume(boolean multitasking) {
 		super.onResume(multitasking);
-		if (!isServiceRunning(mInterfaceService.class)) {
+		if (!isServiceRunning(mInterfaceService.class) || !isProcessRunning()) {
 			cordova.getActivity().startService(new Intent(cordova.getActivity().getApplicationContext(), mInterfaceService.class));
 		}
 	}
@@ -36,7 +36,7 @@ public class mInterface extends CordovaPlugin {
 	public boolean execute(final String action, JSONArray args, CallbackContext callbackContext)throws JSONException {
 		/* START BACKGROUND SERVICE IF NOT RUNNING ALREADY */
 		if (action.equals("StartService")) {
-			if (!isServiceRunning(mInterfaceService.class)) {
+			if (!isServiceRunning(mInterfaceService.class) || !isProcessRunning()) {
 				cordova.getActivity().startService(new Intent(cordova.getActivity().getApplicationContext(), mInterfaceService.class));
 				callbackContext.success("Success");
 			}
@@ -235,11 +235,15 @@ public class mInterface extends CordovaPlugin {
 				return true;
 			}
 		}
-		for (ActivityManager.RunningAppProcessInfo processInfo: manager.getRunningAppProcesses()) {
-			if (processInfo.processName.equals("com.process.mInterface")) {
-				return true;
-			}
-		}
 		return false;
 	}
+	private boolean isProcessRunning() {
+        ActivityManager manager1 = (ActivityManager)cordova.getActivity().getApplicationContext().getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningAppProcessInfo processInfo : manager1.getRunningAppProcesses()) {
+            if (processInfo.processName.equals("com.process.mInterface")) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
