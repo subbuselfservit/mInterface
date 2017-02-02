@@ -66,7 +66,6 @@ public class mInterface extends CordovaPlugin {
 			softwareProductVersion= versionObj.optString("softwareProductVersion").toString();
 			softwareProductSubVersion = versionObj.optString("softwareProductSubVersion").toString();
 			builder.setTitle("New Update");
-			builder.setIcon(R.drawable.icon);
 			builder.setMessage("Your mservice version is " + appVersion + ". There is an updated version  " + softwareProductVersion + "." + softwareProductSubVersion + " available. Please update.");
 			builder.setPositiveButton("Update", new DialogInterface.OnClickListener() {
 				@Override
