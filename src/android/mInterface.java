@@ -66,7 +66,8 @@ public class mInterface extends CordovaPlugin {
 			softwareProductVersion= versionObj.optString("softwareProductVersion").toString();
 			softwareProductSubVersion = versionObj.optString("softwareProductSubVersion").toString();
 			builder.setTitle("New Update");
-			builder.setMessage("Your mservice version is " + appVersion + ". Please upgrade the app to " + softwareProductVersion + "." + softwareProductSubVersion + " to proceed.");
+			builder.setIcon(R.drawable.icon);
+			builder.setMessage("Your mservice version is " + appVersion + ". There is an updated version  " + softwareProductVersion + "." + softwareProductSubVersion + " available. Please update.");
 			builder.setPositiveButton("Update", new DialogInterface.OnClickListener() {
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
@@ -90,7 +91,7 @@ public class mInterface extends CordovaPlugin {
 				public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
 					if (keyCode == KeyEvent.KEYCODE_BACK) {
 						dialog.dismiss();
-						callbackContext.error("failure");
+						callbackContext.success("Success");
 					}
 					return true;
 				}
