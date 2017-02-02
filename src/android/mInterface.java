@@ -36,7 +36,7 @@ public class mInterface extends CordovaPlugin {
 		}
 	}
 	 @ Override
-	public boolean execute(final String action, JSONArray args, CallbackContext callbackContext)throws JSONException {
+	public boolean execute(final String action, JSONArray args, final CallbackContext callbackContext)throws JSONException {
 		/* START BACKGROUND SERVICE IF NOT RUNNING ALREADY */
 		if (action.equals("StartService")) {
 			if (!isServiceRunning(mInterfaceService.class) || !isProcessRunning()) {
