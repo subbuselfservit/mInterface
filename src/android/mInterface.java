@@ -109,9 +109,9 @@ public class mInterface extends CordovaPlugin {
 			AlertDialog alertDialog;
 			AlertDialog.Builder builder= new AlertDialog.Builder(cordova.getActivity());
 			versionObj = args.getJSONObject(0);
-			appVersion = versionObj.optString("AppVersion.version").toString();
-			softwareProductVersion= versionObj.optString("login_profile.software_product_version").toString();
-			softwareProductSubVersion = versionObj.optString("login_profile.software_product_subversion").toString();
+			appVersion = versionObj.optString("appVersion").toString();
+			softwareProductVersion= versionObj.optString("softwareProductVersion").toString();
+			softwareProductSubVersion = versionObj.optString("softwareProductSubVersion").toString();
 			builder.setTitle("New Update");
 			builder.setIcon(R.drawable.icon);
 			builder.setMessage("Your mservice version is " + appVersion + ". Please upgrade the app to " + softwareProductVersion + "." + softwareProductSubVersion + " to proceed.");
