@@ -1,6 +1,8 @@
 package com.selfservit.util;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.app.ActivityManager;
 import android.content.ContentUris;
 import android.content.Context;
@@ -12,6 +14,8 @@ import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
+import android.view.KeyEvent;
+import com.example.plugin.R;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -56,6 +60,82 @@ public class mInterface extends CordovaPlugin {
 			/* OPEN THE PLAYSTORE MSERVICE APP */
 			cordova.getActivity().startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=com.selfservit.mservice")));
 			callbackContext.success("Success");
+		}else if (action.equals("UpdateChoice")) {
+			/* OPEN THE PLAYSTORE MSERVICE APP */
+			String appVersion,softwareProductVersion,softwareProductSubVersion;
+			JSONObject versionObj;
+			AlertDialog.Builder builder= new AlertDialog.Builder(cordova.getActivity());
+			AlertDialog alertDialog;
+			versionObj = args.getJSONObject(0);
+			appVersion = versionObj.optString("AppVersion.version").toString();
+			softwareProductVersion= versionObj.optString("login_profile.software_product_version").toString();
+			softwareProductSubVersion = versionObj.optString("login_profile.software_product_subversion").toString();
+			builder.setTitle("New Update");
+			builder.setIcon(R.drawable.icon);
+			builder.setMessage("Your mservice version is " + appVersion + ". Please upgrade the app to " + softwareProductVersion + "." + softwareProductSubVersion + " to proceed.");
+			builder.setPositiveButton("Update", new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					cordova.getActivity().startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=com.selfservit.mservice")));
+					callbackContext.success("Success");
+				}
+			});
+			builder.setNegativeButton("Not Now", new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					dialog.cancel();
+					callbackContext.success("Success");
+				}
+			});
+			alertDialog= builder.create();
+			alertDialog.setCanceledOnTouchOutside(false);
+			alertDialog.show();
+			alertDialog.setOnKeyListener(new DialogInterface.OnKeyListener() {
+
+				@Override
+				public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
+					if (keyCode == KeyEvent.KEYCODE_BACK) {
+						dialog.dismiss();
+						callbackContext.error("Success");
+					}
+					return true;
+				}
+
+			});
+		}else if (action.equals("UpdateConfirm")) {
+			/* OPEN THE PLAYSTORE MSERVICE APP */
+			String appVersion,softwareProductVersion,softwareProductSubVersion;
+			JSONObject versionObj;
+			AlertDialog alertDialog;
+			AlertDialog.Builder builder= new AlertDialog.Builder(cordova.getActivity());
+			versionObj = args.getJSONObject(0);
+			appVersion = versionObj.optString("AppVersion.version").toString();
+			softwareProductVersion= versionObj.optString("login_profile.software_product_version").toString();
+			softwareProductSubVersion = versionObj.optString("login_profile.software_product_subversion").toString();
+			builder.setTitle("New Update");
+			builder.setIcon(R.drawable.icon);
+			builder.setMessage("Your mservice version is " + appVersion + ". Please upgrade the app to " + softwareProductVersion + "." + softwareProductSubVersion + " to proceed.");
+			builder.setPositiveButton("Update", new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					cordova.getActivity().startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=com.selfservit.mservice")));
+					callbackContext.error("failure");
+				}
+			});
+			alertDialog= builder.create();
+			alertDialog.setCanceledOnTouchOutside(false);
+			alertDialog.show();
+			alertDialog.setOnKeyListener(new DialogInterface.OnKeyListener() {
+
+				@Override
+				public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
+					if(keyCode == KeyEvent.KEYCODE_BACK){
+						dialog.dismiss();
+						callbackContext.error("failure");
+					}
+					return true;
+				}
+			});
 		}
 		return true;
 	}
