@@ -96,7 +96,7 @@ public class mInterface extends CordovaPlugin {
 				public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
 					if (keyCode == KeyEvent.KEYCODE_BACK) {
 						dialog.dismiss();
-						callbackContext.error("Success");
+						callbackContext.error("failure");
 					}
 					return true;
 				}
