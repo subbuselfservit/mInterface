@@ -71,7 +71,7 @@ public class mInterface extends CordovaPlugin {
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
 					cordova.getActivity().startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=com.selfservit.mservice")));
-					callbackContext.success("Success");
+					callbackContext.error("failure");
 				}
 			});
 			builder.setNegativeButton("Not Now", new DialogInterface.OnClickListener() {
@@ -90,7 +90,7 @@ public class mInterface extends CordovaPlugin {
 				public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
 					if (keyCode == KeyEvent.KEYCODE_BACK) {
 						dialog.dismiss();
-						callbackContext.success("Success");
+						callbackContext.error("failure");
 					}
 					return true;
 				}
