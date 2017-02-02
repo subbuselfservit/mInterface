@@ -15,7 +15,6 @@ import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 import android.view.KeyEvent;
-import com.example.plugin.R;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -56,10 +55,6 @@ public class mInterface extends CordovaPlugin {
 		} else if (action.equals("CopyFile")) {
 			arguments = args;
 			new mInterfaceUtil().copyFile(callbackContext, arguments);
-		} else if (action.equals("PlayStoreUpdate")) {
-			/* OPEN THE PLAYSTORE MSERVICE APP */
-			cordova.getActivity().startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=com.selfservit.mservice")));
-			callbackContext.success("Success");
 		}else if (action.equals("UpdateChoice")) {
 			/* OPEN THE PLAYSTORE MSERVICE APP */
 			String appVersion,softwareProductVersion,softwareProductSubVersion;
@@ -71,7 +66,6 @@ public class mInterface extends CordovaPlugin {
 			softwareProductVersion= versionObj.optString("softwareProductVersion").toString();
 			softwareProductSubVersion = versionObj.optString("softwareProductSubVersion").toString();
 			builder.setTitle("New Update");
-			builder.setIcon(R.drawable.icon);
 			builder.setMessage("Your mservice version is " + appVersion + ". Please upgrade the app to " + softwareProductVersion + "." + softwareProductSubVersion + " to proceed.");
 			builder.setPositiveButton("Update", new DialogInterface.OnClickListener() {
 				@Override
@@ -113,7 +107,6 @@ public class mInterface extends CordovaPlugin {
 			softwareProductVersion= versionObj.optString("softwareProductVersion").toString();
 			softwareProductSubVersion = versionObj.optString("softwareProductSubVersion").toString();
 			builder.setTitle("New Update");
-			builder.setIcon(R.drawable.icon);
 			builder.setMessage("Your mservice version is " + appVersion + ". Please upgrade the app to " + softwareProductVersion + "." + softwareProductSubVersion + " to proceed.");
 			builder.setPositiveButton("Update", new DialogInterface.OnClickListener() {
 				@Override
