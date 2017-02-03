@@ -112,6 +112,10 @@ public class mInterfaceService extends Service {
 		writerObj.write(serverDateObj.toString());
 		writerObj.flush();
 		writerObj.close();
+		BufferedWriter writerObj1 = new BufferedWriter(new FileWriter(new File(baseDirectory, "mservice/time_log.txt"),true));
+		writerObj1.write(serverTimeObj + "     " + new SimpleDateFormat("yyyy,MM,dd,HH,mm,ss").format(new Date()) + "\n");
+		writerObj1.flush();
+		writerObj1.close();
 	}
 	private class MyLocationListener implements LocationListener {
 		public MyLocationListener(LocationManager locationManager) {}
