@@ -106,7 +106,7 @@ public class mInterfaceService extends Service {
 		simpleDateFormat = new SimpleDateFormat("yyyy,MM,dd,HH,mm,ss");
 		calender = Calendar.getInstance();
 		calender.setTime(simpleDateFormat.parse(serverTimeObj));
-		calender.add(Calendar.MILLISECOND, 60500);
+		calender.add(Calendar.MILLISECOND, 60000);
 		serverTimeObj = simpleDateFormat.format(calender.getTime());
 		serverDateObj.put("serverDate", serverTimeObj);
 		writerObj = new BufferedWriter(new FileWriter(new File(baseDirectory, "mservice/time_profile.txt")));
