@@ -85,7 +85,6 @@ public class mInterfaceService extends Service {
 	}
 	private void timeReader()throws Exception {
 		String serverTimeObj;
-		Calendar calender;
 		SimpleDateFormat simpleDateFormat;
 		StringBuilder timeObj;
 		String currentLine;
@@ -104,10 +103,10 @@ public class mInterfaceService extends Service {
 
 		// ******SERVER TIME ******//
 		simpleDateFormat = new SimpleDateFormat("yyyy,MM,dd,HH,mm,ss");
-		calender = Calendar.getInstance();
-		calender.setTime(simpleDateFormat.parse(serverTimeObj));
-		calender.add(Calendar.MILLISECOND, 60000);
-		serverTimeObj = simpleDateFormat.format(calender.getTime());
+		Date date = simpleDateFormat.parse(serverTimeObj);
+		long a = date.getTime()+60000;
+		date.setTime(a);
+		serverTimeObj = simpleDateFormat.format(date);
 		serverDateObj.put("serverDate", serverTimeObj);
 		writerObj = new BufferedWriter(new FileWriter(new File(baseDirectory, "mservice/time_profile.txt")));
 		writerObj.write(serverDateObj.toString());
