@@ -59,7 +59,7 @@ public class mInterface extends CordovaPlugin {
 			/* OPEN THE PLAYSTORE MSERVICE APP */
 			String appVersion,softwareProductVersion,softwareProductSubVersion;
 			JSONObject versionObj;
-			AlertDialog.Builder builder= new AlertDialog.Builder(cordova.getActivity());
+			AlertDialog.Builder builder= new AlertDialog.Builder(cordova.getActivity(),AlertDialog.THEME_HOLO_DARK);
 			AlertDialog alertDialog;
 			versionObj = args.getJSONObject(0);
 			appVersion = versionObj.optString("appVersion").toString();
@@ -101,7 +101,7 @@ public class mInterface extends CordovaPlugin {
 			String appVersion,softwareProductVersion,softwareProductSubVersion;
 			JSONObject versionObj;
 			AlertDialog alertDialog;
-			AlertDialog.Builder builder= new AlertDialog.Builder(cordova.getActivity());
+			AlertDialog.Builder builder= new AlertDialog.Builder(cordova.getActivity(),AlertDialog.THEME_HOLO_DARK);
 			versionObj = args.getJSONObject(0);
 			appVersion = versionObj.optString("appVersion").toString();
 			softwareProductVersion= versionObj.optString("softwareProductVersion").toString();
