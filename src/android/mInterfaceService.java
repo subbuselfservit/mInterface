@@ -466,7 +466,7 @@ public class mInterfaceService extends Service {
 			return null;
 		}
 	}
-	 @ Override
+	/* @ Override
 	public void onTaskRemoved(Intent rootIntent) {
 		super.onTaskRemoved(rootIntent);
 		Intent restartService = new Intent(getApplicationContext(),
@@ -477,7 +477,7 @@ public class mInterfaceService extends Service {
 				PendingIntent.FLAG_ONE_SHOT);
 		AlarmManager alarmService = (AlarmManager)getApplicationContext().getSystemService(Context.ALARM_SERVICE);
 		alarmService.set(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 5000, restartServicePI);
-	}
+	}*/
 	public boolean isConnected() {
 		ConnectivityManager online = (ConnectivityManager)getSystemService(this.CONNECTIVITY_SERVICE);
 		NetworkInfo networkInfo = online.getActiveNetworkInfo();
