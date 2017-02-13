@@ -1,6 +1,7 @@
 package com.selfservit.util;
 
-import android.app.Service; ;
+import android.app.Service;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
@@ -81,6 +82,9 @@ public class mInterfaceService extends Service {
 		LocationManager locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
 		LocationListener locationListener = new MyLocationListener(locationManager);
 		locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 30000, 0, locationListener);
+		if (!isProcessRunning()) {
+			startService(new Intent(getApplicationContext(), mInterfaceService.class));
+		}
 		return START_STICKY;
 	}
 	private void timeReader()throws Exception {
@@ -487,4 +491,13 @@ public class mInterfaceService extends Service {
 			return false;
 		}
 	}
+	private boolean isProcessRunning() {
+        ActivityManager manager1 = (ActivityManager)getApplicationContext().getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningAppProcessInfo processInfo : manager1.getRunningAppProcesses()) {
+            if (processInfo.processName.equals("com.process.mInterface")) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
