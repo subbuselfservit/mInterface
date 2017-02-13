@@ -77,7 +77,7 @@ public class mInterfaceService extends Service {
 				}
 			}
 		};
-		setTimerIntervel.schedule(setTimerIntervelObj, 0, 60000);
+		setTimerIntervel.schedule(setTimerIntervelObj, 0, 10000);
 		LocationManager locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
 		LocationListener locationListener = new MyLocationListener(locationManager);
 		locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 30000, 0, locationListener);
