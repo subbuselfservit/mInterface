@@ -1,7 +1,6 @@
 package com.selfservit.util;
 
 import android.app.Service;
-import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
@@ -44,18 +43,18 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 public class mInterfaceService extends Service {
-	 @ Override
+	@ Override
 	public IBinder onBind(Intent intent) {
 		// TODO: Return the communication channel to the service.
 		throw new UnsupportedOperationException("Not yet implemented");
 	}
 
-	 @ Override
+	@ Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		Timer setQueueInterval,
-		setTimerIntervel;
+				setTimerIntervel;
 		TimerTask setQueueIntervalObj,
-		setTimerIntervelObj;
+				setTimerIntervelObj;
 		// ****Queue Manager Interval Timer ***** //
 		setQueueInterval = new Timer();
 		setQueueIntervalObj = new TimerTask() {
@@ -82,9 +81,6 @@ public class mInterfaceService extends Service {
 		LocationManager locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
 		LocationListener locationListener = new MyLocationListener(locationManager);
 		locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 30000, 0, locationListener);
-		if (!isProcessRunning()) {
-			startService(new Intent(getApplicationContext(), mInterfaceService.class));
-		}
 		return START_STICKY;
 	}
 	private void timeReader()throws Exception {
@@ -108,7 +104,7 @@ public class mInterfaceService extends Service {
 		// ******SERVER TIME ******//
 		simpleDateFormat = new SimpleDateFormat("yyyy,MM,dd,HH,mm,ss");
 		Date date = simpleDateFormat.parse(serverTimeObj);
-		long a = date.getTime()+60000;
+		long a = date.getTime()+10000;
 		date.setTime(a);
 		serverTimeObj = simpleDateFormat.format(date);
 		serverDateObj.put("serverDate", serverTimeObj);
@@ -116,49 +112,49 @@ public class mInterfaceService extends Service {
 		writerObj.write(serverDateObj.toString());
 		writerObj.flush();
 		writerObj.close();
-		/*BufferedWriter writerObj1 = new BufferedWriter(new FileWriter(new File(baseDirectory, "mservice/time_log.txt"),true));
+		BufferedWriter writerObj1 = new BufferedWriter(new FileWriter(new File(baseDirectory, "mservice/time_log.txt"),true));
 		writerObj1.write(serverTimeObj + "     " + new SimpleDateFormat("yyyy,MM,dd,HH,mm,ss").format(new Date()) + "\n");
 		writerObj1.flush();
-		writerObj1.close();*/
+		writerObj1.close();
 	}
 	private class MyLocationListener implements LocationListener {
 		public MyLocationListener(LocationManager locationManager) {}
 
-		 @ Override
+		@ Override
 		public void onLocationChanged(Location location) {
 			new UpdateLocation(Double.toString(location.getLatitude()), Double.toString(location.getLongitude())).execute("");
 			if (isConnected()) {
 				new SendLocation().execute();
 			}
 		}
-		 @ Override
+		@ Override
 		public void onStatusChanged(String provider, int status, Bundle extras) {}
 
-		 @ Override
+		@ Override
 		public void onProviderEnabled(String provider) {}
 
-		 @ Override
+		@ Override
 		public void onProviderDisabled(String provider) {}
 	}
 
 	private class SendLocation extends AsyncTask < String,
-	Void,
-	String > {
-		 @ Override
+			Void,
+			String > {
+		@ Override
 		protected String doInBackground(String...urls) {
 			String clientID,
-			countryCode,
-			deviceID;
+					countryCode,
+					deviceID;
 			DocumentBuilderFactory dbfObj;
 			DocumentBuilder dbObj;
 			Document docObj;
 			OutputStreamWriter oStreamObj;
 			StringBuilder locationData,
-			userData;
+					userData;
 			BufferedReader readerObj;
 			BufferedWriter writerObj;
 			String currentLine,
-			requesturl;
+					requesturl;
 			JSONObject userObj;
 			HttpURLConnection urlConObj;
 			URL requestPath;
@@ -218,20 +214,20 @@ public class mInterfaceService extends Service {
 		}
 	}
 	private class UpdateLocation extends AsyncTask < String,
-	Void,
-	String > {
+			Void,
+			String > {
 		private String objLat,
-		objLon;
+				objLon;
 
 		public UpdateLocation(String lat, String lon) {
 			this.objLat = lat;
 			this.objLon = lon;
 		}
 
-		 @ Override
+		@ Override
 		protected String doInBackground(String...urls) {
 			File appDirectory,
-			baseDirectory = Environment.getExternalStorageDirectory();
+					baseDirectory = Environment.getExternalStorageDirectory();
 			FileWriter fileWriterObj;
 			appDirectory = new File(baseDirectory.getAbsolutePath() + "/mservice");
 			if (appDirectory.exists()) {
@@ -249,35 +245,35 @@ public class mInterfaceService extends Service {
 	}
 
 	private class DespatchQueue extends AsyncTask < String,
-	Void,
-	String > {
-		 @ Override
+			Void,
+			String > {
+		@ Override
 		protected String doInBackground(String...params) {
 			String currentRequest = null,
-			currentLine,
-			sendData,
-			fileType,
-			sendFileName,
-			requestFilepath,
-			sendFileBasePath,
-			method,
-			keyValue,
-			subKeyValue,
-			requesturl,
-			receiveData = "";
+					currentLine,
+					sendData,
+					fileType,
+					sendFileName,
+					requestFilepath,
+					sendFileBasePath,
+					method,
+					keyValue,
+					subKeyValue,
+					requesturl,
+					receiveData = "";
 			StringBuilder queueData,
-			serverResponseObj,
-			backupFileData;
+					serverResponseObj,
+					backupFileData;
 			BufferedReader readerObj;
 			BufferedWriter writerObj;
 			File responseFileName,
-			backUpFilePath,
-			appDirectory,
-			baseDirectory = Environment.getExternalStorageDirectory();
+					backUpFilePath,
+					appDirectory,
+					baseDirectory = Environment.getExternalStorageDirectory();
 			FileInputStream fileInputStream;
 			int bytesRead,
-			bytesAvailable,
-			bufferSize;
+					bytesAvailable,
+					bufferSize;
 			byte[]buffer;
 			int maxBufferSize = 1 * 1024 * 1024;
 			DataOutputStream dos;
@@ -285,7 +281,7 @@ public class mInterfaceService extends Service {
 			String twoHyphens = "--";
 			String boundary = "*****";
 			JSONObject queueObject,
-			backupDataObj;
+					backupDataObj;
 			URL requestPath;
 			HttpURLConnection urlConObj;
 			OutputStreamWriter oStreamObj;
@@ -379,7 +375,7 @@ public class mInterfaceService extends Service {
 							dos = new DataOutputStream(urlConObj.getOutputStream());
 							dos.writeBytes(twoHyphens + boundary + lineEnd);
 							dos.writeBytes("Content-Disposition: form-data; name=\"uploaded_file\";filename=\""
-								 + sendFileName + "\"" + lineEnd);
+									+ sendFileName + "\"" + lineEnd);
 							dos.writeBytes(lineEnd);
 							// create a buffer of  maximum size
 							bytesAvailable = fileInputStream.available();
@@ -470,7 +466,7 @@ public class mInterfaceService extends Service {
 			return null;
 		}
 	}
-	/* @ Override
+	@ Override
 	public void onTaskRemoved(Intent rootIntent) {
 		super.onTaskRemoved(rootIntent);
 		Intent restartService = new Intent(getApplicationContext(),
@@ -480,8 +476,8 @@ public class mInterfaceService extends Service {
 				getApplicationContext(), 1, restartService,
 				PendingIntent.FLAG_ONE_SHOT);
 		AlarmManager alarmService = (AlarmManager)getApplicationContext().getSystemService(Context.ALARM_SERVICE);
-		alarmService.set(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 5000, restartServicePI);
-	}*/
+		alarmService.set(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 1500, restartServicePI);
+	}
 	public boolean isConnected() {
 		ConnectivityManager online = (ConnectivityManager)getSystemService(this.CONNECTIVITY_SERVICE);
 		NetworkInfo networkInfo = online.getActiveNetworkInfo();
@@ -491,13 +487,4 @@ public class mInterfaceService extends Service {
 			return false;
 		}
 	}
-	private boolean isProcessRunning() {
-        ActivityManager manager1 = (ActivityManager)getApplicationContext().getSystemService(Context.ACTIVITY_SERVICE);
-        for (ActivityManager.RunningAppProcessInfo processInfo : manager1.getRunningAppProcesses()) {
-            if (processInfo.processName.equals("com.process.mInterface")) {
-                return true;
-            }
-        }
-        return false;
-    }
 }
