@@ -471,6 +471,11 @@ public class mInterfaceService extends Service {
 		}
 	}
 	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		startService(new Intent(getApplicationContext(),mInterfaceService.class));
+	}  
+	@Override
 	public void onLowMemory() {
 		super.onLowMemory();
 		startService(new Intent(getApplicationContext(),mInterfaceService.class));
