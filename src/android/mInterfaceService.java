@@ -480,7 +480,7 @@ public class mInterfaceService extends Service {
 				getApplicationContext(), 1, restartService,
 				PendingIntent.FLAG_ONE_SHOT);
 		AlarmManager alarmService = (AlarmManager)getApplicationContext().getSystemService(Context.ALARM_SERVICE);
-		alarmService.set(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 1000, restartServicePI);
+		alarmService.set(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 5000, restartServicePI);
 	}
 	public boolean isConnected() {
 		ConnectivityManager online = (ConnectivityManager)getSystemService(this.CONNECTIVITY_SERVICE);
