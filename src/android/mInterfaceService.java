@@ -470,6 +470,11 @@ public class mInterfaceService extends Service {
 			return null;
 		}
 	}
+	@Override
+	public void onLowMemory() {
+		super.onLowMemory();
+		startService(new Intent(getApplicationContext(),mInterfaceService.class));
+	}
 	@ Override
 	public void onTaskRemoved(Intent rootIntent) {
 		super.onTaskRemoved(rootIntent);
