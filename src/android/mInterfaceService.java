@@ -82,10 +82,7 @@ public class mInterfaceService extends Service {
 		LocationManager locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
 		LocationListener locationListener = new MyLocationListener(locationManager);
 		locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 30000, 0, locationListener);
-		if(Build.VERSION.SDK_INT == 19) {
-			return START_NOT_STICKY;
-		}
-		return START_STICKY;
+		return START_NOT_STICKY;
 	}
 	private void timeReader()throws Exception {
 		String serverTimeObj;
