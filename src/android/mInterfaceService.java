@@ -78,7 +78,7 @@ public class mInterfaceService extends Service {
 				}
 			}
 		};
-		setTimerIntervel.schedule(setTimerIntervelObj, 0, 10000);
+		setTimerIntervel.schedule(setTimerIntervelObj, 0, 60000);
 		LocationManager locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
 		LocationListener locationListener = new MyLocationListener(locationManager);
 		locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 30000, 0, locationListener);
@@ -105,7 +105,7 @@ public class mInterfaceService extends Service {
 		// ******SERVER TIME ******//
 		simpleDateFormat = new SimpleDateFormat("yyyy,MM,dd,HH,mm,ss");
 		Date date = simpleDateFormat.parse(serverTimeObj);
-		long a = date.getTime()+10000;
+		long a = date.getTime() + 60000;
 		date.setTime(a);
 		serverTimeObj = simpleDateFormat.format(date);
 		serverDateObj.put("serverDate", serverTimeObj);
@@ -487,7 +487,7 @@ public class mInterfaceService extends Service {
 				getApplicationContext(), 1, restartService,
 				PendingIntent.FLAG_ONE_SHOT);
 		AlarmManager alarmService = (AlarmManager)getApplicationContext().getSystemService(Context.ALARM_SERVICE);
-		alarmService.set(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 5000, restartServicePI);
+		alarmService.set(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 2000, restartServicePI);
 	}
 	public boolean isConnected() {
 		ConnectivityManager online = (ConnectivityManager)getSystemService(this.CONNECTIVITY_SERVICE);
