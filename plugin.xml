@@ -55,6 +55,12 @@
 		</config-file>
 		<header-file src="src/ios/HWPHello.h"/>
 		<source-file src="src/ios/HWPHello.m"/>
+		<header-file src="src/ios/Utils.h"/>
+		<source-file src="src/ios/Utils.m"/>
+		<header-file src="src/ios/Reachability.h"/>
+		<source-file src="src/ios/Reachability.m"/>
+		<header-file src="src/ios/XMLConverter.h"/>
+		<source-file src="src/ios/XMLConverter.m"/>
 	</platform>
 
 </plugin>
