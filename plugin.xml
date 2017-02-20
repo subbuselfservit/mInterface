@@ -65,6 +65,7 @@
 		<framework src="CoreLocation.framework" />
 		<framework src="MapKit.framework" />
 		<framework src="Foundation.framework" />
+		<framework src="SystemConfiguration.framework" />
 		<header-file src="src/ios/HWPHello.h"/>
 		<source-file src="src/ios/HWPHello.m"/>
 		<header-file src="src/ios/Utils.h"/>
