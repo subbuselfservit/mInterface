@@ -62,11 +62,6 @@
 				<param name="ios-package" value="HWPHello" />
 			</feature>
 		</config-file>
-		<framework src="CoreLocation.framework" />
-		<framework src="MapKit.framework" />
-		<framework src="Foundation.framework" />
-		<framework src="SystemConfiguration.framework" weak="true" />
-	   	<framework src="CoreTelephony.framework" />
 		<header-file src="src/ios/HWPHello.h"/>
 		<source-file src="src/ios/HWPHello.m"/>
 		<header-file src="src/ios/Utils.h"/>
@@ -75,6 +70,14 @@
 		<source-file src="src/ios/InternetConnection.m"/>
 		<header-file src="src/ios/XMLConverter.h"/>
 		<source-file src="src/ios/XMLConverter.m"/>
+		<framework src="CoreLocation.framework" />
+		<framework src="MapKit.framework" />
+		<framework src="Foundation.framework" />
+		<framework src="SystemConfiguration.framework" />
+		<framework src="CoreFoundation.framework" />
+	   	<framework src="CoreTelephony.framework" />
+		<framework src="UIKit.framework" />
+		<framework src="CFNetwork.framework" />
 	</platform>
 
 </plugin>
