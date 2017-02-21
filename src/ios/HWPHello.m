@@ -1,6 +1,6 @@
 #import "HWPHello.h"
 #import "XMLConverter.h"
-//#import "InternetConnection.h"
+#import "InternetConnection.h"
 
 @implementation HWPHello
 
@@ -87,12 +87,12 @@
 {
     [self.commandDelegate runInBackground:^{
         //To check internet is available or not
-        //InternetConnection *networkReachability = [InternetConnection reachabilityForInternetConnection];
-       // NetworkStatus networkStatus = [networkReachability currentReachabilityStatus];
-       // if(networkStatus == NotReachable){
-          //  NSLog(@"There is no internet connection");
-        //} else {
-         //   NSLog(@"There is internet conncetion available");
+        InternetConnection *networkReachability = [InternetConnection reachabilityForInternetConnection];
+        NetworkStatus networkStatus = [networkReachability currentReachabilityStatus];
+        if(networkStatus == NotReachable){
+            NSLog(@"There is no internet connection");
+        } else {
+            NSLog(@"There is internet conncetion available");
             //send Location updates to server if network is available
             NSString *docdir = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
             NSString *folderPath = @"/mservice/MyLocation.txt";
@@ -138,18 +138,28 @@
                  [NSURLConnection connectionWithRequest:request delegate:self];
              }
              }];
-        //}
+        }
     }];
 }
 
 - (void)getLastKnownLocation:(CDVInvokedUrlCommand*)command;
 {
     [self.commandDelegate runInBackground:^{
-        double lat = [Utils sharedSingleton].locationManager.location.coordinate.latitude;
-        double lngt = [Utils sharedSingleton].locationManager.location.coordinate.longitude;
-        NSString *locationString = [NSString stringWithFormat:@"{\"lat\":\"%f\",\"lon\":\"%f\"}", lat, lngt];
-        NSLog(@"%@", locationString);
-        CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:locationString];
+        CDVPluginResult *result;
+        InternetConnection *networkReachability = [InternetConnection reachabilityForInternetConnection];
+        NetworkStatus networkStatus = [networkReachability currentReachabilityStatus];
+        if(networkStatus == NotReachable){
+            NSLog(@"There is no internet connection");
+            NSString *noInternet = @"There is no internet connection";
+            result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:noInternet];
+        } else {
+            NSLog(@"There is internet conncetion available");
+            double lat = [Utils sharedSingleton].locationManager.location.coordinate.latitude;
+            double lngt = [Utils sharedSingleton].locationManager.location.coordinate.longitude;
+            NSString *locationString = [NSString stringWithFormat:@"{\"lat\":\"%f\",\"lon\":\"%f\"}", lat, lngt];
+            NSLog(@"%@", locationString);
+            result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:locationString];
+        }
         [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
     }];
 }
