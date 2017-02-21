@@ -1,6 +1,6 @@
 #import "HWPHello.h"
 #import "XMLConverter.h"
-#import "InternetConnection.h"
+//#import "InternetConnection.h"
 
 @implementation HWPHello
 
@@ -87,12 +87,12 @@
 {
     [self.commandDelegate runInBackground:^{
         //To check internet is available or not
-        InternetConnection *networkReachability = [InternetConnection reachabilityForInternetConnection];
-        NetworkStatus networkStatus = [networkReachability currentReachabilityStatus];
-        if(networkStatus == NotReachable){
-            NSLog(@"There is no internet connection");
-        } else {
-            NSLog(@"There is internet conncetion available");
+        //InternetConnection *networkReachability = [InternetConnection reachabilityForInternetConnection];
+       // NetworkStatus networkStatus = [networkReachability currentReachabilityStatus];
+       // if(networkStatus == NotReachable){
+          //  NSLog(@"There is no internet connection");
+        //} else {
+         //   NSLog(@"There is internet conncetion available");
             //send Location updates to server if network is available
             NSString *docdir = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
             NSString *folderPath = @"/mservice/MyLocation.txt";
@@ -138,7 +138,7 @@
                  [NSURLConnection connectionWithRequest:request delegate:self];
              }
              }];
-        }
+        //}
     }];
 }
 
