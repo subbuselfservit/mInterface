@@ -173,16 +173,16 @@
             NSString *deviceID = dict[@"device_id"];
             
             //For xml parsing
-            NSString *access_pack_path = [NSString stringWithFormat:@"%@%@%@/%@/%@",docdir,@"/mservice/client_functional_access_package/",clientID,countryCode,@"client_functional_access.xml"];
+           // NSString *access_pack_path = [NSString stringWithFormat:@"%@%@%@/%@/%@",docdir,@"/mservice/client_functional_access_package/",clientID,countryCode,@"client_functional_access.xml"];
             
             //Convert XML to JSON
-            [XMLConverter convertXMLFile:access_pack_path completion:^(BOOL success, NSDictionary *dictionary, NSError *error)
-             {
-                 if (success) {
-                     NSDictionary * dict = [dictionary objectForKey:@"functional_access_detail"];
-                     NSString *domain_name = [dict objectForKey:@"domain_name"];
-                     NSString *port_no = [dict objectForKey:@"port_no"];
-                     NSString *protocol_type = [dict objectForKey:@"protocol_type"];
+           // [XMLConverter convertXMLFile:access_pack_path completion:^(BOOL success, NSDictionary *dictionary, NSError *error)
+           //  {
+           //      if (success) {
+                  //   NSDictionary * dict = @"functional_access_detail"];
+                     NSString *domain_name = @"203.124.121.207";
+                     NSString *port_no = @"81";
+                     NSString *protocol_type = "http:";
                      
                      //Send Data to server
                      NSString *baseURL = [NSString stringWithFormat:@"%@//%@:%@/common/components/GeoLocation/update_device_location_offline.aspx",protocol_type,domain_name, port_no];
@@ -199,8 +199,8 @@
                      }*/
                      // generates an autoreleased NSURLConnection
                      [NSURLConnection connectionWithRequest:request delegate:self];
-                 }
-             }];
+               //  }
+            // }];
             result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"Internet available and data Sucsessfully sent"];
         }
         [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
