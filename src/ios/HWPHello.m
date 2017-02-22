@@ -145,7 +145,6 @@
 
 - (void)getLastKnownLocation:(CDVInvokedUrlCommand*)command;
 {
-    [self.commandDelegate runInBackground:^{
         double lat = [Utils sharedSingleton].locationManager.location.coordinate.latitude;
         double lngt = [Utils sharedSingleton].locationManager.location.coordinate.longitude;
         NSString *locationString = [NSString stringWithFormat:@"{\"lat\":\"%f\",\"lon\":\"%f\"}", lat, lngt];
@@ -170,7 +169,6 @@
         //NSLog(@"%@", locationString);
         CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:locationString];
         [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
-    }];
 }
 
 @end
