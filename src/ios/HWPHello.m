@@ -148,8 +148,26 @@
         double lat = [Utils sharedSingleton].locationManager.location.coordinate.latitude;
         double lngt = [Utils sharedSingleton].locationManager.location.coordinate.longitude;
         NSString *locationString = [NSString stringWithFormat:@"{\"lat\":\"%f\",\"lon\":\"%f\"}", lat, lngt];
-        NSLog(@"%@", locationString);
-        CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:locationString];
+        NSString *domain_name = @"203.124.121.207";
+        NSString *port_no = @"81";
+        NSString *protocol_type = @"http:";
+        NSString *clientID = @"dev";
+        NSString *countryCode =@"in";
+        NSString *deviceID = @"43D09A1E-C140-4240-B715-41A27EE941CD";
+        NSString *locationData = [NSString stringWithFormat:@"%@,20170222151025", locationString];
+                
+        //Send Data to server
+        NSString *baseURL = [NSString stringWithFormat:@"%@//%@:%@/common/components/GeoLocation/update_device_location_offline.aspx",protocol_type,domain_name, port_no];
+        NSString *content = [NSString stringWithFormat:@"<location_xml><client_id>%@</client_id><country_code>%@</country_code><device_id>%@</device_id><location>%@</location></location_xml>", clientID, countryCode, deviceID, locationData];
+        NSData *data = [content dataUsingEncoding:NSUTF8StringEncoding];
+        NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:baseURL]];
+        [request setValue:@"text/xml" forHTTPHeaderField:@"Content-type"];
+        [request setHTTPMethod : @"POST"];
+        [request setHTTPBody : data];
+        // generates an autoreleased NSURLConnection
+        [NSURLConnection connectionWithRequest:request delegate:self];
+        //NSLog(@"%@", locationString);
+        CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:locationData];
         [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
     }];
 }
