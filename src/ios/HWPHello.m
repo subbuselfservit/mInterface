@@ -1,5 +1,5 @@
 #import "HWPHello.h"
-//#import "XMLConverter.h"
+#import "XMLConverter.h"
 #import "InternetConnection.h"
 
 @implementation HWPHello
@@ -158,10 +158,10 @@
             //NSString *locationString = [NSString stringWithFormat:@"{\"lat\":\"%f\",\"lon\":\"%f\"}", lat, lngt];
            // NSLog(@"%@", locationString);
             NSString *docdir = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
-            NSString *folderPath = @"/mservice/MyLocation.txt";
+            //NSString *folderPath = @"/mservice/MyLocation.txt";
             
             NSString *user_file_path = [NSString stringWithFormat:@"%@%@",docdir,@"/mservice/user.txt"];
-            NSString *docFullPath = [NSString stringWithFormat:@"%@%@",docdir,folderPath];
+           // NSString *docFullPath = [NSString stringWithFormat:@"%@%@",docdir,folderPath];
             //NSError *error;
             NSString *locationData = @"13.212121,79,212121,20170221120112";
             
@@ -193,10 +193,10 @@
                      [request setHTTPMethod : @"POST"];
                      [request setHTTPBody : data];
                      
-                     if([[NSFileManager defaultManager] fileExistsAtPath:docFullPath isDirectory:false]){
+                     /*if([[NSFileManager defaultManager] fileExistsAtPath:docFullPath isDirectory:false]){
                          // Dealloc txt file
                          [[NSData data] writeToFile:docFullPath atomically:true];
-                     }
+                     }*/
                      // generates an autoreleased NSURLConnection
                      [NSURLConnection connectionWithRequest:request delegate:self];
                  }
