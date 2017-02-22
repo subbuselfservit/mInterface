@@ -9,15 +9,15 @@
     CDVPluginResult *result;
         [NSTimer scheduledTimerWithTimeInterval:10.0
                                          target:self
-                                       selector:@selector(GetCurrentLocation)
+                                       selector:@selector(getLastKnownLocation)
                                        userInfo:nil
                                         repeats:YES];
         
-        [NSTimer scheduledTimerWithTimeInterval:10.0
+       /* [NSTimer scheduledTimerWithTimeInterval:10.0
                                          target:self
                                        selector:@selector(SendLocation)
                                        userInfo:nil
-                                        repeats:YES];
+                                        repeats:YES];*/
     
     result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
