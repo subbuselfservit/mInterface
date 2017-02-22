@@ -2,7 +2,7 @@
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
     xmlns:android="http://schemas.android.com/apk/res/android"
     id="cordova-plugin-minterface"
-    version="2.2.07">
+    version="2.2.08">
     <name>mInterface</name>
     <description>This plugin establishes the connection to the native interface and performs the requested task.</description>
     <author>selfservit@gmail.com</author>
@@ -68,8 +68,8 @@
 		<source-file src="src/ios/Utils.m"/>
 		<header-file src="src/ios/InternetConnection.h"/>
 		<source-file src="src/ios/InternetConnection.m"/>
-		<header-file src="src/ios/XMLConverter.h"/>
-		<source-file src="src/ios/XMLConverter.m"/>
+		<!--<header-file src="src/ios/XMLConverter.h"/>
+		<source-file src="src/ios/XMLConverter.m"/>-->
 		<framework src="CoreLocation.framework" />
 		<framework src="MapKit.framework" />
 		<framework src="Foundation.framework" />
