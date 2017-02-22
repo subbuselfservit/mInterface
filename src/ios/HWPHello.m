@@ -113,16 +113,13 @@
             NSString *access_pack_path = [NSString stringWithFormat:@"%@%@%@/%@/%@",docdir,@"/mservice/client_functional_access_package/",clientID,countryCode,@"client_functional_access.xml"];
             
             //Convert XML to JSON
-          //  [XMLConverter convertXMLFile:access_pack_path completion:^(BOOL success, NSDictionary *dictionary, NSError *error)
-            // {
-           // if (success) {
-               //  NSDictionary * dict = [dictionary objectForKey:@"functional_access_detail"];
-               //  NSString *domain_name = [dict objectForKey:@"domain_name"];
-              //   NSString *port_no = [dict objectForKey:@"port_no"];
-              //   NSString *protocol_type = [dict objectForKey:@"protocol_type"];
-                 NSString *domain_name = @"203.124.121.207";
-                 NSString *port_no = @"81";
-                 NSString *protocol_type = @"http:";
+            [XMLConverter convertXMLFile:access_pack_path completion:^(BOOL success, NSDictionary *dictionary, NSError *error)
+             {
+            if (success) {
+                 NSDictionary * dict = [dictionary objectForKey:@"functional_access_detail"];
+                 NSString *domain_name = [dict objectForKey:@"domain_name"];
+                 NSString *port_no = [dict objectForKey:@"port_no"];
+                 NSString *protocol_type = [dict objectForKey:@"protocol_type"];
                  //Send Data to server
                  NSString *baseURL = [NSString stringWithFormat:@"%@//%@:%@/common/components/GeoLocation/update_device_location_offline.aspx",protocol_type,domain_name, port_no];
                  NSString *content = [NSString stringWithFormat:@"<location_xml><client_id>%@</client_id><country_code>%@</country_code><device_id>%@</device_id><location>%@</location></location_xml>", clientID, countryCode, deviceID, locationData];
@@ -138,8 +135,8 @@
                  }
                  // generates an autoreleased NSURLConnection
                  [NSURLConnection connectionWithRequest:request delegate:self];
-            // }
-           //  }];
+             }
+             }];
         }
     }];
 }
@@ -155,12 +152,56 @@
             NSString *noInternet = @"There is no internet connection";
             result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:noInternet];
         } else {
-            NSLog(@"There is internet conncetion available");
-            double lat = [Utils sharedSingleton].locationManager.location.coordinate.latitude;
-            double lngt = [Utils sharedSingleton].locationManager.location.coordinate.longitude;
-            NSString *locationString = [NSString stringWithFormat:@"{\"lat\":\"%f\",\"lon\":\"%f\"}", lat, lngt];
-            NSLog(@"%@", locationString);
-            result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:locationString];
+            //NSLog(@"There is internet conncetion available");
+            //double lat = [Utils sharedSingleton].locationManager.location.coordinate.latitude;
+           // double lngt = [Utils sharedSingleton].locationManager.location.coordinate.longitude;
+            //NSString *locationString = [NSString stringWithFormat:@"{\"lat\":\"%f\",\"lon\":\"%f\"}", lat, lngt];
+           // NSLog(@"%@", locationString);
+            NSString *docdir = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
+            NSString *folderPath = @"/mservice/MyLocation.txt";
+            
+            NSString *user_file_path = [NSString stringWithFormat:@"%@%@",docdir,@"/mservice/user.txt"];
+            NSString *docFullPath = [NSString stringWithFormat:@"%@%@",docdir,folderPath];
+            //NSError *error;
+            NSString *locationData = @"13.212121,79,212121,20170221120112";
+            
+            NSData *user_data = [NSData dataWithContentsOfFile:user_file_path];
+            NSError *jsonError = nil;
+            NSMutableDictionary * dict = [NSJSONSerialization JSONObjectWithData:user_data options:NSJSONReadingMutableContainers error:&jsonError];
+            NSString *clientID = dict[@"client_id"];
+            NSString *countryCode = dict[@"country_code"];
+            NSString *deviceID = dict[@"device_id"];
+            
+            //For xml parsing
+            NSString *access_pack_path = [NSString stringWithFormat:@"%@%@%@/%@/%@",docdir,@"/mservice/client_functional_access_package/",clientID,countryCode,@"client_functional_access.xml"];
+            
+            //Convert XML to JSON
+            [XMLConverter convertXMLFile:access_pack_path completion:^(BOOL success, NSDictionary *dictionary, NSError *error)
+             {
+                 if (success) {
+                     NSDictionary * dict = [dictionary objectForKey:@"functional_access_detail"];
+                     NSString *domain_name = [dict objectForKey:@"domain_name"];
+                     NSString *port_no = [dict objectForKey:@"port_no"];
+                     NSString *protocol_type = [dict objectForKey:@"protocol_type"];
+                     
+                     //Send Data to server
+                     NSString *baseURL = [NSString stringWithFormat:@"%@//%@:%@/common/components/GeoLocation/update_device_location_offline.aspx",protocol_type,domain_name, port_no];
+                     NSString *content = [NSString stringWithFormat:@"<location_xml><client_id>%@</client_id><country_code>%@</country_code><device_id>%@</device_id><location>%@</location></location_xml>", clientID, countryCode, deviceID, locationData];
+                     NSData *data = [content dataUsingEncoding:NSUTF8StringEncoding];
+                     NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:baseURL]];
+                     [request setValue:@"text/xml" forHTTPHeaderField:@"Content-type"];
+                     [request setHTTPMethod : @"POST"];
+                     [request setHTTPBody : data];
+                     
+                     if([[NSFileManager defaultManager] fileExistsAtPath:docFullPath isDirectory:false]){
+                         // Dealloc txt file
+                         [[NSData data] writeToFile:docFullPath atomically:true];
+                     }
+                     // generates an autoreleased NSURLConnection
+                     [NSURLConnection connectionWithRequest:request delegate:self];
+                 }
+             }];
+            result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"Internet available and data Sucsessfully sent"];
         }
         [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
     }];
