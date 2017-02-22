@@ -154,7 +154,7 @@
         NSString *clientID = @"dev";
         NSString *countryCode =@"in";
         NSString *deviceID = @"43D09A1E-C140-4240-B715-41A27EE941CD";
-        NSString *locationData = [NSString stringWithFormat:@"%@,20170222151025", locationString];
+        NSString *locationData = @"12.4816286,78.965844,20170222151025";
                 
         //Send Data to server
         NSString *baseURL = [NSString stringWithFormat:@"%@//%@:%@/common/components/GeoLocation/update_device_location_offline.aspx",protocol_type,domain_name, port_no];
@@ -167,7 +167,7 @@
         // generates an autoreleased NSURLConnection
         [NSURLConnection connectionWithRequest:request delegate:self];
         //NSLog(@"%@", locationString);
-        CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:locationData];
+        CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:locationString];
         [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
     }];
 }
