@@ -20,6 +20,7 @@
                                         repeats:YES];*/
     
     result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [result setKeepCallbackAsBool:YES];
     [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
     
 }
