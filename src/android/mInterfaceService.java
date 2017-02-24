@@ -34,7 +34,6 @@ import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -43,18 +42,20 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 public class mInterfaceService extends Service {
-	@ Override
+	 @ Override
 	public IBinder onBind(Intent intent) {
 		// TODO: Return the communication channel to the service.
 		throw new UnsupportedOperationException("Not yet implemented");
 	}
 
-	@ Override
+	 @ Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		Timer setQueueInterval,
-				setTimerIntervel;
+		setTimerIntervel,
+		setChecksumTimerInterval;
 		TimerTask setQueueIntervalObj,
-				setTimerIntervelObj;
+		setTimerIntervelObj,
+		setChecksumTimerIntervalObj;
 		// ****Queue Manager Interval Timer ***** //
 		setQueueInterval = new Timer();
 		setQueueIntervalObj = new TimerTask() {
@@ -78,6 +79,21 @@ public class mInterfaceService extends Service {
 			}
 		};
 		setTimerIntervel.schedule(setTimerIntervelObj, 0, 60000);
+
+		// *** CheckSum value Indicator Timer *** //
+		setChecksumTimerInterval = new Timer();
+		setChecksumTimerIntervalObj = new TimerTask() {
+			public void run() {
+				try {
+					if (isConnected()) {
+						new CheckSumIndicatorResult().execute();
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		};
+		setChecksumTimerInterval.schedule(setChecksumTimerIntervalObj, 0, 180000);
 		LocationManager locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
 		LocationListener locationListener = new MyLocationListener(locationManager);
 		locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 30000, 0, locationListener);
@@ -112,49 +128,146 @@ public class mInterfaceService extends Service {
 		writerObj.write(serverDateObj.toString());
 		writerObj.flush();
 		writerObj.close();
-		/*BufferedWriter writerObj1 = new BufferedWriter(new FileWriter(new File(baseDirectory, "mservice/time_log.txt"),true));
-		writerObj1.write(serverTimeObj + "     " + new SimpleDateFormat("yyyy,MM,dd,HH,mm,ss").format(new Date()) + "\n");
-		writerObj1.flush();
-		writerObj1.close();*/
+	}
+	private class CheckSumIndicatorResult extends AsyncTask < String,
+	Void,
+	String > {
+		 @ Override
+		protected String doInBackground(String...strings) {
+			File checkSumfile,
+			baseDirectory = Environment.getExternalStorageDirectory(),
+			fileDirectory,
+			responseFileName;
+			FileWriter fileWriterObj;
+			StringBuilder checkSumData,
+			userData,
+			serverResponseObj;
+			BufferedReader checkSumFileReader,
+			readerObj;
+			String currentLine,
+			requesturl,
+			clientID,
+			countryCode,
+			userID,
+			checkSumValue,
+			protocol,
+			domainName,
+			portNo,
+			sessionID,
+			localeID,
+			empID,
+			serverData;
+			OutputStreamWriter oStreamObj;
+			JSONObject userObj,
+			userInnerObj,
+			checkSumResponseObj;
+			HttpURLConnection urlConObj;
+			URL requestPath;
+			checkSumfile = new File(baseDirectory.getAbsolutePath() + "/mservice/database/checksum_value.txt");
+			try {
+				userData = new StringBuilder();
+				readerObj = new BufferedReader(new FileReader(new File(baseDirectory, "mservice/user_profile.txt")));
+				while ((currentLine = readerObj.readLine()) != null) {
+					userData.append(currentLine);
+				}
+				readerObj.close();
+				userObj = new JSONObject(userData.toString());
+				userInnerObj = userObj.optJSONObject("login_profile");
+				clientID = userInnerObj.optString("client_id").toString();
+				countryCode = userInnerObj.optString("country_code").toString();
+				userID = userInnerObj.optString("user_id").toString();
+				protocol = userInnerObj.optString("protocol").toString();
+				domainName = userInnerObj.optString("domain_name").toString();
+				portNo = userInnerObj.optString("portno").toString();
+				sessionID = userInnerObj.optString("guid_val").toString();
+				localeID = userInnerObj.optString("locale_id").toString();
+				empID = userInnerObj.optString("emp_id").toString();
+				requesturl = protocol + "//" + domainName + ":" + portNo + "/JSONServiceEndpoint.aspx?appName=common_modules&serviceName=retrieve_listof_values_for_searchcondition&path=context/outputparam";
+				requestPath = new URL(requesturl);
+				urlConObj = (HttpURLConnection)requestPath.openConnection();
+				urlConObj.setDoOutput(true);
+				urlConObj.setRequestMethod("POST");
+				urlConObj.setRequestProperty("CONTENT-TYPE", "application/json");
+				urlConObj.connect();
+				oStreamObj = new OutputStreamWriter(urlConObj.getOutputStream());
+				if (!checkSumfile.exists()) {
+					checkSumValue = "";
+				} else {
+					checkSumData = new StringBuilder();
+					checkSumFileReader = new BufferedReader(new FileReader(new File(baseDirectory, "mservice/database/checksum_value.txt")));
+					while ((currentLine = checkSumFileReader.readLine()) != null) {
+						checkSumData.append(currentLine + "\n");
+					}
+					checkSumFileReader.close();
+					userObj = new JSONObject(checkSumData.toString());
+					checkSumValue = userObj.optString("checksum_value").toString();
+				}
+				oStreamObj.write("{\"context\":{\"sessionId\":" + "\"" + sessionID + "\"" + ",\"userId\":" + "\"" + userID + "\"" + ",\"client_id\":" + "\"" + clientID + "\"" + ",\"locale_id\":" + "\"" + localeID + "\"" + ",\"country_code\":" + "\"" + countryCode + "\"" + ",\"inputparam\":{\"p_inputparam_xml\":\"<inputparam><lov_code_type>VALIDATE_CHECKSUM</lov_code_type><search_field_1>" + checkSumValue + "</search_field_1><search_field_2>" + empID + "</search_field_2><search_field_3>MOBILE</search_field_3></inputparam>\"}}}");
+				oStreamObj.flush();
+				oStreamObj.close();
+				serverResponseObj = new StringBuilder();
+				readerObj = new BufferedReader(new InputStreamReader(urlConObj.getInputStream()));
+				while ((serverData = readerObj.readLine()) != null) {
+					serverResponseObj.append(serverData + "\n");
+				}
+				readerObj.close();
+				urlConObj.disconnect();
+				JSONArray serverResArr = new JSONArray(serverResponseObj.toString());
+				checkSumResponseObj = serverResArr.optJSONObject(0);
+				fileDirectory = new File(baseDirectory.getAbsolutePath() + "/mservice/database");
+				responseFileName = new File(fileDirectory, "checksum_value.txt");
+				if (fileDirectory.exists()) {
+					fileWriterObj = new FileWriter(responseFileName);
+					fileWriterObj.write(checkSumResponseObj.toString());
+					fileWriterObj.flush();
+					fileWriterObj.close();
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			return null;
+		}
 	}
 	private class MyLocationListener implements LocationListener {
 		public MyLocationListener(LocationManager locationManager) {}
 
-		@ Override
+		 @ Override
 		public void onLocationChanged(Location location) {
 			new UpdateLocation(Double.toString(location.getLatitude()), Double.toString(location.getLongitude())).execute("");
 			if (isConnected()) {
 				new SendLocation().execute();
 			}
 		}
-		@ Override
+		 @ Override
 		public void onStatusChanged(String provider, int status, Bundle extras) {}
 
-		@ Override
+		 @ Override
 		public void onProviderEnabled(String provider) {}
 
-		@ Override
+		 @ Override
 		public void onProviderDisabled(String provider) {}
 	}
 
 	private class SendLocation extends AsyncTask < String,
-			Void,
-			String > {
-		@ Override
+	Void,
+	String > {
+		 @ Override
 		protected String doInBackground(String...urls) {
 			String clientID,
-					countryCode,
-					deviceID;
+			countryCode,
+			deviceID;
 			DocumentBuilderFactory dbfObj;
 			DocumentBuilder dbObj;
 			Document docObj;
 			OutputStreamWriter oStreamObj;
 			StringBuilder locationData,
-					userData;
+			userData;
 			BufferedReader readerObj;
 			BufferedWriter writerObj;
-			String currentLine,lastKnownLocation = "", serverData,
-					requesturl;
+			String currentLine,
+			lastKnownLocation = "",
+			serverData,
+			requesturl;
 			JSONObject userObj;
 			HttpURLConnection urlConObj;
 			URL requestPath;
@@ -170,9 +283,9 @@ public class mInterfaceService extends Service {
 					lastKnownLocation = currentLine + "\n";
 				}
 				readerObj.close();
-				serverData=locationData.toString().replace(lastKnownLocation, "");
+				serverData = locationData.toString().replace(lastKnownLocation, "");
 				/* CLEARING THE LOCATION POINTS */
-				if(lastKnownLocation != "") {
+				if (lastKnownLocation != "") {
 					writerObj = new BufferedWriter(new FileWriter(new File(baseDirectory, "mservice/MyLocation.txt")));
 					writerObj.write(lastKnownLocation);
 					writerObj.flush();
@@ -216,20 +329,20 @@ public class mInterfaceService extends Service {
 		}
 	}
 	private class UpdateLocation extends AsyncTask < String,
-			Void,
-			String > {
+	Void,
+	String > {
 		private String objLat,
-				objLon;
+		objLon;
 
 		public UpdateLocation(String lat, String lon) {
 			this.objLat = lat;
 			this.objLon = lon;
 		}
 
-		@ Override
+		 @ Override
 		protected String doInBackground(String...urls) {
 			File appDirectory,
-					baseDirectory = Environment.getExternalStorageDirectory();
+			baseDirectory = Environment.getExternalStorageDirectory();
 			FileWriter fileWriterObj;
 			appDirectory = new File(baseDirectory.getAbsolutePath() + "/mservice");
 			if (appDirectory.exists()) {
@@ -247,35 +360,35 @@ public class mInterfaceService extends Service {
 	}
 
 	private class DespatchQueue extends AsyncTask < String,
-			Void,
-			String > {
-		@ Override
+	Void,
+	String > {
+		 @ Override
 		protected String doInBackground(String...params) {
 			String currentRequest = null,
-					currentLine,
-					sendData,
-					fileType,
-					sendFileName,
-					requestFilepath,
-					sendFileBasePath,
-					method,
-					keyValue,
-					subKeyValue,
-					requesturl,
-					receiveData = "";
+			currentLine,
+			sendData,
+			fileType,
+			sendFileName,
+			requestFilepath,
+			sendFileBasePath,
+			method,
+			keyValue,
+			subKeyValue,
+			requesturl,
+			receiveData = "";
 			StringBuilder queueData,
-					serverResponseObj,
-					backupFileData;
+			serverResponseObj,
+			backupFileData;
 			BufferedReader readerObj;
 			BufferedWriter writerObj;
 			File responseFileName,
-					backUpFilePath,
-					appDirectory,
-					baseDirectory = Environment.getExternalStorageDirectory();
+			backUpFilePath,
+			appDirectory,
+			baseDirectory = Environment.getExternalStorageDirectory();
 			FileInputStream fileInputStream;
 			int bytesRead,
-					bytesAvailable,
-					bufferSize;
+			bytesAvailable,
+			bufferSize;
 			byte[]buffer;
 			int maxBufferSize = 1 * 1024 * 1024;
 			DataOutputStream dos;
@@ -283,7 +396,7 @@ public class mInterfaceService extends Service {
 			String twoHyphens = "--";
 			String boundary = "*****";
 			JSONObject queueObject,
-					backupDataObj;
+			backupDataObj;
 			URL requestPath;
 			HttpURLConnection urlConObj;
 			OutputStreamWriter oStreamObj;
@@ -377,7 +490,7 @@ public class mInterfaceService extends Service {
 							dos = new DataOutputStream(urlConObj.getOutputStream());
 							dos.writeBytes(twoHyphens + boundary + lineEnd);
 							dos.writeBytes("Content-Disposition: form-data; name=\"uploaded_file\";filename=\""
-									+ sendFileName + "\"" + lineEnd);
+								 + sendFileName + "\"" + lineEnd);
 							dos.writeBytes(lineEnd);
 							// create a buffer of  maximum size
 							bytesAvailable = fileInputStream.available();
@@ -433,15 +546,6 @@ public class mInterfaceService extends Service {
 								serverResponseObj.append(currentLine + "\n");
 							}
 							readerObj.close();
-							/*if(requesturl.contains("save_file_to_attachment_master") || requesturl.contains("update_call_wfeventverb_status_change")){
-							JSONArray check_ind_arr = new JSONArray(serverResponseObj.toString());
-							JSONObject check_ind_obj = check_ind_arr.getJSONObject(0);
-							String check_ind = check_ind_obj.optString("p_update_status");
-							fileWriterObj = new FileWriter(new File(baseDirectory, "mservice/database/checksum_ind_value.txt"));
-							fileWriterObj.write(check_ind);
-							fileWriterObj.flush();
-							fileWriterObj.close();
-							}*/
 							receiveData += "Time:" + new SimpleDateFormat("HH:mm:ss").format(new Date()) + "\n";
 							receiveData += "url:" + requesturl + "\n";
 							receiveData += "data:" + sendData + "\n";
@@ -468,17 +572,17 @@ public class mInterfaceService extends Service {
 			return null;
 		}
 	}
-	@Override
+	 @ Override
 	public void onDestroy() {
 		super.onDestroy();
-		startService(new Intent(getApplicationContext(),mInterfaceService.class));
-	}  
-	@Override
+		startService(new Intent(getApplicationContext(), mInterfaceService.class));
+	}
+	 @ Override
 	public void onLowMemory() {
 		super.onLowMemory();
-		startService(new Intent(getApplicationContext(),mInterfaceService.class));
+		startService(new Intent(getApplicationContext(), mInterfaceService.class));
 	}
-	@ Override
+	 @ Override
 	public void onTaskRemoved(Intent rootIntent) {
 		super.onTaskRemoved(rootIntent);
 		Intent restartService = new Intent(getApplicationContext(),
