@@ -6,22 +6,27 @@
 
 - (void)StartService:(CDVInvokedUrlCommand*)command
 {
-   // CDVPluginResult *result = nil;
-        [NSTimer scheduledTimerWithTimeInterval:20.0
+   CDVPluginResult *result = nil;
+   /*     [NSTimer scheduledTimerWithTimeInterval:20.0
                                          target:self
                                        selector:@selector(getLastKnownLocation)
                                        userInfo:nil
-                                        repeats:YES];
-        
+                                        repeats:YES];*/
+   NSTimer *timer = [NSTimer scheduledTimerWithTimeInterval:20.0
+                                                  target:self 
+                                                selector:@selector(getLastKnownLocation:) 
+                                                userInfo:nil 
+                                                 repeats:YES];
+   [[NSRunLoop currentRunLoop] addTimer:timer forMode:NSRunLoopCommonModes];
        /* [NSTimer scheduledTimerWithTimeInterval:20.0
                                          target:self
                                        selector:@selector(SendLocation)
                                        userInfo:nil
                                         repeats:YES];*/
     
-   // result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-   // [result setKeepCallbackAsBool:YES];
-   // [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+   result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+   [result setKeepCallbackAsBool:YES];
+   [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
 }
 
 - (void)viewDidLoad {
