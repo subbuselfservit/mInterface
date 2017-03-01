@@ -150,6 +150,7 @@ public class mInterfaceService extends Service {
 			countryCode,
 			userID,
 			checkSumValue,
+			refreshInd,
 			protocol,
 			domainName,
 			portNo,
@@ -192,6 +193,7 @@ public class mInterfaceService extends Service {
 				oStreamObj = new OutputStreamWriter(urlConObj.getOutputStream());
 				if (!checkSumfile.exists()) {
 					checkSumValue = "";
+					refreshInd = "";
 				} else {
 					checkSumData = new StringBuilder();
 					checkSumFileReader = new BufferedReader(new FileReader(new File(baseDirectory, "mservice/database/checksum_value.txt")));
@@ -201,8 +203,9 @@ public class mInterfaceService extends Service {
 					checkSumFileReader.close();
 					userObj = new JSONObject(checkSumData.toString());
 					checkSumValue = userObj.optString("checksum_value").toString();
+					refreshInd = userObj.optString("refresh_ind").toString();
 				}
-				if (checkSumValue == "" || checkSumValue == "false") {
+				if (refreshInd == "" || refreshInd == "false") {
 					oStreamObj.write("{\"context\":{\"sessionId\":" + "\"" + sessionID + "\"" + ",\"userId\":" + "\"" + userID + "\"" + ",\"client_id\":" + "\"" + clientID + "\"" + ",\"locale_id\":" + "\"" + localeID + "\"" + ",\"country_code\":" + "\"" + countryCode + "\"" + ",\"inputparam\":{\"p_inputparam_xml\":\"<inputparam><lov_code_type>VALIDATE_CHECKSUM</lov_code_type><search_field_1>" + checkSumValue + "</search_field_1><search_field_2>" + empID + "</search_field_2><search_field_3>MOBILE</search_field_3></inputparam>\"}}}");
 					oStreamObj.flush();
 					oStreamObj.close();
