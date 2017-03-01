@@ -202,25 +202,27 @@ public class mInterfaceService extends Service {
 					userObj = new JSONObject(checkSumData.toString());
 					checkSumValue = userObj.optString("checksum_value").toString();
 				}
-				oStreamObj.write("{\"context\":{\"sessionId\":" + "\"" + sessionID + "\"" + ",\"userId\":" + "\"" + userID + "\"" + ",\"client_id\":" + "\"" + clientID + "\"" + ",\"locale_id\":" + "\"" + localeID + "\"" + ",\"country_code\":" + "\"" + countryCode + "\"" + ",\"inputparam\":{\"p_inputparam_xml\":\"<inputparam><lov_code_type>VALIDATE_CHECKSUM</lov_code_type><search_field_1>" + checkSumValue + "</search_field_1><search_field_2>" + empID + "</search_field_2><search_field_3>MOBILE</search_field_3></inputparam>\"}}}");
-				oStreamObj.flush();
-				oStreamObj.close();
-				serverResponseObj = new StringBuilder();
-				readerObj = new BufferedReader(new InputStreamReader(urlConObj.getInputStream()));
-				while ((serverData = readerObj.readLine()) != null) {
-					serverResponseObj.append(serverData + "\n");
-				}
-				readerObj.close();
-				urlConObj.disconnect();
-				JSONArray serverResArr = new JSONArray(serverResponseObj.toString());
-				checkSumResponseObj = serverResArr.optJSONObject(0);
-				fileDirectory = new File(baseDirectory.getAbsolutePath() + "/mservice/database");
-				responseFileName = new File(fileDirectory, "checksum_value.txt");
-				if (fileDirectory.exists()) {
-					fileWriterObj = new FileWriter(responseFileName);
-					fileWriterObj.write(checkSumResponseObj.toString());
-					fileWriterObj.flush();
-					fileWriterObj.close();
+				if (checkSumValue == "" || checkSumValue == "false") {
+					oStreamObj.write("{\"context\":{\"sessionId\":" + "\"" + sessionID + "\"" + ",\"userId\":" + "\"" + userID + "\"" + ",\"client_id\":" + "\"" + clientID + "\"" + ",\"locale_id\":" + "\"" + localeID + "\"" + ",\"country_code\":" + "\"" + countryCode + "\"" + ",\"inputparam\":{\"p_inputparam_xml\":\"<inputparam><lov_code_type>VALIDATE_CHECKSUM</lov_code_type><search_field_1>" + checkSumValue + "</search_field_1><search_field_2>" + empID + "</search_field_2><search_field_3>MOBILE</search_field_3></inputparam>\"}}}");
+					oStreamObj.flush();
+					oStreamObj.close();
+					serverResponseObj = new StringBuilder();
+					readerObj = new BufferedReader(new InputStreamReader(urlConObj.getInputStream()));
+					while ((serverData = readerObj.readLine()) != null) {
+						serverResponseObj.append(serverData + "\n");
+					}
+					readerObj.close();
+					urlConObj.disconnect();
+					JSONArray serverResArr = new JSONArray(serverResponseObj.toString());
+					checkSumResponseObj = serverResArr.optJSONObject(0);
+					fileDirectory = new File(baseDirectory.getAbsolutePath() + "/mservice/database");
+					responseFileName = new File(fileDirectory, "checksum_value.txt");
+					if (fileDirectory.exists()) {
+						fileWriterObj = new FileWriter(responseFileName);
+						fileWriterObj.write(checkSumResponseObj.toString());
+						fileWriterObj.flush();
+						fileWriterObj.close();
+					}
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
