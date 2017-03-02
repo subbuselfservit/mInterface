@@ -134,97 +134,97 @@ public class mInterfaceService extends Service {
 	String > {
 		 @ Override
 		protected String doInBackground(String...strings) {
-			File checkSumfile,
-			baseDirectory = Environment.getExternalStorageDirectory(),
-			fileDirectory,
-			responseFileName;
-			FileWriter fileWriterObj;
-			StringBuilder checkSumData,
-			userData,
-			serverResponseObj;
-			BufferedReader checkSumFileReader,
-			readerObj;
+			File baseDirectory,
+			checksumFile,
+			userProfileFile;
+
+			BufferedReader checksumFileReader,
+			userProfileFileReader,
+			responseReader;
+
 			String currentLine,
-			requesturl,
-			clientID,
-			countryCode,
-			userID,
-			checkSumValue,
-			refreshInd,
-			protocol,
-			domainName,
-			portNo,
-			sessionID,
-			localeID,
-			empID,
-			serverData;
-			OutputStreamWriter oStreamObj;
-			JSONObject userObj,
-			userInnerObj,
-			checkSumResponseObj;
-			HttpURLConnection urlConObj;
+			checksumFileData,
+			checksumValue,
+			refreshIndValue,
+			userProfileFileData,
+			serverResponseData;
+
+			JSONObject checksumObj,
+			userProfileObj,
+			serverResponseObj;
+
+			JSONArray serverResponseArray;
+
 			URL requestPath;
-			checkSumfile = new File(baseDirectory.getAbsolutePath() + "/mservice/database/checksum_value.txt");
+
+			HttpURLConnection urlConObj;
+
+			OutputStreamWriter oStreamObj;
+
+			FileWriter writerObj;
+
 			try {
-				userData = new StringBuilder();
-				readerObj = new BufferedReader(new FileReader(new File(baseDirectory, "mservice/user_profile.txt")));
-				while ((currentLine = readerObj.readLine()) != null) {
-					userData.append(currentLine);
-				}
-				readerObj.close();
-				userObj = new JSONObject(userData.toString());
-				userInnerObj = userObj.optJSONObject("login_profile");
-				clientID = userInnerObj.optString("client_id").toString();
-				countryCode = userInnerObj.optString("country_code").toString();
-				userID = userInnerObj.optString("user_id").toString();
-				protocol = userInnerObj.optString("protocol").toString();
-				domainName = userInnerObj.optString("domain_name").toString();
-				portNo = userInnerObj.optString("portno").toString();
-				sessionID = userInnerObj.optString("guid_val").toString();
-				localeID = userInnerObj.optString("locale_id").toString();
-				empID = userInnerObj.optString("emp_id").toString();
-				requesturl = protocol + "//" + domainName + ":" + portNo + "/JSONServiceEndpoint.aspx?appName=common_modules&serviceName=retrieve_listof_values_for_searchcondition&path=context/outputparam";
-				requestPath = new URL(requesturl);
-				urlConObj = (HttpURLConnection)requestPath.openConnection();
-				urlConObj.setDoOutput(true);
-				urlConObj.setRequestMethod("POST");
-				urlConObj.setRequestProperty("CONTENT-TYPE", "application/json");
-				urlConObj.connect();
-				oStreamObj = new OutputStreamWriter(urlConObj.getOutputStream());
-				if (!checkSumfile.exists()) {
-					checkSumValue = "";
-					refreshInd = "";
-				} else {
-					checkSumData = new StringBuilder();
-					checkSumFileReader = new BufferedReader(new FileReader(new File(baseDirectory, "mservice/database/checksum_value.txt")));
-					while ((currentLine = checkSumFileReader.readLine()) != null) {
-						checkSumData.append(currentLine + "\n");
+
+				baseDirectory = Environment.getExternalStorageDirectory();
+				checksumFileData = "";
+				checksumValue = "";
+				refreshIndValue = "";
+				userProfileFileData = "";
+				serverResponseData = "";
+
+				/* READ THE CHECKSUM VALUE AND GET CHECKSUM AND REFRESH INDICATOR VALUE*/
+				checksumFile = new File(baseDirectory, "/mservice/database/checksum_value.txt");
+				if (checksumFile.exists()) {
+					checksumFileReader = new BufferedReader(new FileReader(checksumFile));
+					while ((currentLine = checksumFileReader.readLine()) != null) {
+						checksumFileData += currentLine;
 					}
-					checkSumFileReader.close();
-					userObj = new JSONObject(checkSumData.toString());
-					checkSumValue = userObj.optString("checksum_value").toString();
-					refreshInd = userObj.optString("refresh_ind").toString();
+					checksumFileReader.close();
+					checksumObj = new JSONObject(checksumFileData);
+					checksumValue = checksumObj.optString("checksum_value").toString();
+					refreshIndValue = checksumObj.optString("refresh_ind").toString();
 				}
-				if (refreshInd == "" || refreshInd == "false") {
-					oStreamObj.write("{\"context\":{\"sessionId\":" + "\"" + sessionID + "\"" + ",\"userId\":" + "\"" + userID + "\"" + ",\"client_id\":" + "\"" + clientID + "\"" + ",\"locale_id\":" + "\"" + localeID + "\"" + ",\"country_code\":" + "\"" + countryCode + "\"" + ",\"inputparam\":{\"p_inputparam_xml\":\"<inputparam><lov_code_type>VALIDATE_CHECKSUM</lov_code_type><search_field_1>" + checkSumValue + "</search_field_1><search_field_2>" + empID + "</search_field_2><search_field_3>MOBILE</search_field_3></inputparam>\"}}}");
-					oStreamObj.flush();
-					oStreamObj.close();
-					serverResponseObj = new StringBuilder();
-					readerObj = new BufferedReader(new InputStreamReader(urlConObj.getInputStream()));
-					while ((serverData = readerObj.readLine()) != null) {
-						serverResponseObj.append(serverData + "\n");
-					}
-					readerObj.close();
-					urlConObj.disconnect();
-					JSONArray serverResArr = new JSONArray(serverResponseObj.toString());
-					checkSumResponseObj = serverResArr.optJSONObject(0);
-					fileDirectory = new File(baseDirectory.getAbsolutePath() + "/mservice/database");
-					responseFileName = new File(fileDirectory, "checksum_value.txt");
-					if (fileDirectory.exists()) {
-						fileWriterObj = new FileWriter(responseFileName);
-						fileWriterObj.write(checkSumResponseObj.toString());
-						fileWriterObj.flush();
-						fileWriterObj.close();
+
+				if (refreshIndValue.matches("") || refreshIndValue.matches("false")) {
+
+					/* READ THE USER PROFILE VALUE */
+					userProfileFile = new File(baseDirectory, "/mservice/user_profile.txt");
+					if (userProfileFile.exists()) {
+						userProfileFileReader = new BufferedReader(new FileReader(userProfileFile));
+						while ((currentLine = userProfileFileReader.readLine()) != null) {
+							userProfileFileData += currentLine;
+						}
+						userProfileFileReader.close();
+						userProfileObj = new JSONObject(userProfileFileData);
+						userProfileObj = userProfileObj.optJSONObject("login_profile");
+
+						/* SEND VALIDATE CHECKSUM REQUEST TO SERVER */
+						requestPath = new URL(userProfileObj.optString("protocol").toString() + "//" + userProfileObj.optString("domain_name").toString() + ":" + userProfileObj.optString("portno").toString() + "/JSONServiceEndpoint.aspx?appName=common_modules&serviceName=retrieve_listof_values_for_searchcondition&path=context/outputparam");
+						urlConObj = (HttpURLConnection)requestPath.openConnection();
+						urlConObj.setDoOutput(true);
+						urlConObj.setRequestMethod("POST");
+						urlConObj.setRequestProperty("CONTENT-TYPE", "application/json");
+						urlConObj.connect();
+
+						oStreamObj = new OutputStreamWriter(urlConObj.getOutputStream());
+						oStreamObj.write("{\"context\":{\"sessionId\":" + "\"" + userProfileObj.optString("guid_val").toString() + "\"" + ",\"userId\":" + "\"" + userProfileObj.optString("user_id").toString() + "\"" + ",\"client_id\":" + "\"" + userProfileObj.optString("client_id").toString() + "\"" + ",\"locale_id\":" + "\"" + userProfileObj.optString("locale_id").toString() + "\"" + ",\"country_code\":" + "\"" + userProfileObj.optString("country_code").toString() + "\"" + ",\"inputparam\":{\"p_inputparam_xml\":\"<inputparam><lov_code_type>VALIDATE_CHECKSUM</lov_code_type><search_field_1>" + checksumValue + "</search_field_1><search_field_2>" + userProfileObj.optString("emp_id").toString() + "</search_field_2><search_field_3>MOBILE</search_field_3></inputparam>\"}}}");
+						oStreamObj.flush();
+						oStreamObj.close();
+
+						/* READ THE SERVER RESPONSE AND WRITE TO THE FILE */
+						responseReader = new BufferedReader(new InputStreamReader(urlConObj.getInputStream()));
+						while ((currentLine = responseReader.readLine()) != null) {
+							serverResponseData += currentLine;
+						}
+						responseReader.close();
+						urlConObj.disconnect();
+
+						serverResponseArray = new JSONArray(serverResponseData);
+						serverResponseObj = serverResponseArray.optJSONObject(0);
+						writerObj = new FileWriter(checksumFile);
+						writerObj.write(serverResponseObj.toString());
+						writerObj.flush();
+						writerObj.close();
 					}
 				}
 			} catch (Exception e) {
