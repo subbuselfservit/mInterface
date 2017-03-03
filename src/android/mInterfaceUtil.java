@@ -31,38 +31,10 @@ public class mInterfaceUtil {
 	public String getLocation(Context context) {
 		String latitude="",
 				longitude="";
-		/* REGISTER THE LOCATION MANAGER */
-		locationManager = (LocationManager)context.getSystemService(context.LOCATION_SERVICE);
-		//*** IMPLEMENT LOCATION LISTENER CLASS METHODS ****//
-			locationListener = new LocationListener() {
-				@Override
-				public void onLocationChanged(Location location) {
-				}
-
-				@Override
-				public void onStatusChanged(String provider, int status, Bundle extras) {
-				}
-
-				@Override
-				public void onProviderEnabled(String provider) {
-				}
-
-				@Override
-				public void onProviderDisabled(String provider) {
-				}
-			};
-
-			//*** REQUEST LOCATION UPDATES FROM LOCATION MANAGER ***//
-			locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
-			Location lastLocationProvider = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-			//*** CONVERT DOUBLE VALUE INTO TO STRING ***//
-			if (lastLocationProvider != null) {
-				latitude = String.valueOf(lastLocationProvider.getLatitude());
-				longitude = String.valueOf(lastLocationProvider.getLongitude());
-			}else{
+		
 				String currentLine,lastKnownLocation="";
 				try {
-					BufferedReader readerObj = new BufferedReader(new FileReader(new File(Environment.getExternalStorageDirectory(), "mservice/MyLocation.txt")));
+					BufferedReader readerObj = new BufferedReader(new FileReader(new File(Environment.getExternalStorageDirectory(), "mservice/LastKnownLocation.txt")));
 					while ((currentLine = readerObj.readLine()) != null) {
 						lastKnownLocation = currentLine;
 					}
@@ -73,7 +45,7 @@ public class mInterfaceUtil {
 				}catch(Exception e){
 					e.printStackTrace();
 				}
-			}
+				
 				//*** SUBSTRING LATITUDE,LONGITUDE IF GREATER THAN 10 POINTS ***//
 				if (latitude.length() > 10) {
 					latitude = latitude.substring(0, 10);
@@ -87,10 +59,18 @@ public class mInterfaceUtil {
 
 	/*FOR CHECK LOCATION SERVICE SETTING IS ENABLED OR NOT */
 	public String checkLocation(Context context) {
+		Boolean isEnabled = false;
+	
 		//*** REGISTER THE LOCATION MANAGER *** //
 		locationManager = (LocationManager)context.getSystemService(context.LOCATION_SERVICE);
 		//*** CHECK LOCATION SETTING ENABLED OR NOT ***//
-		return String.valueOf(locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER));
+		isEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+
+        if (!isEnabled) {
+			isEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+		}
+		
+		return String.valueOf(isEnabled);
 	}
 
 	/* COPY A FILE FROM ONE LOCATION TO ANOTHER LOCATION */
