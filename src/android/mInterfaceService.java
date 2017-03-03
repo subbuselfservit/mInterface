@@ -96,7 +96,9 @@ public class mInterfaceService extends Service {
 		setChecksumTimerInterval.schedule(setChecksumTimerIntervalObj, 0, 10000);
 		LocationManager locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
 		LocationListener locationListener = new MyLocationListener(locationManager);
-		locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 30000, 0, locationListener);
+		locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 200, locationListener);
+		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 200, locationListener);
+		
 		return START_NOT_STICKY;
 	}
 	private void timeReader()throws Exception {
@@ -285,17 +287,17 @@ public class mInterfaceService extends Service {
 				readerObj = new BufferedReader(new FileReader(new File(baseDirectory, "mservice/MyLocation.txt")));
 				while ((currentLine = readerObj.readLine()) != null) {
 					locationData.append(currentLine + "\n");
-					lastKnownLocation = currentLine + "\n";
+					//lastKnownLocation = currentLine + "\n";
 				}
 				readerObj.close();
-				serverData = locationData.toString().replace(lastKnownLocation, "");
+				serverData = locationData.toString();
 				/* CLEARING THE LOCATION POINTS */
-				if (lastKnownLocation != "") {
+				/*if (lastKnownLocation != "") {
 					writerObj = new BufferedWriter(new FileWriter(new File(baseDirectory, "mservice/MyLocation.txt")));
 					writerObj.write(lastKnownLocation);
 					writerObj.flush();
 					writerObj.close();
-				}
+				}*/
 				/* GETTING THE USER INFO */
 				userData = new StringBuilder();
 				readerObj = new BufferedReader(new FileReader(new File(baseDirectory, "mservice/user.txt")));
@@ -354,6 +356,11 @@ public class mInterfaceService extends Service {
 				try {
 					fileWriterObj = new FileWriter(new File(baseDirectory, "mservice/MyLocation.txt"), true);
 					fileWriterObj.write(this.objLat + "," + this.objLon + "," + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()) + "\n");
+					fileWriterObj.flush();
+					fileWriterObj.close();
+					
+					fileWriterObj = new FileWriter(new File(baseDirectory, "mservice/LastKnownLocation.txt"), false);
+					fileWriterObj.write(this.objLat + "," + this.objLon);
 					fileWriterObj.flush();
 					fileWriterObj.close();
 				} catch (Exception e) {
