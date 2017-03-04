@@ -93,7 +93,7 @@ public class mInterfaceService extends Service {
 				}
 			}
 		};
-		setChecksumTimerInterval.schedule(setChecksumTimerIntervalObj, 0, 10000);
+		setChecksumTimerInterval.schedule(setChecksumTimerIntervalObj, 0, 180000);
 		LocationManager locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
 		LocationListener locationListener = new MyLocationListener(locationManager);
 		locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 200, locationListener);
