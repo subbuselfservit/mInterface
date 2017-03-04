@@ -181,10 +181,10 @@
                  [request setHTTPMethod : @"POST"];
                  [request setHTTPBody : data];
                 
-                 if([[NSFileManager defaultManager] fileExistsAtPath:docFullPath isDirectory:false]){
+               /*  if([[NSFileManager defaultManager] fileExistsAtPath:docFullPath isDirectory:false]){
                      // Dealloc txt file
                      [[NSData data] writeToFile:docFullPath atomically:true];
-                 }
+                 }*/
                  // generates an autoreleased NSURLConnection
                  [NSURLConnection connectionWithRequest:request delegate:self];
              }
