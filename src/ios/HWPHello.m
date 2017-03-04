@@ -152,7 +152,7 @@
     //double lat = [Utils sharedSingleton].locationManager.location.coordinate.latitude;
     //double lngt = [Utils sharedSingleton].locationManager.location.coordinate.longitude;
    // NSString *locationString = [NSString stringWithFormat:@"{\"lat\":\"%f\",\"lon\":\"%f\"}", lat, lngt];
-    NSString *docdir = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
+    NSString *docdir = [NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) objectAtIndex:0];
     NSString *user_file_path = [NSString stringWithFormat:@"%@%@",docdir,@"/mservice/user.txt"];
     NSData *user_data = [NSData dataWithContentsOfFile:user_file_path];
     NSError *jsonError = nil;
