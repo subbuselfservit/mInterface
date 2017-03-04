@@ -292,12 +292,12 @@ public class mInterfaceService extends Service {
 				readerObj.close();
 				serverData = locationData.toString();
 				/* CLEARING THE LOCATION POINTS */
-				/*if (lastKnownLocation != "") {
+				if (serverData != "") {
 					writerObj = new BufferedWriter(new FileWriter(new File(baseDirectory, "mservice/MyLocation.txt")));
-					writerObj.write(lastKnownLocation);
+					writerObj.write("");
 					writerObj.flush();
 					writerObj.close();
-				}*/
+				}
 				/* GETTING THE USER INFO */
 				userData = new StringBuilder();
 				readerObj = new BufferedReader(new FileReader(new File(baseDirectory, "mservice/user.txt")));
@@ -360,7 +360,7 @@ public class mInterfaceService extends Service {
 					fileWriterObj.close();
 					
 					fileWriterObj = new FileWriter(new File(baseDirectory, "mservice/LastKnownLocation.txt"), false);
-					fileWriterObj.write(this.objLat + "," + this.objLon);
+					fileWriterObj.write(this.objLat + "," + this.objLon + "," + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()));
 					fileWriterObj.flush();
 					fileWriterObj.close();
 				} catch (Exception e) {
