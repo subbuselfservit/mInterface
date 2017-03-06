@@ -154,6 +154,14 @@
    // NSString *locationString = [NSString stringWithFormat:@"{\"lat\":\"%f\",\"lon\":\"%f\"}", lat, lngt];
     NSString *docdir = [NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) objectAtIndex:0];
     NSString *user_file_path = [NSString stringWithFormat:@"%@%@",docdir,@"/mservice/user.txt"];
+    NSString *fileCheck;
+    NSFileManager *filemanager = [NSFileManager defaultManager];
+    if([filemanager fileExistsAtPath:user_file_path] == YES){
+            fileCheck = @"File is already exists";
+        } else {
+         fileCheck = @"File operation is wrong...";
+    }
+   NSString *pathAndfilecheck= [NSString stringWithFormat:@"%@\n%@",user_file_path, fileCheck];
     //NSData *user_data = [NSData dataWithContentsOfFile:user_file_path];
    // NSError *jsonError = nil;
    // NSMutableDictionary * dict = [NSJSONSerialization JSONObjectWithData:user_data options:NSJSONReadingMutableContainers error:&jsonError];
@@ -163,7 +171,7 @@
    // NSString *outData = [NSString stringWithFormat:@"%@, %@, %@,", clientID, countryCode, deviceID];
     //NSLog(@"%@", outData);
     //NSLog(@"%@", locationString);
-    CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:user_file_path];
+    CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:pathAndfilecheck];
     [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
 }
 
