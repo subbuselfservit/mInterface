@@ -154,16 +154,16 @@
    // NSString *locationString = [NSString stringWithFormat:@"{\"lat\":\"%f\",\"lon\":\"%f\"}", lat, lngt];
     NSString *docdir = [NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) objectAtIndex:0];
     NSString *user_file_path = [NSString stringWithFormat:@"%@%@",docdir,@"/mservice/user.txt"];
-    NSData *user_data = [NSData dataWithContentsOfFile:user_file_path];
-    NSError *jsonError = nil;
-    NSMutableDictionary * dict = [NSJSONSerialization JSONObjectWithData:user_data options:NSJSONReadingMutableContainers error:&jsonError];
-    NSString *clientID = dict[@"client_id"];
-    NSString *countryCode = dict[@"country_code"];
-    NSString *deviceID = dict[@"device_id"];
-    NSString *outData = [NSString stringWithFormat:@"%@, %@, %@,", clientID, countryCode, deviceID];
+    //NSData *user_data = [NSData dataWithContentsOfFile:user_file_path];
+   // NSError *jsonError = nil;
+   // NSMutableDictionary * dict = [NSJSONSerialization JSONObjectWithData:user_data options:NSJSONReadingMutableContainers error:&jsonError];
+   // NSString *clientID = dict[@"client_id"];
+   // NSString *countryCode = dict[@"country_code"];
+   // NSString *deviceID = dict[@"device_id"];
+   // NSString *outData = [NSString stringWithFormat:@"%@, %@, %@,", clientID, countryCode, deviceID];
     //NSLog(@"%@", outData);
     //NSLog(@"%@", locationString);
-    CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:outData];
+    CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:user_file_path];
     [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
 }
 
