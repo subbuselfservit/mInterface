@@ -153,7 +153,8 @@
     //double lngt = [Utils sharedSingleton].locationManager.location.coordinate.longitude;
    // NSString *locationString = [NSString stringWithFormat:@"{\"lat\":\"%f\",\"lon\":\"%f\"}", lat, lngt];
     NSString *docdir = [NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) objectAtIndex:0];
-    NSString *user_file_path = [NSString stringWithFormat:@"%@%@",docdir,@"/mservice/user.txt"];
+    NSString *path = [docdir stringByAppendingPathComponent:@"MyDocuments"];
+    NSString *user_file_path = [NSString stringWithFormat:@"%@%@",path,@"/mservice/user.txt"];
     NSString *fileCheck;
     NSFileManager *filemanager = [NSFileManager defaultManager];
     if([filemanager fileExistsAtPath:user_file_path] == YES){
