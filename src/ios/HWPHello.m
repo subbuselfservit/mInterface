@@ -156,7 +156,7 @@
     NSString *user_file_path = [NSString stringWithFormat:@"%@%@",docdir,@"/mservice/user.txt"];
       NSData *user_data = [NSData dataWithContentsOfFile:user_file_path];
       NSError *jsonError = nil;
-      NSMutableDictionary * dict = [NSJSONSerialization JSONObjectWithData:user_data options:NSJSONReadingMutableContainers error:&jsonError];
+      NSMutableDictionary *dict = [NSJSONSerialization JSONObjectWithData:user_data options:NSJSONReadingMutableContainers error:&jsonError];
       NSString *clientID = dict[@"client_id"];
       NSString *countryCode = dict[@"country_code"];
       NSString *deviceID = dict[@"device_id"];
