@@ -48,14 +48,24 @@
 	    	<source-file src="src/android/mInterfaceUtil.java" target-dir="src/com/selfservit/util/" />
     </platform>
 	<platform name="ios">
-		<config-file target="*-Info.plist" parent="NSLocationAlwaysUsageDescription">
-            		<string>This app requires background location tracking</string>
-        	</config-file>
-
+		<preference name="BACKGROUND_MODE_LOCATION" default="&lt;string&gt;location&lt;/string&gt;" />
+		<preference name="LOCATION_ALWAYS_USAGE_DESCRIPTION" default="Background location-tracking is required" />
+		<preference name="LOCATION_WHEN_IN_USE_USAGE_DESCRIPTION" default="Background location-tracking is required" />
+		<preference name="MOTION_USAGE_DESCRIPTION" default="Using the accelerometer increases battery-efficiency by intelligently toggling location-tracking only when the device is detected to be moving" />
+		
 		<config-file target="*-Info.plist" parent="UIBackgroundModes">
-		    <array>
-			<string>location</string>
-		    </array>
+            		<array>
+                		<string>$BACKGROUND_MODE_LOCATION</string>
+            		</array>
+        	</config-file>
+		<config-file target="*-Info.plist" parent="NSLocationAlwaysUsageDescription">
+            		<string>$LOCATION_ALWAYS_USAGE_DESCRIPTION</string>
+        	</config-file>
+        	<config-file target="*-Info.plist" parent="NSLocationWhenInUseUsageDescription">
+            		<string>$LOCATION_WHEN_IN_USE_USAGE_DESCRIPTION</string>
+        	</config-file>
+        	<config-file target="*-Info.plist" parent="NSMotionUsageDescription">
+            		<string>$MOTION_USAGE_DESCRIPTION</string>
 		</config-file>
 		<config-file target="config.xml" parent="/widget">
 			<feature name="mInterface">
@@ -79,5 +89,4 @@
 		<framework src="UIKit.framework" />
 		<framework src="CFNetwork.framework" />
 	</platform>
-
 </plugin>
