@@ -153,6 +153,11 @@
     //double lngt = [Utils sharedSingleton].locationManager.location.coordinate.longitude;
     // NSString *locationString = [NSString stringWithFormat:@"{\"lat\":\"%f\",\"lon\":\"%f\"}", lat, lngt];
     CDVPluginResult *result = nil;
+    double lat = [Utils sharedSingleton].locationManager.location.coordinate.latitude;
+    double lngt = [Utils sharedSingleton].locationManager.location.coordinate.longitude;
+    NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+    [dateFormatter setDateFormat:@"yyyyMMddHHmmss"];
+ 
     NSString *docdir = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
     NSString *user_file_path = [NSString stringWithFormat:@"%@%@",docdir,@"/mservice/user.txt"];
     NSData *user_data = [NSData dataWithContentsOfFile:user_file_path];
@@ -161,7 +166,7 @@
     NSString *clientID = dict[@"client_id"];
     NSString *countryCode = dict[@"country_code"];
     NSString *deviceID = dict[@"device_id"];
-    NSString *locationData = @"12.12121212,13.13131313,20170305181612";
+    NSString *locationData = [NSString stringWithFormat:@"%f,%f,%@", lat, lngt, [dateFormatter stringFromDate:[NSDate date]]];
     
     NSString *access_pack_path = [NSString stringWithFormat:@"%@%@%@/%@/%@",docdir,@"/mservice/client_functional_access_package/",clientID,countryCode,@"client_functional_access.xml"];
     //Convert XML to JSON
