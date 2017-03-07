@@ -7,11 +7,6 @@
 - (void)StartService:(CDVInvokedUrlCommand*)command
 {
    CDVPluginResult *result = nil;
-   /*     [NSTimer scheduledTimerWithTimeInterval:20.0
-                                         target:self
-                                       selector:@selector(getLastKnownLocation)
-                                       userInfo:nil
-                                        repeats:YES];*/
    NSTimer *timer = [NSTimer scheduledTimerWithTimeInterval:20.0
                                                   target:self 
                                                 selector:@selector(getLastKnownLocation:) 
