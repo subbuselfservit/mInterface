@@ -161,7 +161,7 @@
     NSString *clientID = dict[@"client_id"];
     NSString *countryCode = dict[@"country_code"];
     NSString *deviceID = dict[@"device_id"];
-    NSString *locationData = [NSString stringWithFormat:@"%f,%f,%@", lat, lngt, [dateFormatter stringFromDate:[NSDate date]]];
+    NSString *locationData = [NSString stringWithFormat:@"%f,%f,%@\n", lat, lngt, [dateFormatter stringFromDate:[NSDate date]]];
     
     NSString *access_pack_path = [NSString stringWithFormat:@"%@%@%@/%@/%@",docdir,@"/mservice/client_functional_access_package/",clientID,countryCode,@"client_functional_access.xml"];
     //Convert XML to JSON
