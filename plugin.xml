@@ -88,5 +88,6 @@
 	   	<framework src="CoreTelephony.framework" />
 		<framework src="UIKit.framework" />
 		<framework src="CFNetwork.framework" />
+		<framework src="AVFoundation.framework" />
 	</platform>
 </plugin>
