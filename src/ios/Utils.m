@@ -29,6 +29,12 @@
 
 #pragma mark - MapViewDelegate
 - (void) locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray<CLLocation *> *)locations{
+    CLLocation *location = [locations lastObject];
+    NSDate *eventDate = location.timestamp;
+    NSTimeInterval howRecent = [eventDate timeIntervalSinceNow];
+    if(abs(howRecent < 30)){
+        [self UpdateLocation];
+    }
     //    NSLog(@"%@",[locations objectAtIndex:0]);
 }
 
