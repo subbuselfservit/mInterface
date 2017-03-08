@@ -4,6 +4,7 @@
 @import UIKit;
 #import <MapKit/MapKit.h>
 #import <CoreLocation/CoreLocation.h>
+#import <Cordova/CDVPlugin.h>
 #import "Utils.h"
 
 @interface HWPHello : CDVPlugin
@@ -11,4 +12,5 @@
     - (void)SendLocation;
     - (void)getLastKnownLocation:(CDVInvokedUrlCommand*)command;
     - (void)GetCurrentLocation;
+    - (void)pluginResultForTimer:(CDVInvokedUrlCommand*)command;
 @end
