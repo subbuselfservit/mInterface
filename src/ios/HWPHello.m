@@ -144,6 +144,7 @@
 
 - (void)getLastKnownLocation:(CDVInvokedUrlCommand*)command
 {
+   [self.commandDelegate runInBackground:^{
    CDVPluginResult *result = nil;
    NSTimer *timer = [NSTimer scheduledTimerWithTimeInterval:20.0
                                                   target:self 
@@ -155,6 +156,7 @@
    result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
    [result setKeepCallbackAsBool:YES];
    [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+   }];
 }
 
 - (void)pluginResultForTimer:(CDVInvokedUrlCommand*)command
