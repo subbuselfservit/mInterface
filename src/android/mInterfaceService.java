@@ -42,6 +42,10 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 public class mInterfaceService extends Service {
+	public Timer setQueueInterval,
+			setTimerIntervel,
+			setChecksumTimerInterval;	
+	
 	 @ Override
 	public IBinder onBind(Intent intent) {
 		// TODO: Return the communication channel to the service.
@@ -50,9 +54,7 @@ public class mInterfaceService extends Service {
 
 	 @ Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		Timer setQueueInterval,
-		setTimerIntervel,
-		setChecksumTimerInterval;
+		
 		TimerTask setQueueIntervalObj,
 		setTimerIntervelObj,
 		setChecksumTimerIntervalObj;
@@ -587,16 +589,52 @@ public class mInterfaceService extends Service {
 	 @ Override
 	public void onDestroy() {
 		super.onDestroy();
+		 if (setChecksumTimerInterval != null) {
+			 setChecksumTimerInterval.cancel();
+		 }
+
+		 if (setQueueInterval != null) {
+			 setQueueInterval.cancel();
+		 }
+
+		 if (setTimerIntervel != null) {
+			 setTimerIntervel.cancel();
+		 }
+		 
 		startService(new Intent(getApplicationContext(), mInterfaceService.class));
 	}
 	 @ Override
 	public void onLowMemory() {
 		super.onLowMemory();
+		 if (setChecksumTimerInterval != null) {
+			 setChecksumTimerInterval.cancel();
+		 }
+
+		 if (setQueueInterval != null) {
+			 setQueueInterval.cancel();
+		 }
+
+		 if (setTimerIntervel != null) {
+			 setTimerIntervel.cancel();
+		 }
+		 
 		startService(new Intent(getApplicationContext(), mInterfaceService.class));
 	}
 	 @ Override
 	public void onTaskRemoved(Intent rootIntent) {
 		super.onTaskRemoved(rootIntent);
+		 if (setChecksumTimerInterval != null) {
+			 setChecksumTimerInterval.cancel();
+		 }
+
+		 if (setQueueInterval != null) {
+			 setQueueInterval.cancel();
+		 }
+
+		 if (setTimerIntervel != null) {
+			 setTimerIntervel.cancel();
+		 }
+		 
 		Intent restartService = new Intent(getApplicationContext(),
 				this.getClass());
 		restartService.setPackage(getPackageName());
