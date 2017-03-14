@@ -6,22 +6,37 @@
 
 - (void)StartService:(CDVInvokedUrlCommand*)command
 {
-   CDVPluginResult *result = nil;
-   NSTimer *timer = [NSTimer scheduledTimerWithTimeInterval:20.0
-                                                  target:self 
-                                                selector:@selector(getLastKnownLocation:) 
-                                                userInfo:nil 
-                                                 repeats:YES];
-   [[NSRunLoop currentRunLoop] addTimer:timer forMode:NSRunLoopCommonModes];
-       /* [NSTimer scheduledTimerWithTimeInterval:20.0
-                                         target:self
-                                       selector:@selector(SendLocation)
-                                       userInfo:nil
-                                        repeats:YES];*/
+    //self.locationManager = [CLLocationManager new];
+    self.locationManager = [[CLLocationManager alloc] init];
+    [self.locationManager setDelegate:self];
+    [self.locationManager setDistanceFilter:kCLDistanceFilterNone];
+    [self.locationManager setHeadingFilter:kCLHeadingFilterNone];
+    [self.locationManager requestAlwaysAuthorization];
+    [self.locationManager requestWhenInUseAuthorization];
+    // Allow background Update
+    if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 9) {
+        _locationManager.allowsBackgroundLocationUpdates = YES;
+    }
+    [self.locationManager startUpdatingLocation];
+   // [_locationManager startMonitoringSignificantLocationChanges];
     
-   result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-   [result setKeepCallbackAsBool:YES];
-   [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+    CDVPluginResult *result = nil;
+    NSTimer *timer = [NSTimer scheduledTimerWithTimeInterval:30.0
+                                                      target:self
+                                                    selector:@selector(GetCurrentLocation:)
+                                                    userInfo:nil
+                                                     repeats:YES];
+    [[NSRunLoop currentRunLoop] addTimer:timer forMode:NSRunLoopCommonModes];
+    NSTimer *timer = [NSTimer scheduledTimerWithTimeInterval:30.0
+                                                      target:self
+                                                    selector:@selector(SendLocation:)
+                                                    userInfo:nil
+                                                     repeats:YES];
+    [[NSRunLoop currentRunLoop] addTimer:timer forMode:NSRunLoopCommonModes];
+    
+    result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [result setKeepCallbackAsBool:YES];
+    [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
 }
 
 - (void)viewDidLoad {
@@ -35,7 +50,8 @@
     // Do any additional setup after loading the view, typically from a nib.
 }
 
-- (void)GetCurrentLocation{
+- (void)GetCurrentLocation:(CDVInvokedUrlCommand*)command
+{
     [self.commandDelegate runInBackground:^{
         //code for directory and file creation
         NSArray *docDir = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
@@ -83,7 +99,7 @@
     }];
 }
 
-- (void)SendLocation
+- (void)SendLocation:(CDVInvokedUrlCommand*)command
 {
     [self.commandDelegate runInBackground:^{
         //To check internet is available or not
