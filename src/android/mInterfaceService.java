@@ -579,9 +579,25 @@ public class mInterfaceService extends Service {
 					fileWriterObj.write(receiveData);
 					fileWriterObj.flush();
 					fileWriterObj.close();
+				}else{
+					try {
+						BufferedWriter writerObj1 = new BufferedWriter(new FileWriter(new File(baseDirectory, "mservice/bug_report1.txt")));
+						writerObj1.write("No Internet Connection");
+						writerObj1.flush();
+						writerObj1.close();
+					}catch (Exception e){
+						e.printStackTrace();
+					}
 				}
 			} catch (Exception e) {
-				e.printStackTrace();
+				try {
+					BufferedWriter writerObj1 = new BufferedWriter(new FileWriter(new File(baseDirectory, "mservice/bug_report.txt")));
+					writerObj1.write(e.getMessage());
+					writerObj1.flush();
+					writerObj1.close();
+				}catch (Exception ex){
+					e.printStackTrace();
+				}
 			}
 			return null;
 		}
