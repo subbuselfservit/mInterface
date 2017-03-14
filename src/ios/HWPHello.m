@@ -51,7 +51,6 @@
                                                     selector:@selector(GetCurrentLocation:)
                                                     userInfo:nil
                                                      repeats:YES];
-    [[NSRunLoop currentRunLoop] addTimer:timer forMode:NSRunLoopCommonModes];
     NSTimer *sendLocationTimer = [NSTimer scheduledTimerWithTimeInterval:30.0
                                                       target:self
                                                     selector:@selector(SendLocation:)
