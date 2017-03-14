@@ -4,6 +4,31 @@
 
 @implementation HWPHello
 
+#pragma mark - MapViewDelegate
+- (void) locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray<CLLocation *> *)locations{
+    //NSLog(@"%@",[locations lastObject]);
+   CLLocation* location = [locations lastObject];
+    NSDate* eventDate = location.timestamp;
+    NSTimeInterval howRecent = [eventDate timeIntervalSinceNow];
+    if (fabs(howRecent) < 10.0) {
+        // If the event is recent, do something with it.
+        /*NSLog(@"latitude %+.6f, longitude %+.6f\n",
+              location.coordinate.latitude,
+              location.coordinate.longitude);*/
+    }
+}
+// Error while updating location
+- (void) locationManager:(CLLocationManager *)manager didFailWithError:(NSError *)error{
+    NSLog(@"%@",error);
+}
+- (void)locationManager:(CLLocationManager *)manager didUpdateToLocation:(CLLocation *)newLocation fromLocation:(CLLocation *)oldLocation {
+    
+}
+- (void)locationManager:(CLLocationManager *)manager didUpdateHeading:(CLHeading *)newHeading {
+    //handle your heading updates here- I would suggest only handling the nth update, because they
+    //come in fast and furious and it takes a lot of processing power to handle all of them
+}
+
 - (void)StartService:(CDVInvokedUrlCommand*)command
 {
     //self.locationManager = [CLLocationManager new];
@@ -39,17 +64,6 @@
     [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
 }
 
-- (void)viewDidLoad {
-    [self.commandDelegate runInBackground:^{
-    [NSTimer scheduledTimerWithTimeInterval:10.0
-                                     target:self
-                                   selector:@selector(GetCurrentLocation)
-                                   userInfo:nil
-                                    repeats:YES];
-     }];
-    // Do any additional setup after loading the view, typically from a nib.
-}
-
 - (void)GetCurrentLocation:(CDVInvokedUrlCommand*)command
 {
     [self.commandDelegate runInBackground:^{
@@ -57,7 +71,6 @@
         NSArray *docDir = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
         NSError *error;
         NSString *fullPath = [[docDir objectAtIndex:0] stringByAppendingPathComponent:@"/mservice"];
-        
         NSData *fileContents = [[NSData alloc] init];
         // Check if folder is exists
         if (![[NSFileManager defaultManager] fileExistsAtPath:fullPath]){
@@ -72,12 +85,9 @@
         } else {
             //create if file is not exsits
             [fileContents writeToFile:fullPath atomically:true];
-            NSLog(@"File is not there so created once");
         }
-        NSLog(@"%@",fullPath);
-
-        double lat = [Utils sharedSingleton].locationManager.location.coordinate.latitude;
-        double lngt = [Utils sharedSingleton].locationManager.location.coordinate.longitude;
+        double lat = self.locationManager.location.coordinate.latitude;
+        double lngt = self.locationManager.location.coordinate.longitude;
         NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
         [dateFormatter setDateFormat:@"yyyyMMddHHmmss"];
         
@@ -91,11 +101,6 @@
         [fileHandle seekToEndOfFile];
         [fileHandle writeData:[content dataUsingEncoding:NSUTF8StringEncoding]];
         [fileHandle closeFile];
-        
-        NSLog(@"Text successfully written..");
-        NSLog(@"Latitude : %f", lat);
-        NSLog(@"Longitude : %f", lngt);
-        NSLog(@"%@", [dateFormatter stringFromDate:[NSDate date]]);
     }];
 }
 
@@ -124,10 +129,8 @@
             NSString *clientID = dict[@"client_id"];
             NSString *countryCode = dict[@"country_code"];
             NSString *deviceID = dict[@"device_id"];
-       
             //For xml parsing
             NSString *access_pack_path = [NSString stringWithFormat:@"%@%@%@/%@/%@",docdir,@"/mservice/client_functional_access_package/",clientID,countryCode,@"client_functional_access.xml"];
-            
             //Convert XML to JSON
             [XMLConverter convertXMLFile:access_pack_path completion:^(BOOL success, NSDictionary *dictionary, NSError *error)
              {
@@ -136,7 +139,6 @@
                  NSString *domain_name = [dict objectForKey:@"domain_name"];
                  NSString *port_no = [dict objectForKey:@"port_no"];
                  NSString *protocol_type = [dict objectForKey:@"protocol_type"];
-                
                  //Send Data to server
                  NSString *baseURL = [NSString stringWithFormat:@"%@//%@:%@/common/components/GeoLocation/update_device_location_offline.aspx",protocol_type,domain_name, port_no];
                  NSString *content = [NSString stringWithFormat:@"<location_xml><client_id>%@</client_id><country_code>%@</country_code><device_id>%@</device_id><location>%@</location></location_xml>", clientID, countryCode, deviceID, locationData];
@@ -145,7 +147,6 @@
                  [request setValue:@"text/xml" forHTTPHeaderField:@"Content-type"];
                  [request setHTTPMethod : @"POST"];
                  [request setHTTPBody : data];
-                
                  if([[NSFileManager defaultManager] fileExistsAtPath:docFullPath isDirectory:false]){
                      // Dealloc txt file
                      [[NSData data] writeToFile:docFullPath atomically:true];
@@ -157,35 +158,6 @@
         }
     }];
 }
-
-#pragma mark - MapViewDelegate
-- (void) locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray<CLLocation *> *)locations{
-    //NSLog(@"%@",[locations lastObject]);
-   CLLocation* location = [locations lastObject];
-    NSDate* eventDate = location.timestamp;
-    NSTimeInterval howRecent = [eventDate timeIntervalSinceNow];
-    if (fabs(howRecent) < 10.0) {
-        // If the event is recent, do something with it.
-        /*NSLog(@"latitude %+.6f, longitude %+.6f\n",
-              location.coordinate.latitude,
-              location.coordinate.longitude);*/
-    }
-}
-
-// Error while updating location
-- (void) locationManager:(CLLocationManager *)manager didFailWithError:(NSError *)error{
-    NSLog(@"%@",error);
-}
-
-- (void)locationManager:(CLLocationManager *)manager didUpdateToLocation:(CLLocation *)newLocation fromLocation:(CLLocation *)oldLocation {
-    
-}
-
-- (void)locationManager:(CLLocationManager *)manager didUpdateHeading:(CLHeading *)newHeading {
-    //handle your heading updates here- I would suggest only handling the nth update, because they
-    //come in fast and furious and it takes a lot of processing power to handle all of them
-}
-
 
 - (void)getLastKnownLocation:(CDVInvokedUrlCommand*)command
 {
@@ -217,12 +189,11 @@
     [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];*/
 }
 
-
 - (void)pluginResultForTimer:(CDVInvokedUrlCommand*)command
 {   
    [self.commandDelegate runInBackground:^{
-   //double lat = [Utils sharedSingleton].locationManager.location.coordinate.latitude;
-    //double lngt = [Utils sharedSingleton].locationManager.location.coordinate.longitude;
+    //double lat = self.locationManager.location.coordinate.latitude;
+    //double lngt = self.locationManager.location.coordinate.longitude;
     // NSString *locationString = [NSString stringWithFormat:@"{\"lat\":\"%f\",\"lon\":\"%f\"}", lat, lngt];
     double lat = self.locationManager.location.coordinate.latitude;
     double lngt = self.locationManager.location.coordinate.longitude;
@@ -248,7 +219,6 @@
              NSString *domain_name = [dict objectForKey:@"domain_name"];
              NSString *port_no = [dict objectForKey:@"port_no"];
              NSString *protocol_type = [dict objectForKey:@"protocol_type"];
-             
              //Send Data to server
              NSString *baseURL = [NSString stringWithFormat:@"%@//%@:%@/common/components/GeoLocation/update_device_location_offline.aspx",protocol_type,domain_name, port_no];
              NSString *content = [NSString stringWithFormat:@"<location_xml><client_id>%@</client_id><country_code>%@</country_code><device_id>%@</device_id><location>%@</location></location_xml>", clientID, countryCode, deviceID, locationData];
@@ -257,11 +227,6 @@
              [request setValue:@"text/xml" forHTTPHeaderField:@"Content-type"];
              [request setHTTPMethod : @"POST"];
              [request setHTTPBody : data];
-             
-             /*if([[NSFileManager defaultManager] fileExistsAtPath:docFullPath isDirectory:false]){
-              // Dealloc txt file
-              [[NSData data] writeToFile:docFullPath atomically:true];
-              }*/
              // generates an autoreleased NSURLConnection
              [NSURLConnection connectionWithRequest:request delegate:self];
          }
