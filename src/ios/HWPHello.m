@@ -142,20 +142,64 @@
     }];
 }
 
+#pragma mark - MapViewDelegate
+- (void) locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray<CLLocation *> *)locations{
+    //NSLog(@"%@",[locations lastObject]);
+   CLLocation* location = [locations lastObject];
+    NSDate* eventDate = location.timestamp;
+    NSTimeInterval howRecent = [eventDate timeIntervalSinceNow];
+    if (fabs(howRecent) < 10.0) {
+        // If the event is recent, do something with it.
+        /*NSLog(@"latitude %+.6f, longitude %+.6f\n",
+              location.coordinate.latitude,
+              location.coordinate.longitude);*/
+    }
+}
+
+// Error while updating location
+- (void) locationManager:(CLLocationManager *)manager didFailWithError:(NSError *)error{
+    NSLog(@"%@",error);
+}
+
+- (void)locationManager:(CLLocationManager *)manager didUpdateToLocation:(CLLocation *)newLocation fromLocation:(CLLocation *)oldLocation {
+    
+}
+
+- (void)locationManager:(CLLocationManager *)manager didUpdateHeading:(CLHeading *)newHeading {
+    //handle your heading updates here- I would suggest only handling the nth update, because they
+    //come in fast and furious and it takes a lot of processing power to handle all of them
+}
+
+
 - (void)getLastKnownLocation:(CDVInvokedUrlCommand*)command
 {
-   CDVPluginResult *result = nil;
-   NSTimer *timer = [NSTimer scheduledTimerWithTimeInterval:20.0
-                                                  target:self 
-                                                selector:@selector(pluginResultForTimer:) 
-                                                userInfo:nil 
-                                                 repeats:YES];
-   [[NSRunLoop currentRunLoop] addTimer:timer forMode:NSRunLoopCommonModes];
+    //self.locationManager = [CLLocationManager new];
+    self.locationManager = [[CLLocationManager alloc] init];
+    [self.locationManager setDelegate:self];
+    [self.locationManager setDistanceFilter:kCLDistanceFilterNone];
+    [self.locationManager setHeadingFilter:kCLHeadingFilterNone];
+    [self.locationManager requestAlwaysAuthorization];
+    [self.locationManager requestWhenInUseAuthorization];
+    // Allow background Update
+    if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 9) {
+        _locationManager.allowsBackgroundLocationUpdates = YES;
+    }
+    [self.locationManager startUpdatingLocation];
+   // [_locationManager startMonitoringSignificantLocationChanges];
     
-   result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-   [result setKeepCallbackAsBool:YES];
-   [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+    CDVPluginResult *result = nil;
+    NSTimer *timer = [NSTimer scheduledTimerWithTimeInterval:5.0
+                                                      target:self
+                                                    selector:@selector(pluginResultForTimer:)
+                                                    userInfo:nil
+                                                     repeats:YES];
+    [[NSRunLoop currentRunLoop] addTimer:timer forMode:NSRunLoopCommonModes];
+    
+    result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [result setKeepCallbackAsBool:YES];
+    [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
 }
+
 
 - (void)pluginResultForTimer:(CDVInvokedUrlCommand*)command
 {   
@@ -163,8 +207,8 @@
    //double lat = [Utils sharedSingleton].locationManager.location.coordinate.latitude;
     //double lngt = [Utils sharedSingleton].locationManager.location.coordinate.longitude;
     // NSString *locationString = [NSString stringWithFormat:@"{\"lat\":\"%f\",\"lon\":\"%f\"}", lat, lngt];
-    double lat = [Utils sharedSingleton].locationManager.location.coordinate.latitude;
-    double lngt = [Utils sharedSingleton].locationManager.location.coordinate.longitude;
+    double lat = self.locationManager.location.coordinate.latitude;
+    double lngt = self.locationManager.location.coordinate.longitude;
     NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
     [dateFormatter setDateFormat:@"yyyyMMddHHmmss"];
  
