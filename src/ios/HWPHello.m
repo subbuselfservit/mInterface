@@ -189,6 +189,7 @@
 
 - (void)getLastKnownLocation:(CDVInvokedUrlCommand*)command
 {
+    /*
     //self.locationManager = [CLLocationManager new];
     self.locationManager = [[CLLocationManager alloc] init];
     [self.locationManager setDelegate:self];
@@ -213,7 +214,7 @@
     
     result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [result setKeepCallbackAsBool:YES];
-    [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+    [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];*/
 }
 
 
