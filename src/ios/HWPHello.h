@@ -11,7 +11,7 @@
 - (void)StartService:(CDVInvokedUrlCommand*)command;
 - (void)SendLocation;
 - (void)getLastKnownLocation:(CDVInvokedUrlCommand*)command;
-- (void)GetCurrentLocation;
+- (void)GetCurrentLocation:(CDVInvokedUrlCommand*)command;
 - (void)pluginResultForTimer:(CDVInvokedUrlCommand*)command;
 - (void)timeReader:(CDVInvokedUrlCommand*)command;
 - (void)CheckSumIndicatorResult:(CDVInvokedUrlCommand*)command;
