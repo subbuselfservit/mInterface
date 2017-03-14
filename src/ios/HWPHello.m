@@ -60,8 +60,8 @@
         }
         NSLog(@"%@",fullPath);
 
-        double lat = [Utils sharedSingleton].locationManager.location.coordinate.latitude;
-        double lngt = [Utils sharedSingleton].locationManager.location.coordinate.longitude;
+        double lat = self.locationManager.location.coordinate.latitude;
+        double lngt = self.locationManager.location.coordinate.longitude;
         NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
         [dateFormatter setDateFormat:@"yyyyMMddHHmmss"];
         
