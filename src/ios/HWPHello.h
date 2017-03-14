@@ -9,9 +9,9 @@
 
 @interface HWPHello : CDVPlugin <CLLocationManagerDelegate>
 - (void)StartService:(CDVInvokedUrlCommand*)command;
-- (void)SendLocation;
-- (void)getLastKnownLocation:(CDVInvokedUrlCommand*)command;
 - (void)GetCurrentLocation:(CDVInvokedUrlCommand*)command;
+- (void)SendLocation:(CDVInvokedUrlCommand*)command;
+- (void)getLastKnownLocation:(CDVInvokedUrlCommand*)command;
 - (void)pluginResultForTimer:(CDVInvokedUrlCommand*)command;
 - (void)timeReader:(CDVInvokedUrlCommand*)command;
 - (void)CheckSumIndicatorResult:(CDVInvokedUrlCommand*)command;
