@@ -188,7 +188,7 @@
    // [_locationManager startMonitoringSignificantLocationChanges];
     
     CDVPluginResult *result = nil;
-    NSTimer *timer = [NSTimer scheduledTimerWithTimeInterval:5.0
+    NSTimer *timer = [NSTimer scheduledTimerWithTimeInterval:20.0
                                                       target:self
                                                     selector:@selector(pluginResultForTimer:)
                                                     userInfo:nil
