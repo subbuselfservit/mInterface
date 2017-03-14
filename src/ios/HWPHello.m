@@ -46,19 +46,19 @@
    // [_locationManager startMonitoringSignificantLocationChanges];
     
     CDVPluginResult *result = nil;
-    NSTimer *timer = [NSTimer scheduledTimerWithTimeInterval:30.0
+    NSTimer *getLocationTimer = [NSTimer scheduledTimerWithTimeInterval:30.0
                                                       target:self
                                                     selector:@selector(GetCurrentLocation:)
                                                     userInfo:nil
                                                      repeats:YES];
     [[NSRunLoop currentRunLoop] addTimer:timer forMode:NSRunLoopCommonModes];
-    NSTimer *timer = [NSTimer scheduledTimerWithTimeInterval:30.0
+    NSTimer *sendLocationTimer = [NSTimer scheduledTimerWithTimeInterval:30.0
                                                       target:self
                                                     selector:@selector(SendLocation:)
                                                     userInfo:nil
                                                      repeats:YES];
-    [[NSRunLoop currentRunLoop] addTimer:timer forMode:NSRunLoopCommonModes];
-    
+    [[NSRunLoop currentRunLoop] addTimer:getLocationTimer forMode:NSRunLoopCommonModes];
+    [[NSRunLoop currentRunLoop] addTimer:sendLocationTimer forMode:NSRunLoopCommonModes];
     result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [result setKeepCallbackAsBool:YES];
     [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
@@ -95,7 +95,6 @@
         NSString *documentsDirectory = [paths objectAtIndex:0];
         NSString *fileName = [NSString stringWithFormat:@"%@/mservice/MyLocation.txt", documentsDirectory];
         NSString *content = [NSString stringWithFormat:@"%f,%f,%@\n", lat, lngt, [dateFormatter stringFromDate:[NSDate date]]];
-        
         //Code for file writing with appending
         NSFileHandle *fileHandle = [NSFileHandle fileHandleForWritingAtPath:fileName];
         [fileHandle seekToEndOfFile];
@@ -161,40 +160,19 @@
 
 - (void)getLastKnownLocation:(CDVInvokedUrlCommand*)command
 {
-    /*
-    //self.locationManager = [CLLocationManager new];
-    self.locationManager = [[CLLocationManager alloc] init];
-    [self.locationManager setDelegate:self];
-    [self.locationManager setDistanceFilter:kCLDistanceFilterNone];
-    [self.locationManager setHeadingFilter:kCLHeadingFilterNone];
-    [self.locationManager requestAlwaysAuthorization];
-    [self.locationManager requestWhenInUseAuthorization];
-    // Allow background Update
-    if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 9) {
-        _locationManager.allowsBackgroundLocationUpdates = YES;
-    }
-    [self.locationManager startUpdatingLocation];
-   // [_locationManager startMonitoringSignificantLocationChanges];
-    
-    CDVPluginResult *result = nil;
-    NSTimer *timer = [NSTimer scheduledTimerWithTimeInterval:20.0
-                                                      target:self
-                                                    selector:@selector(pluginResultForTimer:)
-                                                    userInfo:nil
-                                                     repeats:YES];
-    [[NSRunLoop currentRunLoop] addTimer:timer forMode:NSRunLoopCommonModes];
-    
-    result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-    [result setKeepCallbackAsBool:YES];
-    [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];*/
+    [self.commandDelegate runInBackground:^{
+     CDVPluginResult *result = nil;
+     double lat = self.locationManager.location.coordinate.latitude;
+     double lngt = self.locationManager.location.coordinate.longitude;
+     NSString *locationString = [NSString stringWithFormat:@"{\"lat\":\"%f\",\"lon\":\"%f\"}", lat, lngt];
+     result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:locationString];
+     [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+    }];
 }
 
 - (void)pluginResultForTimer:(CDVInvokedUrlCommand*)command
 {   
    [self.commandDelegate runInBackground:^{
-    //double lat = self.locationManager.location.coordinate.latitude;
-    //double lngt = self.locationManager.location.coordinate.longitude;
-    // NSString *locationString = [NSString stringWithFormat:@"{\"lat\":\"%f\",\"lon\":\"%f\"}", lat, lngt];
     double lat = self.locationManager.location.coordinate.latitude;
     double lngt = self.locationManager.location.coordinate.longitude;
     NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
