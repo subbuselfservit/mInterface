@@ -113,7 +113,6 @@
 - (void)SendLocation:(CDVInvokedUrlCommand*)command
 {
     [self.commandDelegate runInBackground:^{
-        NSString *checkFile;
         NSArray *getdocDir = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
         NSError *geterror;
         NSString *getfullPath = [[getdocDir objectAtIndex:0] stringByAppendingPathComponent:@"/mservice"];
@@ -124,16 +123,13 @@
             [[NSFileManager defaultManager] createDirectoryAtPath:getfullPath withIntermediateDirectories:YES attributes:nil error:&geterror];
         }
         getfullPath = [getfullPath stringByAppendingString:@"/MyLocation.txt"];
-        NSLog(@"File path is : %@", getfullPath);
         NSFileManager *filemanager = [NSFileManager defaultManager];
         //check if file is not exists
         if([filemanager fileExistsAtPath:getfullPath] == YES){
             NSLog(@"File Exsists");
-            checkFile = @"File is there..";
         } else {
             //create if file is not exsits
             [fileContents writeToFile:getfullPath atomically:true];
-            checkFile = @"File is there..";
         }
         double lat = self.locationManager.location.coordinate.latitude;
         double lngt = self.locationManager.location.coordinate.longitude;
@@ -141,15 +137,11 @@
         [dateFormatter setDateFormat:@"yyyyMMddHHmmss"];
         
         NSString *content = [NSString stringWithFormat:@"%f,%f,%@\n", lat, lngt, [dateFormatter stringFromDate:[NSDate date]]];
-        NSLog(@"Location data is : %@", content);
         //Code for file writing with appending
         NSFileHandle *fileHandle = [NSFileHandle fileHandleForWritingAtPath:getfullPath];
         [fileHandle seekToEndOfFile];
         [fileHandle writeData:[content dataUsingEncoding:NSUTF8StringEncoding]];
         [fileHandle closeFile];
-        NSString *locationData = [NSString stringWithContentsOfFile:getfullPath encoding:NSUTF8StringEncoding error:&geterror];
-        NSString *finalOutput = [NSString stringWithFormat:@"%@, \n %@\n %@", getfullPath, locationData, checkFile];
-        NSLog(@"Output : %@", finalOutput);
         //To check internet is available or not
         InternetConnection *networkReachability = [InternetConnection reachabilityForInternetConnection];
         NetworkStatus networkStatus = [networkReachability currentReachabilityStatus];
@@ -163,7 +155,6 @@
             //NSString *docFullPath = [NSString stringWithFormat:@"%@%@",docdir, @"/mservice/MyLocation.txt"];
             NSError *error;
             NSString *locationData = [NSString stringWithContentsOfFile:getfullPath encoding:NSUTF8StringEncoding error:&error];
-            NSLog(@"Readed Location Data : %@", locationData);
             
             NSData *user_data = [NSData dataWithContentsOfFile:user_file_path];
             NSError *jsonError = nil;
