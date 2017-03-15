@@ -13,8 +13,8 @@
 - (void)SendLocation:(CDVInvokedUrlCommand*)command;
 - (void)getLastKnownLocation:(CDVInvokedUrlCommand*)command;
 - (void)pluginResultForTimer:(CDVInvokedUrlCommand*)command;
-- (void)timeReader:(CDVInvokedUrlCommand*)command;
-- (void)CheckSumIndicatorResult:(CDVInvokedUrlCommand*)command;
+//- (void)timeReader:(CDVInvokedUrlCommand*)command;
+//- (void)CheckSumIndicatorResult:(CDVInvokedUrlCommand*)command;
 
 @property (strong, nonatomic) CLLocationManager * locationManager;
 @property (strong, nonatomic) NSMutableArray * coordinatesArray;
