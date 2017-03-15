@@ -7,15 +7,12 @@
 #pragma mark - MapViewDelegate
 - (void) locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray<CLLocation *> *)locations{
     //NSLog(@"%@",[locations lastObject]);
-   CLLocation* location = [locations lastObject];
+  /* CLLocation* location = [locations lastObject];
     NSDate* eventDate = location.timestamp;
     NSTimeInterval howRecent = [eventDate timeIntervalSinceNow];
     if (fabs(howRecent) < 10.0) {
-        // If the event is recent, do something with it.
-        /*NSLog(@"latitude %+.6f, longitude %+.6f\n",
-              location.coordinate.latitude,
-              location.coordinate.longitude);*/
-    }
+   
+    }*/
 }
 // Error while updating location
 - (void) locationManager:(CLLocationManager *)manager didFailWithError:(NSError *)error{
@@ -46,18 +43,16 @@
    // [_locationManager startMonitoringSignificantLocationChanges];
     
     CDVPluginResult *result = nil;
-   // NSTimer *getLocationTimer = 
-        [NSTimer scheduledTimerWithTimeInterval:30.0
-                                         target:self
-                                       selector:@selector(GetCurrentLocation:)
-                                       userInfo:nil
-                                        repeats:YES];
-    //NSTimer *sendLocationTimer = 
-        [NSTimer scheduledTimerWithTimeInterval:30.0
-                                         target:self
-                                       selector:@selector(SendLocation:)
-                                       userInfo:nil
-                                        repeats:YES];
+    [NSTimer scheduledTimerWithTimeInterval:30.0
+                                     target:self
+                                   selector:@selector(GetCurrentLocation:)
+                                   userInfo:nil
+                                    repeats:YES];
+    [NSTimer scheduledTimerWithTimeInterval:30.0
+                                     target:self
+                                   selector:@selector(SendLocation:)
+                                   userInfo:nil
+                                    repeats:YES];
     //[[NSRunLoop currentRunLoop] addTimer:getLocationTimer forMode:NSRunLoopCommonModes];
     //[[NSRunLoop currentRunLoop] addTimer:sendLocationTimer forMode:NSRunLoopCommonModes];
     result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
