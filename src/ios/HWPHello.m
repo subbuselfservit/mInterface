@@ -46,20 +46,22 @@
    // [_locationManager startMonitoringSignificantLocationChanges];
     
     CDVPluginResult *result = nil;
-    NSTimer *getLocationTimer = [NSTimer scheduledTimerWithTimeInterval:30.0
-                                                      target:self
-                                                    selector:@selector(GetCurrentLocation:)
-                                                    userInfo:nil
-                                                     repeats:YES];
-    NSTimer *sendLocationTimer = [NSTimer scheduledTimerWithTimeInterval:30.0
-                                                      target:self
-                                                    selector:@selector(SendLocation:)
-                                                    userInfo:nil
-                                                     repeats:YES];
-    [[NSRunLoop currentRunLoop] addTimer:getLocationTimer forMode:NSRunLoopCommonModes];
-    [[NSRunLoop currentRunLoop] addTimer:sendLocationTimer forMode:NSRunLoopCommonModes];
+   // NSTimer *getLocationTimer = 
+        [NSTimer scheduledTimerWithTimeInterval:30.0
+                                         target:self
+                                       selector:@selector(GetCurrentLocation:)
+                                       userInfo:nil
+                                        repeats:YES];
+    //NSTimer *sendLocationTimer = 
+        [NSTimer scheduledTimerWithTimeInterval:30.0
+                                         target:self
+                                       selector:@selector(SendLocation:)
+                                       userInfo:nil
+                                        repeats:YES];
+    //[[NSRunLoop currentRunLoop] addTimer:getLocationTimer forMode:NSRunLoopCommonModes];
+    //[[NSRunLoop currentRunLoop] addTimer:sendLocationTimer forMode:NSRunLoopCommonModes];
     result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-    [result setKeepCallbackAsBool:YES];
+    //[result setKeepCallbackAsBool:YES];
     [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
 }
 
