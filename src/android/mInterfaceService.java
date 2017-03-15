@@ -391,7 +391,7 @@ public class mInterfaceService extends Service {
 					requesturl = null,
 					receiveData = "";
 			StringBuilder queueData,
-					serverResponseObj,
+					serverResponseObj = null,
 					backupFileData;
 			BufferedReader readerObj;
 			BufferedWriter writerObj;
@@ -418,23 +418,15 @@ public class mInterfaceService extends Service {
 
 			try {
 				/* FETCH CURRENT REQUEST FROM QUEUE MANAGER */
-				queueData = new StringBuilder();
 				readerObj = new BufferedReader(new FileReader(new File(baseDirectory, "mservice/database/queue_mgr.txt")));
 				while ((currentLine = readerObj.readLine()) != null) {
 					if (currentRequest == null) {
 						currentRequest = currentLine;
-					} else {
-						queueData.append(currentLine + "\n");
 					}
 				}
 				readerObj.close();
 
 				if (isConnected() && currentRequest != null) {
-					/*writerObj = new BufferedWriter(new FileWriter(new File(baseDirectory, "mservice/database/queue_mgr.txt")));
-					writerObj.write(queueData.toString());
-					writerObj.flush();
-					writerObj.close();/
-
 					/* FROM REQUEST OBJECT */
 					queueObject = new JSONObject(currentRequest);
 					requesturl = queueObject.optString("url").toString();
@@ -470,22 +462,26 @@ public class mInterfaceService extends Service {
 							readerObj.close();
 							urlConObj.disconnect();
 							backupFileData = new StringBuilder();
-							if (backUpFilePath.exists()) {
-								readerObj = new BufferedReader(new FileReader(backUpFilePath));
-								while ((currentLine = readerObj.readLine()) != null) {
-									backupFileData.append(currentLine + "\n");
+							try {
+								if (backUpFilePath.exists()) {
+									readerObj = new BufferedReader(new FileReader(backUpFilePath));
+									while ((currentLine = readerObj.readLine()) != null) {
+										backupFileData.append(currentLine + "\n");
+									}
+									readerObj.close();
+									backupDataObj = new JSONObject(backupFileData.toString());
+								} else {
+									backUpFilePath.createNewFile();
+									backupDataObj = new JSONObject();
 								}
-								readerObj.close();
-								backupDataObj = new JSONObject(backupFileData.toString());
-							} else {
-								backUpFilePath.createNewFile();
-								backupDataObj = new JSONObject();
+								backupDataObj.put(subKeyValue, new JSONArray(serverResponseObj.toString()));
+								writerObj = new BufferedWriter(new FileWriter(backUpFilePath));
+								writerObj.write(backupDataObj.toString());
+								writerObj.flush();
+								writerObj.close();
+							}catch (Exception exp){
+								exp.printStackTrace();
 							}
-							backupDataObj.put(subKeyValue, new JSONArray(serverResponseObj.toString()));
-							writerObj = new BufferedWriter(new FileWriter(backUpFilePath));
-							writerObj.write(backupDataObj.toString());
-							writerObj.flush();
-							writerObj.close();
 						}
 					} else {
 						if (fileType.equals("file")) {
@@ -584,6 +580,17 @@ public class mInterfaceService extends Service {
 					fileWriterObj.flush();
 					fileWriterObj.close();
 
+					queueData = new StringBuilder();
+					readerObj = new BufferedReader(new FileReader(new File(baseDirectory, "mservice/database/queue_mgr.txt")));
+					while ((currentLine = readerObj.readLine()) != null) {
+						if (currentRequest == null) {
+							currentRequest = currentLine;
+						}else{
+							queueData.append(currentLine + "\n");
+						}
+					}
+					readerObj.close();
+
 					writerObj = new BufferedWriter(new FileWriter(new File(baseDirectory, "mservice/database/queue_mgr.txt")));
 					writerObj.write(queueData.toString());
 					writerObj.flush();
@@ -591,14 +598,7 @@ public class mInterfaceService extends Service {
 
 				}
 			} catch (Exception e) {
-				try {
-					BufferedWriter writerObj1 = new BufferedWriter(new FileWriter(new File(baseDirectory, "mservice/bug_report.txt"),true));
-					writerObj1.write(requesturl+"\n"+e.getMessage()+"-------\n");
-					writerObj1.flush();
-					writerObj1.close();
-				}catch (Exception ex){
-					e.printStackTrace();
-				}
+				e.printStackTrace();
 			}
 			return null;
 		}
