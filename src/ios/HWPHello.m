@@ -110,10 +110,46 @@
     }];
 }
 
-
 - (void)SendLocation:(CDVInvokedUrlCommand*)command
 {
     [self.commandDelegate runInBackground:^{
+        NSString *checkFile;
+        NSArray *getdocDir = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+        NSError *geterror;
+        NSString *getfullPath = [[getdocDir objectAtIndex:0] stringByAppendingPathComponent:@"/mservice"];
+        NSData *fileContents = [[NSData alloc] init];
+        // Check if folder is exists
+        if (![[NSFileManager defaultManager] fileExistsAtPath:getfullPath]){
+            // Create folder if not exists
+            [[NSFileManager defaultManager] createDirectoryAtPath:getfullPath withIntermediateDirectories:YES attributes:nil error:&geterror];
+        }
+        getfullPath = [getfullPath stringByAppendingString:@"/MyLocation.txt"];
+        NSLog(@"File path is : %@", getfullPath);
+        NSFileManager *filemanager = [NSFileManager defaultManager];
+        //check if file is not exists
+        if([filemanager fileExistsAtPath:getfullPath] == YES){
+            NSLog(@"File Exsists");
+            checkFile = @"File is there..";
+        } else {
+            //create if file is not exsits
+            [fileContents writeToFile:getfullPath atomically:true];
+            checkFile = @"File is there..";
+        }
+        double lat = self.locationManager.location.coordinate.latitude;
+        double lngt = self.locationManager.location.coordinate.longitude;
+        NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+        [dateFormatter setDateFormat:@"yyyyMMddHHmmss"];
+        
+        NSString *content = [NSString stringWithFormat:@"%f,%f,%@\n", lat, lngt, [dateFormatter stringFromDate:[NSDate date]]];
+        NSLog(@"Location data is : %@", content);
+        //Code for file writing with appending
+        NSFileHandle *fileHandle = [NSFileHandle fileHandleForWritingAtPath:getfullPath];
+        [fileHandle seekToEndOfFile];
+        [fileHandle writeData:[content dataUsingEncoding:NSUTF8StringEncoding]];
+        [fileHandle closeFile];
+        NSString *locationData = [NSString stringWithContentsOfFile:getfullPath encoding:NSUTF8StringEncoding error:&geterror];
+        NSString *finalOutput = [NSString stringWithFormat:@"%@, \n %@\n %@", getfullPath, locationData, checkFile];
+        NSLog(@"Output : %@", finalOutput);
         //To check internet is available or not
         InternetConnection *networkReachability = [InternetConnection reachabilityForInternetConnection];
         NetworkStatus networkStatus = [networkReachability currentReachabilityStatus];
@@ -123,13 +159,12 @@
             NSLog(@"There is internet conncetion available");
             //send Location updates to server if network is available
             NSString *docdir = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
-            NSString *folderPath = @"/mservice/MyLocation.txt";
-        
             NSString *user_file_path = [NSString stringWithFormat:@"%@%@",docdir,@"/mservice/user.txt"];
-            NSString *docFullPath = [NSString stringWithFormat:@"%@%@",docdir,folderPath];
+            //NSString *docFullPath = [NSString stringWithFormat:@"%@%@",docdir, @"/mservice/MyLocation.txt"];
             NSError *error;
-            NSString *locationData = [NSString stringWithContentsOfFile:docFullPath encoding:NSUTF8StringEncoding error:&error];
-        
+            NSString *locationData = [NSString stringWithContentsOfFile:getfullPath encoding:NSUTF8StringEncoding error:&error];
+            NSLog(@"Readed Location Data : %@", locationData);
+            
             NSData *user_data = [NSData dataWithContentsOfFile:user_file_path];
             NSError *jsonError = nil;
             NSMutableDictionary * dict = [NSJSONSerialization JSONObjectWithData:user_data options:NSJSONReadingMutableContainers error:&jsonError];
@@ -141,30 +176,32 @@
             //Convert XML to JSON
             [XMLConverter convertXMLFile:access_pack_path completion:^(BOOL success, NSDictionary *dictionary, NSError *error)
              {
-            if (success) {
-                 NSDictionary * dict = [dictionary objectForKey:@"functional_access_detail"];
-                 NSString *domain_name = [dict objectForKey:@"domain_name"];
-                 NSString *port_no = [dict objectForKey:@"port_no"];
-                 NSString *protocol_type = [dict objectForKey:@"protocol_type"];
-                 //Send Data to server
-                 NSString *baseURL = [NSString stringWithFormat:@"%@//%@:%@/common/components/GeoLocation/update_device_location_offline.aspx",protocol_type,domain_name, port_no];
-                 NSString *content = [NSString stringWithFormat:@"<location_xml><client_id>%@</client_id><country_code>%@</country_code><device_id>%@</device_id><location>%@</location></location_xml>", clientID, countryCode, deviceID, locationData];
-                 NSData *data = [content dataUsingEncoding:NSUTF8StringEncoding];
-                 NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:baseURL]];
-                 [request setValue:@"text/xml" forHTTPHeaderField:@"Content-type"];
-                 [request setHTTPMethod : @"POST"];
-                 [request setHTTPBody : data];
-                 if([[NSFileManager defaultManager] fileExistsAtPath:docFullPath isDirectory:false]){
-                     // Dealloc txt file
-                     [[NSData data] writeToFile:docFullPath atomically:true];
+                 if (success) {
+                     NSDictionary * dict = [dictionary objectForKey:@"functional_access_detail"];
+                     NSString *domain_name = [dict objectForKey:@"domain_name"];
+                     NSString *port_no = [dict objectForKey:@"port_no"];
+                     NSString *protocol_type = [dict objectForKey:@"protocol_type"];
+                     //Send Data to server
+                     NSString *baseURL = [NSString stringWithFormat:@"%@//%@:%@/common/components/GeoLocation/update_device_location_offline.aspx",protocol_type,domain_name, port_no];
+                     NSString *content = [NSString stringWithFormat:@"<location_xml><client_id>%@</client_id><country_code>%@</country_code><device_id>%@</device_id><location>%@</location></location_xml>", clientID, countryCode, deviceID, locationData];
+                     NSLog(@"Content to server : %@", content);
+                     NSData *data = [content dataUsingEncoding:NSUTF8StringEncoding];
+                     NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:baseURL]];
+                     [request setValue:@"text/xml" forHTTPHeaderField:@"Content-type"];
+                     [request setHTTPMethod : @"POST"];
+                     [request setHTTPBody : data];
+                     if([[NSFileManager defaultManager] fileExistsAtPath:getfullPath isDirectory:false]){
+                         // Dealloc txt file
+                         [[NSData data] writeToFile:getfullPath atomically:true];
+                     }
+                     // generates an autoreleased NSURLConnection
+                     [NSURLConnection connectionWithRequest:request delegate:self];
                  }
-                 // generates an autoreleased NSURLConnection
-                 [NSURLConnection connectionWithRequest:request delegate:self];
-             }
              }];
         }
     }];
 }
+
 
 - (void)getLastKnownLocation:(CDVInvokedUrlCommand*)command
 {
