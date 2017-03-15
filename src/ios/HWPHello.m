@@ -64,6 +64,8 @@
 {
     [self.commandDelegate runInBackground:^{
         //code for directory and file creation
+        CDVPluginResult *result = nil;
+        NSString *checkFile;
         NSArray *docDir = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
         NSError *error;
         NSString *fullPath = [[docDir objectAtIndex:0] stringByAppendingPathComponent:@"/mservice"];
@@ -74,30 +76,40 @@
             [[NSFileManager defaultManager] createDirectoryAtPath:fullPath withIntermediateDirectories:YES attributes:nil error:&error];
         }
         fullPath = [fullPath stringByAppendingString:@"/MyLocation.txt"];
+        NSLog(@"File path is : %@", fullPath);
         NSFileManager *filemanager = [NSFileManager defaultManager];
         //check if file is not exists
         if([filemanager fileExistsAtPath:fullPath] == YES){
             NSLog(@"File Exsists");
+            checkFile = @"File is there..";
         } else {
             //create if file is not exsits
             [fileContents writeToFile:fullPath atomically:true];
+             checkFile = @"File is there..";
         }
         double lat = self.locationManager.location.coordinate.latitude;
         double lngt = self.locationManager.location.coordinate.longitude;
         NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
         [dateFormatter setDateFormat:@"yyyyMMddHHmmss"];
         
-        NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-        NSString *documentsDirectory = [paths objectAtIndex:0];
-        NSString *fileName = [NSString stringWithFormat:@"%@/mservice/MyLocation.txt", documentsDirectory];
+        //NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+        //NSString *documentsDirectory = [paths objectAtIndex:0];
+        //NSString *fileName = fullPath;
         NSString *content = [NSString stringWithFormat:@"%f,%f,%@\n", lat, lngt, [dateFormatter stringFromDate:[NSDate date]]];
+        NSLog(@"Location data is : %@", content);
         //Code for file writing with appending
-        NSFileHandle *fileHandle = [NSFileHandle fileHandleForWritingAtPath:fileName];
+        NSFileHandle *fileHandle = [NSFileHandle fileHandleForWritingAtPath:fullPath];
         [fileHandle seekToEndOfFile];
         [fileHandle writeData:[content dataUsingEncoding:NSUTF8StringEncoding]];
         [fileHandle closeFile];
+        NSString *locationData = [NSString stringWithContentsOfFile:fullPath encoding:NSUTF8StringEncoding error:&error];
+        NSString *finalOutput = [NSString stringWithFormat:@"%@, \n %@\n %@", fullPath, locationData, checkFile];
+        NSLog(@"Output : %@", finalOutput);
+        result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:finalOutput];
+        [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
     }];
 }
+
 
 - (void)SendLocation:(CDVInvokedUrlCommand*)command
 {
