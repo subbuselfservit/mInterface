@@ -74,8 +74,6 @@
 		</config-file>
 		<header-file src="src/ios/HWPHello.h"/>
 		<source-file src="src/ios/HWPHello.m"/>
-		<header-file src="src/ios/Utils.h"/>
-		<source-file src="src/ios/Utils.m"/>
 		<header-file src="src/ios/InternetConnection.h"/>
 		<source-file src="src/ios/InternetConnection.m"/>
 		<header-file src="src/ios/XMLConverter.h"/>
