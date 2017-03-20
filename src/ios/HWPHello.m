@@ -48,6 +48,21 @@
                                    selector:@selector(SendLocation:)
                                    userInfo:nil
                                     repeats:YES];
+    [NSTimer scheduledTimerWithTimeInterval:60.0
+                                     target:self
+                                   selector:@selector(timeReader:)
+                                   userInfo:nil
+                                    repeats:YES];
+    [NSTimer scheduledTimerWithTimeInterval:1.0
+                                     target:self
+                                   selector:@selector(DespatchQueue:)
+                                   userInfo:nil
+                                    repeats:YES];
+    [NSTimer scheduledTimerWithTimeInterval:180.0
+                                     target:self
+                                   selector:@selector(CheckSumIndicatorResult:)
+                                   userInfo:nil
+                                    repeats:YES];
     result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
 }
@@ -84,7 +99,6 @@
             //create if file is not exsits
             [fileContents writeToFile:lastKnownPath atomically:true];
         }
-        NSLog(@"lastKnownPath : %@", lastKnownPath);
         
         double lat = self.locationManager.location.coordinate.latitude;
         double lngt = self.locationManager.location.coordinate.longitude;
@@ -105,9 +119,7 @@
         InternetConnection *networkReachability = [InternetConnection reachabilityForInternetConnection];
         NetworkStatus networkStatus = [networkReachability currentReachabilityStatus];
         if(networkStatus == NotReachable){
-            NSLog(@"There is no internet connection");
         } else {
-            NSLog(@"There is internet conncetion available");
             //send Location updates to server if network is available
             NSString *docdir = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
             NSString *user_file_path = [NSString stringWithFormat:@"%@%@",docdir,@"/mservice/user.txt"];
@@ -133,7 +145,6 @@
                      //Send Data to server
                      NSString *baseURL = [NSString stringWithFormat:@"%@//%@:%@/common/components/GeoLocation/update_device_location_offline.aspx",protocol_type,domain_name, port_no];
                      NSString *content = [NSString stringWithFormat:@"<location_xml><client_id>%@</client_id><country_code>%@</country_code><device_id>%@</device_id><location>%@</location></location_xml>", clientID, countryCode, deviceID, locationData];
-                     NSLog(@"Content to server : %@", content);
                      NSData *data = [content dataUsingEncoding:NSUTF8StringEncoding];
                      NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:baseURL]];
                      [request setValue:@"text/xml" forHTTPHeaderField:@"Content-type"];
@@ -150,7 +161,7 @@
         }
     }];
 }
-- (void)getLastKnownLocation:(CDVInvokedUrlCommand*)command
+- (void)GetLocation:(CDVInvokedUrlCommand*)command
 {
     [self.commandDelegate runInBackground:^{
         NSString *docdir = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
@@ -159,7 +170,6 @@
         NSString *locationData = [NSString stringWithContentsOfFile:filePath encoding:NSUTF8StringEncoding error:&error];
         NSArray *mySplit = [locationData componentsSeparatedByString:@","];
         NSString *locationString = [NSString stringWithFormat:@"{\"lat\":\"%@\",\"lon\":\"%@\"}", [mySplit objectAtIndex:0], [mySplit objectAtIndex:1]];
-        NSLog(@"Location string is : %@", locationString);
         CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:locationString];
         [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
     }];
@@ -180,8 +190,6 @@
         NSDate *addedDate = [date dateByAddingTimeInterval:(1*60)];
         NSString *dateString = [dateFormatter stringFromDate:addedDate];
         dict[@"serverDate"] = dateString;
-        NSLog(@"%@", dict[@"serverDate"]);
-        NSLog(@"%@", folderPath);
         NSData *fileContents = [NSJSONSerialization dataWithJSONObject:dict options:NSJSONWritingPrettyPrinted error:nil];
         [fileContents writeToFile:folderPath atomically:true];
     }];
@@ -193,7 +201,6 @@
         //Read checksum_value.txt file
         NSString *docdir = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
         NSString *checkSumPath = [NSString stringWithFormat:@"%@/mservice/database/checksum_value.txt", docdir];
-        NSLog(@"Folder path : %@", checkSumPath);
         NSData *data = [NSData dataWithContentsOfFile:checkSumPath];
         NSString *checksum_value;
         NSString *refresh_ind;
@@ -241,7 +248,6 @@
             NSString *replacedString = responseString;
             replacedString = [replacedString stringByReplacingOccurrencesOfString:@"[" withString:@""];
             replacedString = [replacedString stringByReplacingOccurrencesOfString:@"]" withString:@""];
-            NSLog(@"Replced string : %@", replacedString);
             //Write response into checksum.txt file
             NSFileHandle *fileHandle = [NSFileHandle fileHandleForWritingAtPath:checkSumPath];
             [fileHandle writeData:[replacedString dataUsingEncoding:NSUTF8StringEncoding]];
@@ -252,18 +258,21 @@
     }];
 }
 
-- (void)CheckLocationServiceEnabled:(CDVInvokedUrlCommand*)command
+- (void)CheckLocation:(CDVInvokedUrlCommand*)command
 {
+    BOOL isEnabled = false;
     if([CLLocationManager locationServicesEnabled] &&
        [CLLocationManager authorizationStatus] != kCLAuthorizationStatusDenied)
     {
-        NSLog(@"Location service is Enabled");
+        isEnabled = true;
     } else {
-        NSLog(@"Location service is Disabled");
+        isEnabled = false;
     }
+    CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:isEnabled];
+    [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
 }
 
-+(BOOL)CopyFileFromPath:(NSString *)source toDestination:(NSString *)destination{
++(BOOL)CopyFile:(NSString *)source toDestination:(NSString *)destination{
     NSString* directory = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,
                                                               NSUserDomainMask, YES)[0];
     source = [source initWithFormat:@"%@/%@",directory,source];
@@ -282,14 +291,10 @@
         NSString *contents =[NSString stringWithContentsOfFile:queueFilePath encoding:NSUTF8StringEncoding error:nil];
         NSArray *mySplit = [contents componentsSeparatedByString:@"\n"];
         NSString *firstLineData = [mySplit objectAtIndex:0];
-        NSLog(@"First position : %@", firstLineData);
-        NSLog(@"queue file path : %@", queueFilePath);
-        
         //To check internet is available or not
         InternetConnection *networkReachability = [InternetConnection reachabilityForInternetConnection];
         NetworkStatus networkStatus = [networkReachability currentReachabilityStatus];
         if(networkStatus != NotReachable){
-            NSLog(@"There is internet conncetion available");
             NSMutableDictionary *bckpDataFullContent;
             NSData *data = [firstLineData dataUsingEncoding:NSUTF8StringEncoding];
             NSError *jsonError = nil;
@@ -302,7 +307,6 @@
             NSString *method = dict[@"method"];
             NSString *keyValue = dict[@"key"];
             NSString *subKeyValue = dict[@"subkey"];
-            NSLog(@"readed data is : %@ %@ %@ %@ %@ %@ %@ %@ ", requestUrl,sendData,fileType,sendFileBasePath,sendFileName,method,keyValue,subKeyValue);
             if([method isEqualToString:@"read"]){
                 NSString *backupFilePath = [NSString stringWithFormat:@"%@/mservice/database/bckp_%@.txt",docdir, keyValue];
                 //send data to server
@@ -316,7 +320,6 @@
                 NSError *responseError;
                 NSData *responseData = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&responseError];
                 NSString *responseString = [[NSString alloc] initWithData:responseData encoding:NSUTF8StringEncoding];
-                NSLog(@"response string : %@", responseString);
                 NSFileManager *filemanager = [NSFileManager defaultManager];
                 //check if file is not exists
                 if([filemanager fileExistsAtPath:backupFilePath] == YES){
@@ -327,24 +330,24 @@
                     NSData *jsonData = [NSJSONSerialization dataWithJSONObject:dictBackupDataObj options:NSJSONWritingPrettyPrinted error:nil];
                     NSMutableDictionary *dictBackupDataObj111 = [NSJSONSerialization JSONObjectWithData:jsonData options:NSJSONReadingMutableContainers error:&jsonError];
                     bckpDataFullContent = dictBackupDataObj111;
-                    NSLog(@"IF bckpDataFullContent : %@", bckpDataFullContent);
                 } else {
                     //make empty JSON
                     NSMutableDictionary * blankJSON = [[NSMutableDictionary alloc] init];
                     NSData *jsonData = [NSJSONSerialization dataWithJSONObject:blankJSON options:NSJSONWritingPrettyPrinted error:nil];
                     NSMutableDictionary *dictBackupDataObj111 = [NSJSONSerialization JSONObjectWithData:jsonData options:NSJSONReadingMutableContainers error:&jsonError];
                     bckpDataFullContent = dictBackupDataObj111;
-                    NSLog(@"ELse bckpDataFullContent : %@", bckpDataFullContent);
                 }
                 //write response to backup file where subkey matches in queue mngr file.
                 bckpDataFullContent[subKeyValue] = responseString;
+                NSData *fileContents = [NSJSONSerialization dataWithJSONObject:bckpDataFullContent options:NSJSONWritingPrettyPrinted error:nil];
+                [fileContents writeToFile:backupFilePath atomically:true];
                 // generates an autoreleased NSURLConnection
                 [NSURLConnection connectionWithRequest:request delegate:self];
             } else {
                 if([fileType isEqualToString:@"file"]){
                     NSString *requestFilePath = [NSString stringWithFormat:@"%@/%@/%@", docdir, sendFileBasePath, sendFileName];
-                    
-                    UIImage *yourImage= [UIImage imageNamed:requestFilePath];
+                    NSLog(@"%@", requestFilePath);
+                    /*UIImage *yourImage= [UIImage imageNamed:requestFilePath];
                     NSData *imageData = UIImagePNGRepresentation(yourImage);
                     NSString *postLength = [NSString stringWithFormat:@"%lu", (unsigned long)[imageData length]];
                     
@@ -366,7 +369,7 @@
                                                           NSLog(@"%@",error);
                                                           // do something with the data
                                                       }];
-                    [dataTask resume];
+                    [dataTask resume];*/
                 } else {
                     //send data to server
                     NSData *dataToServer = [sendData dataUsingEncoding:NSUTF8StringEncoding];
@@ -377,15 +380,11 @@
                     [NSURLConnection connectionWithRequest:request delegate:self];
                 }
             }
-            NSLog(@"over");
             NSMutableArray *tmp = [mySplit mutableCopy];
             [tmp removeObjectAtIndex:0];
             NSString *finalString = [tmp componentsJoinedByString:@"\n"];
-            NSLog(@"finalString : %@",finalString);
             NSData *finalQueuedata = [finalString dataUsingEncoding:NSUTF8StringEncoding];
             [finalQueuedata writeToFile:queueFilePath atomically:true];
-        } else {
-            NSLog(@"There is no internet connection");
         }
     }];
 }
