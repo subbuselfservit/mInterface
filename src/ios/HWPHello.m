@@ -268,7 +268,8 @@
     } else {
         isEnabled = false;
     }
-    CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:isEnabled];
+    NSString *serviceResult = [NSString stringWithFormat:@"%s", isEnabled ? "true" : "false"];
+    CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:serviceResult];
     [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
 }
 
