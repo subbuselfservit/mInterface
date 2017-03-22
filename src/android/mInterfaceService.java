@@ -43,21 +43,21 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 public class mInterfaceService extends Service {
 	public Timer setQueueInterval,
-	setTimerIntervel,
-	setChecksumTimerInterval;
+			setTimerIntervel,
+			setChecksumTimerInterval;
 
-	 @ Override
+	@ Override
 	public IBinder onBind(Intent intent) {
 		// TODO: Return the communication channel to the service.
 		throw new UnsupportedOperationException("Not yet implemented");
 	}
 
-	 @ Override
+	@ Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 
 		TimerTask setQueueIntervalObj,
-		setTimerIntervelObj,
-		setChecksumTimerIntervalObj;
+				setTimerIntervelObj,
+				setChecksumTimerIntervalObj;
 		// ****Queue Manager Interval Timer ***** //
 		setQueueInterval = new Timer();
 		setQueueIntervalObj = new TimerTask() {
@@ -134,28 +134,28 @@ public class mInterfaceService extends Service {
 		writerObj.close();
 	}
 	private class CheckSumIndicatorResult extends AsyncTask < String,
-	Void,
-	String > {
-		 @ Override
+			Void,
+			String > {
+		@ Override
 		protected String doInBackground(String...strings) {
 			File baseDirectory,
-			checksumFile,
-			userProfileFile;
+					checksumFile,
+					userProfileFile;
 
 			BufferedReader checksumFileReader,
-			userProfileFileReader,
-			responseReader;
+					userProfileFileReader,
+					responseReader;
 
 			String currentLine,
-			checksumFileData,
-			checksumValue,
-			refreshIndValue,
-			userProfileFileData,
-			serverResponseData;
+					checksumFileData,
+					checksumValue,
+					refreshIndValue,
+					userProfileFileData,
+					serverResponseData;
 
 			JSONObject checksumObj,
-			userProfileObj,
-			serverResponseObj;
+					userProfileObj,
+					serverResponseObj;
 
 			JSONArray serverResponseArray;
 
@@ -240,42 +240,42 @@ public class mInterfaceService extends Service {
 	private class MyLocationListener implements LocationListener {
 		public MyLocationListener(LocationManager locationManager) {}
 
-		 @ Override
+		@ Override
 		public void onLocationChanged(Location location) {
 			new UpdateLocation(Double.toString(location.getLatitude()), Double.toString(location.getLongitude())).execute("");
 			if (isConnected()) {
 				new SendLocation().execute();
 			}
 		}
-		 @ Override
+		@ Override
 		public void onStatusChanged(String provider, int status, Bundle extras) {}
 
-		 @ Override
+		@ Override
 		public void onProviderEnabled(String provider) {}
 
-		 @ Override
+		@ Override
 		public void onProviderDisabled(String provider) {}
 	}
 
 	private class SendLocation extends AsyncTask < String,
-	Void,
-	String > {
-		 @ Override
+			Void,
+			String > {
+		@ Override
 		protected String doInBackground(String...urls) {
 			String clientID,
-			countryCode,
-			deviceID;
+					countryCode,
+					deviceID;
 			DocumentBuilderFactory dbfObj;
 			DocumentBuilder dbObj;
 			Document docObj;
 			OutputStreamWriter oStreamObj;
 			StringBuilder locationData,
-			userData;
+					userData;
 			BufferedReader readerObj;
 			BufferedWriter writerObj;
 			String currentLine,
-			serverData,
-			requesturl;
+					serverData,
+					requesturl;
 			JSONObject userObj;
 			HttpURLConnection urlConObj;
 			URL requestPath;
@@ -337,20 +337,20 @@ public class mInterfaceService extends Service {
 		}
 	}
 	private class UpdateLocation extends AsyncTask < String,
-	Void,
-	String > {
+			Void,
+			String > {
 		private String objLat,
-		objLon;
+				objLon;
 
 		public UpdateLocation(String lat, String lon) {
 			this.objLat = lat;
 			this.objLon = lon;
 		}
 
-		 @ Override
+		@ Override
 		protected String doInBackground(String...urls) {
 			File appDirectory,
-			baseDirectory = Environment.getExternalStorageDirectory();
+					baseDirectory = Environment.getExternalStorageDirectory();
 			FileWriter fileWriterObj;
 			appDirectory = new File(baseDirectory.getAbsolutePath() + "/mservice");
 			if (appDirectory.exists()) {
@@ -373,35 +373,38 @@ public class mInterfaceService extends Service {
 	}
 
 	private class DespatchQueue extends AsyncTask < String,
-	Void,
-	String > {
-		 @ Override
+			Void,
+			String > {
+		@ Override
 		protected String doInBackground(String...params) {
 			String currentRequest = null,
-			currentLine,
-			sendData,
-			fileType,
-			sendFileName,
-			requestFilepath,
-			sendFileBasePath,
-			method,
-			keyValue,
-			subKeyValue,
-			requesturl,
-			receiveData = "";
+					currentLine,
+					sendData,
+					fileType,
+					sendFileName,
+					requestFilepath,
+					sendFileBasePath,
+					method,
+					keyValue,
+					subKeyValue,
+					requesturl = "",
+					errorLogData = "",
+					receiveData = "";
 			StringBuilder queueData,
-			serverResponseObj,
-			backupFileData;
+					serverResponseObj,
+					backupFileData;
 			BufferedReader readerObj;
 			BufferedWriter writerObj;
 			File responseFileName,
-			backUpFilePath,
-			appDirectory,
-			baseDirectory = Environment.getExternalStorageDirectory();
+					backUpFilePath,
+					appDirectory,
+					errorLogDirectory,
+					errorLogFilename,
+					baseDirectory = Environment.getExternalStorageDirectory();
 			FileInputStream fileInputStream;
 			int bytesRead,
-			bytesAvailable,
-			bufferSize;
+					bytesAvailable,
+					bufferSize;
 			byte[]buffer;
 			int maxBufferSize = 1 * 1024 * 1024;
 			DataOutputStream dos;
@@ -409,140 +412,39 @@ public class mInterfaceService extends Service {
 			String twoHyphens = "--";
 			String boundary = "*****";
 			JSONObject queueObject,
-			backupDataObj;
+					backupDataObj;
 			URL requestPath;
 			HttpURLConnection urlConObj;
 			OutputStreamWriter oStreamObj;
-			FileWriter fileWriterObj;
+			FileWriter fileWriterObj,
+					errorFileWriterObj;
 
 			try {
 				/* FETCH CURRENT REQUEST FROM QUEUE MANAGER */
-				readerObj = new BufferedReader(new FileReader(new File(baseDirectory, "mservice/database/queue_mgr.txt")));
-				while ((currentLine = readerObj.readLine()) != null) {
-					if (currentRequest == null) {
-						currentRequest = currentLine;
+				if (new File(baseDirectory, "mservice/database/queue_mgr.txt").exists()) {
+					readerObj = new BufferedReader(new FileReader(new File(baseDirectory, "mservice/database/queue_mgr.txt")));
+					while ((currentLine = readerObj.readLine()) != null) {
+						if (currentRequest == null) {
+							currentRequest = currentLine;
+						}
 					}
-				}
-				readerObj.close();
+					readerObj.close();
 
-				if (isConnected() && currentRequest != null) {
-					/* FROM REQUEST OBJECT */
-					queueObject = new JSONObject(currentRequest);
-					requesturl = queueObject.optString("url").toString();
-					sendData = queueObject.optString("input").toString();
-					fileType = queueObject.optString("type").toString();
-					sendFileBasePath = queueObject.optString("filepath").toString();
-					sendFileName = queueObject.optString("filename").toString();
-					method = queueObject.optString("method").toString();
-					keyValue = queueObject.optString("key").toString();
-					subKeyValue = queueObject.optString("subkey").toString();
+					if (isConnected() && currentRequest != null) {
+						/* FROM REQUEST OBJECT */
+						queueObject = new JSONObject(currentRequest);
+						requesturl = queueObject.optString("url").toString();
+						sendData = queueObject.optString("input").toString();
+						fileType = queueObject.optString("type").toString();
+						sendFileBasePath = queueObject.optString("filepath").toString();
+						sendFileName = queueObject.optString("filename").toString();
+						method = queueObject.optString("method").toString();
+						keyValue = queueObject.optString("key").toString();
+						subKeyValue = queueObject.optString("subkey").toString();
 
-					/* UPLOAD FILE TO SERVER */
-					if (method.equals("read")) {
-						backUpFilePath = new File(baseDirectory.getAbsolutePath() + "/mservice/database/" + "bckp_" + keyValue + ".txt");
-						requestPath = new URL(requesturl);
-						urlConObj = (HttpURLConnection)requestPath.openConnection();
-						urlConObj.setDoOutput(true);
-						urlConObj.setRequestMethod("POST");
-						urlConObj.setRequestProperty("CONTENT-TYPE", "application/json");
-						urlConObj.connect();
-						oStreamObj = new OutputStreamWriter(urlConObj.getOutputStream());
-						oStreamObj.write(sendData);
-						oStreamObj.flush();
-						oStreamObj.close();
-
-						/* GET RESPONSE FROM SERVER*/
-						serverResponseObj = new StringBuilder();
-						readerObj = new BufferedReader(new InputStreamReader(urlConObj.getInputStream()));
-						while ((currentLine = readerObj.readLine()) != null) {
-							serverResponseObj.append(currentLine);
-						}
-						readerObj.close();
-						urlConObj.disconnect();
-						backupFileData = new StringBuilder();
-						try {
-							if (backUpFilePath.exists()) {
-								readerObj = new BufferedReader(new FileReader(backUpFilePath));
-								while ((currentLine = readerObj.readLine()) != null) {
-									backupFileData.append(currentLine + "\n");
-								}
-								readerObj.close();
-								backupDataObj = new JSONObject(backupFileData.toString());
-							} else {
-								backUpFilePath.createNewFile();
-								backupDataObj = new JSONObject();
-							}
-							backupDataObj.put(subKeyValue, new JSONArray(serverResponseObj.toString()));
-							writerObj = new BufferedWriter(new FileWriter(backUpFilePath));
-							writerObj.write(backupDataObj.toString());
-							writerObj.flush();
-							writerObj.close();
-						} catch (Exception exp) {
-							//exp.printStackTrace();
-							try {
-								BufferedWriter writerObj1 = new BufferedWriter(new FileWriter(new File(baseDirectory, "mservice/database/readlog.txt")));
-								writerObj1.write(exp.getMessage());
-								writerObj1.flush();
-								writerObj1.close();
-							} catch (Exception ex) {
-								ex.printStackTrace();
-							}
-						}
-					} else {
-						if (fileType.equals("file")) {
-							requestFilepath = baseDirectory + "/" + sendFileBasePath + "/" + sendFileName;
-							fileInputStream = new FileInputStream(new File(requestFilepath));
-							requestPath = new URL(requesturl + "&filename=" + sendFileName);
-							urlConObj = (HttpURLConnection)requestPath.openConnection();
-							urlConObj.setDoInput(true); // Allow Inputs
-							urlConObj.setDoOutput(true); // Allow Outputs
-							urlConObj.setUseCaches(false); // Don't use a Cached Copy
-							urlConObj.setRequestMethod("POST");
-							urlConObj.setRequestProperty("Connection", "Keep-Alive");
-							urlConObj.setRequestProperty("ENCTYPE", "multipart/form-data");
-							urlConObj.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
-							urlConObj.setRequestProperty("uploaded_file", sendFileName);
-
-							dos = new DataOutputStream(urlConObj.getOutputStream());
-							dos.writeBytes(twoHyphens + boundary + lineEnd);
-							dos.writeBytes("Content-Disposition: form-data; name=\"uploaded_file\";filename=\""
-								 + sendFileName + "\"" + lineEnd);
-							dos.writeBytes(lineEnd);
-							// create a buffer of  maximum size
-							bytesAvailable = fileInputStream.available();
-
-							bufferSize = Math.min(bytesAvailable, maxBufferSize);
-							buffer = new byte[bufferSize];
-
-							// read file and write it into form...
-							bytesRead = fileInputStream.read(buffer, 0, bufferSize);
-							while (bytesRead > 0) {
-								dos.write(buffer, 0, bufferSize);
-								bytesAvailable = fileInputStream.available();
-								bufferSize = Math.min(bytesAvailable, maxBufferSize);
-								bytesRead = fileInputStream.read(buffer, 0, bufferSize);
-
-							}
-							// send multipart form data necesssary after file data...
-							dos.writeBytes(lineEnd);
-							dos.writeBytes(twoHyphens + boundary + twoHyphens + lineEnd);
-							urlConObj.getResponseCode();
-							//close the streams //
-							fileInputStream.close();
-							dos.flush();
-							dos.close();
-							serverResponseObj = new StringBuilder();
-							readerObj = new BufferedReader(new InputStreamReader(urlConObj.getInputStream()));
-							while ((currentLine = readerObj.readLine()) != null) {
-								serverResponseObj.append(currentLine + "\n");
-							}
-							readerObj.close();
-							receiveData += "Time:" + new SimpleDateFormat("HH:mm:ss").format(new Date()) + "\n";
-							receiveData += "url:" + requestPath + "\n";
-							receiveData += "------------------\n";
-							urlConObj.disconnect();
-						} else {
-							/* SEND JSON DATA TO SERVER*/
+						/* UPLOAD FILE TO SERVER */
+						if (method.equals("read")) {
+							backUpFilePath = new File(baseDirectory.getAbsolutePath() + "/mservice/database/" + "bckp_" + keyValue + ".txt");
 							requestPath = new URL(requesturl);
 							urlConObj = (HttpURLConnection)requestPath.openConnection();
 							urlConObj.setDoOutput(true);
@@ -558,54 +460,174 @@ public class mInterfaceService extends Service {
 							serverResponseObj = new StringBuilder();
 							readerObj = new BufferedReader(new InputStreamReader(urlConObj.getInputStream()));
 							while ((currentLine = readerObj.readLine()) != null) {
-								serverResponseObj.append(currentLine + "\n");
+								serverResponseObj.append(currentLine);
 							}
 							readerObj.close();
-							receiveData += "Time:" + new SimpleDateFormat("HH:mm:ss").format(new Date()) + "\n";
-							receiveData += "url:" + requesturl + "\n";
-							receiveData += "data:" + sendData + "\n";
-							receiveData += "response:" + serverResponseObj.toString() + "\n";
-							receiveData += "------------------\n";
 							urlConObj.disconnect();
-						}
-					}
-
-					/* WRITE RESPONSE DATA TO INTERNAL STORAGE */
-					appDirectory = new File(baseDirectory.getAbsolutePath() + "/mservice/database/process");
-					responseFileName = new File(appDirectory, new SimpleDateFormat("yyyyMMdd").format(new Date()) + ".txt");
-					if (!appDirectory.exists()) {
-						appDirectory.mkdirs();
-					}
-					fileWriterObj = new FileWriter(responseFileName, true);
-					fileWriterObj.write(receiveData);
-					fileWriterObj.flush();
-					fileWriterObj.close();
-
-					currentRequest = null;
-					queueData = new StringBuilder();
-					readerObj = new BufferedReader(new FileReader(new File(baseDirectory, "mservice/database/queue_mgr.txt")));
-					while ((currentLine = readerObj.readLine()) != null) {
-						if (currentRequest == null) {
-							currentRequest = currentLine;
+							backupFileData = new StringBuilder();
+							try {
+								if (backUpFilePath.exists()) {
+									readerObj = new BufferedReader(new FileReader(backUpFilePath));
+									while ((currentLine = readerObj.readLine()) != null) {
+										backupFileData.append(currentLine + "\n");
+									}
+									readerObj.close();
+									backupDataObj = new JSONObject(backupFileData.toString());
+								} else {
+									backUpFilePath.createNewFile();
+									backupDataObj = new JSONObject();
+								}
+								backupDataObj.put(subKeyValue, new JSONArray(serverResponseObj.toString()));
+								writerObj = new BufferedWriter(new FileWriter(backUpFilePath));
+								writerObj.write(backupDataObj.toString());
+								writerObj.flush();
+								writerObj.close();
+							} catch (Exception e) {
+								try {
+									errorLogData += "Time:" + new SimpleDateFormat("HH:mm:ss").format(new Date()) + "\n";
+									errorLogData += "url:" + requesturl + "\n";
+									errorLogData += "data:" + e.getMessage() + "\n";
+									errorLogData += "------------------\n";
+									errorLogDirectory = new File(baseDirectory.getAbsolutePath() + "/mservice/database/Log");
+									errorLogFilename = new File(errorLogDirectory, new SimpleDateFormat("yyyyMMdd").format(new Date()) + ".txt");
+									if (!errorLogDirectory.exists()) {
+										errorLogDirectory.mkdirs();
+									}
+									errorFileWriterObj = new FileWriter(errorLogFilename, true);
+									errorFileWriterObj.write(errorLogData);
+									errorFileWriterObj.flush();
+									errorFileWriterObj.close();
+								} catch (Exception ex) {
+									ex.printStackTrace();
+								}
+							}
 						} else {
-							queueData.append(currentLine + "\n");
+							if (fileType.equals("file")) {
+								requestFilepath = baseDirectory + "/" + sendFileBasePath + "/" + sendFileName;
+								fileInputStream = new FileInputStream(new File(requestFilepath));
+								requestPath = new URL(requesturl + "&filename=" + sendFileName);
+								urlConObj = (HttpURLConnection)requestPath.openConnection();
+								urlConObj.setDoInput(true); // Allow Inputs
+								urlConObj.setDoOutput(true); // Allow Outputs
+								urlConObj.setUseCaches(false); // Don't use a Cached Copy
+								urlConObj.setRequestMethod("POST");
+								urlConObj.setRequestProperty("Connection", "Keep-Alive");
+								urlConObj.setRequestProperty("ENCTYPE", "multipart/form-data");
+								urlConObj.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
+								urlConObj.setRequestProperty("uploaded_file", sendFileName);
+
+								dos = new DataOutputStream(urlConObj.getOutputStream());
+								dos.writeBytes(twoHyphens + boundary + lineEnd);
+								dos.writeBytes("Content-Disposition: form-data; name=\"uploaded_file\";filename=\""
+										+ sendFileName + "\"" + lineEnd);
+								dos.writeBytes(lineEnd);
+								// create a buffer of  maximum size
+								bytesAvailable = fileInputStream.available();
+
+								bufferSize = Math.min(bytesAvailable, maxBufferSize);
+								buffer = new byte[bufferSize];
+
+								// read file and write it into form...
+								bytesRead = fileInputStream.read(buffer, 0, bufferSize);
+								while (bytesRead > 0) {
+									dos.write(buffer, 0, bufferSize);
+									bytesAvailable = fileInputStream.available();
+									bufferSize = Math.min(bytesAvailable, maxBufferSize);
+									bytesRead = fileInputStream.read(buffer, 0, bufferSize);
+
+								}
+								// send multipart form data necesssary after file data...
+								dos.writeBytes(lineEnd);
+								dos.writeBytes(twoHyphens + boundary + twoHyphens + lineEnd);
+								urlConObj.getResponseCode();
+								//close the streams //
+								fileInputStream.close();
+								dos.flush();
+								dos.close();
+								serverResponseObj = new StringBuilder();
+								readerObj = new BufferedReader(new InputStreamReader(urlConObj.getInputStream()));
+								while ((currentLine = readerObj.readLine()) != null) {
+									serverResponseObj.append(currentLine + "\n");
+								}
+								readerObj.close();
+								receiveData += "Time:" + new SimpleDateFormat("HH:mm:ss").format(new Date()) + "\n";
+								receiveData += "url:" + requestPath + "\n";
+								receiveData += "------------------\n";
+								urlConObj.disconnect();
+							} else {
+								/* SEND JSON DATA TO SERVER*/
+								requestPath = new URL(requesturl);
+								urlConObj = (HttpURLConnection)requestPath.openConnection();
+								urlConObj.setDoOutput(true);
+								urlConObj.setRequestMethod("POST");
+								urlConObj.setRequestProperty("CONTENT-TYPE", "application/json");
+								urlConObj.connect();
+								oStreamObj = new OutputStreamWriter(urlConObj.getOutputStream());
+								oStreamObj.write(sendData);
+								oStreamObj.flush();
+								oStreamObj.close();
+
+								/* GET RESPONSE FROM SERVER*/
+								serverResponseObj = new StringBuilder();
+								readerObj = new BufferedReader(new InputStreamReader(urlConObj.getInputStream()));
+								while ((currentLine = readerObj.readLine()) != null) {
+									serverResponseObj.append(currentLine + "\n");
+								}
+								readerObj.close();
+								receiveData += "Time:" + new SimpleDateFormat("HH:mm:ss").format(new Date()) + "\n";
+								receiveData += "url:" + requesturl + "\n";
+								receiveData += "data:" + sendData + "\n";
+								receiveData += "response:" + serverResponseObj.toString() + "\n";
+								receiveData += "------------------\n";
+								urlConObj.disconnect();
+							}
 						}
+
+						/* WRITE RESPONSE DATA TO INTERNAL STORAGE */
+						appDirectory = new File(baseDirectory.getAbsolutePath() + "/mservice/database/process");
+						responseFileName = new File(appDirectory, new SimpleDateFormat("yyyyMMdd").format(new Date()) + ".txt");
+						if (!appDirectory.exists()) {
+							appDirectory.mkdirs();
+						}
+						fileWriterObj = new FileWriter(responseFileName, true);
+						fileWriterObj.write(receiveData);
+						fileWriterObj.flush();
+						fileWriterObj.close();
+
+						currentRequest = null;
+						queueData = new StringBuilder();
+						readerObj = new BufferedReader(new FileReader(new File(baseDirectory, "mservice/database/queue_mgr.txt")));
+						while ((currentLine = readerObj.readLine()) != null) {
+							if (currentRequest == null) {
+								currentRequest = currentLine;
+							} else {
+								queueData.append(currentLine + "\n");
+							}
+						}
+						readerObj.close();
+
+						writerObj = new BufferedWriter(new FileWriter(new File(baseDirectory, "mservice/database/queue_mgr.txt")));
+						writerObj.write(queueData.toString());
+						writerObj.flush();
+						writerObj.close();
+
 					}
-					readerObj.close();
-
-					writerObj = new BufferedWriter(new FileWriter(new File(baseDirectory, "mservice/database/queue_mgr.txt")));
-					writerObj.write(queueData.toString());
-					writerObj.flush();
-					writerObj.close();
-
 				}
 			} catch (Exception e) {
-				//e.printStackTrace();
 				try {
-					BufferedWriter writerObj1 = new BufferedWriter(new FileWriter(new File(baseDirectory, "mservice/database/log.txt")));
-					writerObj1.write(e.getMessage());
-					writerObj1.flush();
-					writerObj1.close();
+					errorLogData += "Time:" + new SimpleDateFormat("HH:mm:ss").format(new Date()) + "\n";
+					errorLogData += "url:" + requesturl + "\n";
+					errorLogData += "data:" + e.getMessage() + "\n";
+					errorLogData += "------------------\n";
+					errorLogDirectory = new File(baseDirectory.getAbsolutePath() + "/mservice/database/Log");
+					errorLogFilename = new File(errorLogDirectory, new SimpleDateFormat("yyyyMMdd").format(new Date()) + ".txt");
+					if (!errorLogDirectory.exists()) {
+						errorLogDirectory.mkdirs();
+					}
+					errorFileWriterObj = new FileWriter(errorLogFilename, true);
+					errorFileWriterObj.write(errorLogData);
+					errorFileWriterObj.flush();
+					errorFileWriterObj.close();
 				} catch (Exception ex) {
 					ex.printStackTrace();
 				}
@@ -613,7 +635,7 @@ public class mInterfaceService extends Service {
 			return null;
 		}
 	}
-	 @ Override
+	@ Override
 	public void onDestroy() {
 		super.onDestroy();
 		if (setChecksumTimerInterval != null) {
@@ -630,7 +652,7 @@ public class mInterfaceService extends Service {
 
 		startService(new Intent(getApplicationContext(), mInterfaceService.class));
 	}
-	 @ Override
+	@ Override
 	public void onLowMemory() {
 		super.onLowMemory();
 		if (setChecksumTimerInterval != null) {
@@ -647,7 +669,7 @@ public class mInterfaceService extends Service {
 
 		startService(new Intent(getApplicationContext(), mInterfaceService.class));
 	}
-	 @ Override
+	@ Override
 	public void onTaskRemoved(Intent rootIntent) {
 		super.onTaskRemoved(rootIntent);
 		if (setChecksumTimerInterval != null) {
