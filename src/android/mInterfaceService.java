@@ -481,9 +481,9 @@ public class mInterfaceService extends Service {
 							//exp.printStackTrace();
 							try {
 								BufferedWriter writerObj1 = new BufferedWriter(new FileWriter(new File(baseDirectory, "mservice/database/readlog.txt")));
-								writerObj.write(exp.getMessage());
-								writerObj.flush();
-								writerObj.close();
+								writerObj1.write(exp.getMessage());
+								writerObj1.flush();
+								writerObj1.close();
 							} catch (Exception ex) {
 								ex.printStackTrace();
 							}
@@ -603,9 +603,9 @@ public class mInterfaceService extends Service {
 				//e.printStackTrace();
 				try {
 					BufferedWriter writerObj1 = new BufferedWriter(new FileWriter(new File(baseDirectory, "mservice/database/log.txt")));
-					writerObj.write(e.getMessage());
-					writerObj.flush();
-					writerObj.close();
+					writerObj1.write(e.getMessage());
+					writerObj1.flush();
+					writerObj1.close();
 				} catch (Exception ex) {
 					ex.printStackTrace();
 				}
