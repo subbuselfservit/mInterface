@@ -485,7 +485,7 @@ public class mInterfaceService extends Service {
 								writerObj.flush();
 								writerObj.close();
 							} catch (Exception ex) {
-								e.printStackTrace();
+								ex.printStackTrace();
 							}
 						}
 					} else {
@@ -607,7 +607,7 @@ public class mInterfaceService extends Service {
 					writerObj.flush();
 					writerObj.close();
 				} catch (Exception ex) {
-					e.printStackTrace();
+					ex.printStackTrace();
 				}
 			}
 			return null;
