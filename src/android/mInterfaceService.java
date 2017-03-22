@@ -43,21 +43,21 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 public class mInterfaceService extends Service {
 	public Timer setQueueInterval,
-			setTimerIntervel,
-			setChecksumTimerInterval;
+	setTimerIntervel,
+	setChecksumTimerInterval;
 
-	@ Override
+	 @ Override
 	public IBinder onBind(Intent intent) {
 		// TODO: Return the communication channel to the service.
 		throw new UnsupportedOperationException("Not yet implemented");
 	}
 
-	@ Override
+	 @ Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 
 		TimerTask setQueueIntervalObj,
-				setTimerIntervelObj,
-				setChecksumTimerIntervalObj;
+		setTimerIntervelObj,
+		setChecksumTimerIntervalObj;
 		// ****Queue Manager Interval Timer ***** //
 		setQueueInterval = new Timer();
 		setQueueIntervalObj = new TimerTask() {
@@ -134,28 +134,28 @@ public class mInterfaceService extends Service {
 		writerObj.close();
 	}
 	private class CheckSumIndicatorResult extends AsyncTask < String,
-			Void,
-			String > {
-		@ Override
+	Void,
+	String > {
+		 @ Override
 		protected String doInBackground(String...strings) {
 			File baseDirectory,
-					checksumFile,
-					userProfileFile;
+			checksumFile,
+			userProfileFile;
 
 			BufferedReader checksumFileReader,
-					userProfileFileReader,
-					responseReader;
+			userProfileFileReader,
+			responseReader;
 
 			String currentLine,
-					checksumFileData,
-					checksumValue,
-					refreshIndValue,
-					userProfileFileData,
-					serverResponseData;
+			checksumFileData,
+			checksumValue,
+			refreshIndValue,
+			userProfileFileData,
+			serverResponseData;
 
 			JSONObject checksumObj,
-					userProfileObj,
-					serverResponseObj;
+			userProfileObj,
+			serverResponseObj;
 
 			JSONArray serverResponseArray;
 
@@ -240,42 +240,42 @@ public class mInterfaceService extends Service {
 	private class MyLocationListener implements LocationListener {
 		public MyLocationListener(LocationManager locationManager) {}
 
-		@ Override
+		 @ Override
 		public void onLocationChanged(Location location) {
 			new UpdateLocation(Double.toString(location.getLatitude()), Double.toString(location.getLongitude())).execute("");
 			if (isConnected()) {
 				new SendLocation().execute();
 			}
 		}
-		@ Override
+		 @ Override
 		public void onStatusChanged(String provider, int status, Bundle extras) {}
 
-		@ Override
+		 @ Override
 		public void onProviderEnabled(String provider) {}
 
-		@ Override
+		 @ Override
 		public void onProviderDisabled(String provider) {}
 	}
 
 	private class SendLocation extends AsyncTask < String,
-			Void,
-			String > {
-		@ Override
+	Void,
+	String > {
+		 @ Override
 		protected String doInBackground(String...urls) {
 			String clientID,
-					countryCode,
-					deviceID;
+			countryCode,
+			deviceID;
 			DocumentBuilderFactory dbfObj;
 			DocumentBuilder dbObj;
 			Document docObj;
 			OutputStreamWriter oStreamObj;
 			StringBuilder locationData,
-					userData;
+			userData;
 			BufferedReader readerObj;
 			BufferedWriter writerObj;
 			String currentLine,
-					serverData,
-					requesturl;
+			serverData,
+			requesturl;
 			JSONObject userObj;
 			HttpURLConnection urlConObj;
 			URL requestPath;
@@ -337,20 +337,20 @@ public class mInterfaceService extends Service {
 		}
 	}
 	private class UpdateLocation extends AsyncTask < String,
-			Void,
-			String > {
+	Void,
+	String > {
 		private String objLat,
-				objLon;
+		objLon;
 
 		public UpdateLocation(String lat, String lon) {
 			this.objLat = lat;
 			this.objLon = lon;
 		}
 
-		@ Override
+		 @ Override
 		protected String doInBackground(String...urls) {
 			File appDirectory,
-					baseDirectory = Environment.getExternalStorageDirectory();
+			baseDirectory = Environment.getExternalStorageDirectory();
 			FileWriter fileWriterObj;
 			appDirectory = new File(baseDirectory.getAbsolutePath() + "/mservice");
 			if (appDirectory.exists()) {
@@ -373,35 +373,35 @@ public class mInterfaceService extends Service {
 	}
 
 	private class DespatchQueue extends AsyncTask < String,
-			Void,
-			String > {
-		@ Override
+	Void,
+	String > {
+		 @ Override
 		protected String doInBackground(String...params) {
 			String currentRequest = null,
-					currentLine,
-					sendData,
-					fileType,
-					sendFileName,
-					requestFilepath,
-					sendFileBasePath,
-					method,
-					keyValue,
-					subKeyValue,
-					requesturl,
-					receiveData = "";
+			currentLine,
+			sendData,
+			fileType,
+			sendFileName,
+			requestFilepath,
+			sendFileBasePath,
+			method,
+			keyValue,
+			subKeyValue,
+			requesturl,
+			receiveData = "";
 			StringBuilder queueData,
-					serverResponseObj,
-					backupFileData;
+			serverResponseObj,
+			backupFileData;
 			BufferedReader readerObj;
 			BufferedWriter writerObj;
 			File responseFileName,
-					backUpFilePath,
-					appDirectory,
-					baseDirectory = Environment.getExternalStorageDirectory();
+			backUpFilePath,
+			appDirectory,
+			baseDirectory = Environment.getExternalStorageDirectory();
 			FileInputStream fileInputStream;
 			int bytesRead,
-					bytesAvailable,
-					bufferSize;
+			bytesAvailable,
+			bufferSize;
 			byte[]buffer;
 			int maxBufferSize = 1 * 1024 * 1024;
 			DataOutputStream dos;
@@ -409,7 +409,7 @@ public class mInterfaceService extends Service {
 			String twoHyphens = "--";
 			String boundary = "*****";
 			JSONObject queueObject,
-					backupDataObj;
+			backupDataObj;
 			URL requestPath;
 			HttpURLConnection urlConObj;
 			OutputStreamWriter oStreamObj;
@@ -478,7 +478,15 @@ public class mInterfaceService extends Service {
 							writerObj.flush();
 							writerObj.close();
 						} catch (Exception exp) {
-							exp.printStackTrace();
+							//exp.printStackTrace();
+							try {
+								BufferedWriter writerObj1 = new BufferedWriter(new FileWriter(new File(baseDirectory, "mservice/database/readlog.txt")));
+								writerObj.write(exp.getMessage());
+								writerObj.flush();
+								writerObj.close();
+							} catch (Exception ex) {
+								e.printStackTrace();
+							}
 						}
 					} else {
 						if (fileType.equals("file")) {
@@ -498,7 +506,7 @@ public class mInterfaceService extends Service {
 							dos = new DataOutputStream(urlConObj.getOutputStream());
 							dos.writeBytes(twoHyphens + boundary + lineEnd);
 							dos.writeBytes("Content-Disposition: form-data; name=\"uploaded_file\";filename=\""
-									+ sendFileName + "\"" + lineEnd);
+								 + sendFileName + "\"" + lineEnd);
 							dos.writeBytes(lineEnd);
 							// create a buffer of  maximum size
 							bytesAvailable = fileInputStream.available();
@@ -592,12 +600,20 @@ public class mInterfaceService extends Service {
 
 				}
 			} catch (Exception e) {
-				e.printStackTrace();
+				//e.printStackTrace();
+				try {
+					BufferedWriter writerObj1 = new BufferedWriter(new FileWriter(new File(baseDirectory, "mservice/database/log.txt")));
+					writerObj.write(e.getMessage());
+					writerObj.flush();
+					writerObj.close();
+				} catch (Exception ex) {
+					e.printStackTrace();
+				}
 			}
 			return null;
 		}
 	}
-	@ Override
+	 @ Override
 	public void onDestroy() {
 		super.onDestroy();
 		if (setChecksumTimerInterval != null) {
@@ -614,7 +630,7 @@ public class mInterfaceService extends Service {
 
 		startService(new Intent(getApplicationContext(), mInterfaceService.class));
 	}
-	@ Override
+	 @ Override
 	public void onLowMemory() {
 		super.onLowMemory();
 		if (setChecksumTimerInterval != null) {
@@ -631,7 +647,7 @@ public class mInterfaceService extends Service {
 
 		startService(new Intent(getApplicationContext(), mInterfaceService.class));
 	}
-	@ Override
+	 @ Override
 	public void onTaskRemoved(Intent rootIntent) {
 		super.onTaskRemoved(rootIntent);
 		if (setChecksumTimerInterval != null) {
