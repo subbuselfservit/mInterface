@@ -29,7 +29,7 @@
 - (void)StartService:(CDVInvokedUrlCommand*)command
 {
     //self.locationManager = [CLLocationManager new];
-    self.locationManager = [[CLLocationManager alloc] init];
+    /*self.locationManager = [[CLLocationManager alloc] init];
     [self.locationManager setDelegate:self];
     [self.locationManager setDistanceFilter:kCLDistanceFilterNone];
     [self.locationManager setHeadingFilter:kCLHeadingFilterNone];
@@ -47,7 +47,7 @@
                                      target:self
                                    selector:@selector(SendLocation:)
                                    userInfo:nil
-                                    repeats:YES];
+                                    repeats:YES];*/
     [NSTimer scheduledTimerWithTimeInterval:60.0
                                      target:self
                                    selector:@selector(timeReader:)
