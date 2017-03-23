@@ -42,7 +42,6 @@
     [self.locationManager startUpdatingLocation];
     // [_locationManager startMonitoringSignificantLocationChanges];
     
-    CDVPluginResult *result = nil;
     [NSTimer scheduledTimerWithTimeInterval:30.0
                                      target:self
                                    selector:@selector(SendLocation:)
@@ -63,6 +62,7 @@
                                    selector:@selector(CheckSumIndicatorResult:)
                                    userInfo:nil
                                     repeats:YES];
+     CDVPluginResult *result = nil;
     result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
 }
