@@ -26,51 +26,24 @@
     //come in fast and furious and it takes a lot of processing power to handle all of them
 }
 
-- (void)StartService:(CDVInvokedUrlCommand*)command
-{
-    //self.locationManager = [CLLocationManager new];
-    /*self.locationManager = [[CLLocationManager alloc] init];
-    [self.locationManager setDelegate:self];
-    [self.locationManager setDistanceFilter:kCLDistanceFilterNone];
-    [self.locationManager setHeadingFilter:kCLHeadingFilterNone];
-    [self.locationManager requestAlwaysAuthorization];
-    [self.locationManager requestWhenInUseAuthorization];
-    // Allow background Update
-    if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 9) {
-        _locationManager.allowsBackgroundLocationUpdates = YES;
-    }
-    [self.locationManager startUpdatingLocation];
-    // [_locationManager startMonitoringSignificantLocationChanges];
-    
-    [NSTimer scheduledTimerWithTimeInterval:30.0
-                                     target:self
-                                   selector:@selector(SendLocation:)
-                                   userInfo:nil
-                                    repeats:YES];*/
-    [NSTimer scheduledTimerWithTimeInterval:60.0
-                                     target:self
-                                   selector:@selector(timeReader:)
-                                   userInfo:nil
-                                    repeats:YES];
-    [NSTimer scheduledTimerWithTimeInterval:1.0
-                                     target:self
-                                   selector:@selector(DespatchQueue:)
-                                   userInfo:nil
-                                    repeats:YES];
-    [NSTimer scheduledTimerWithTimeInterval:180.0
-                                     target:self
-                                   selector:@selector(CheckSumIndicatorResult:)
-                                   userInfo:nil
-                                    repeats:YES];
-     CDVPluginResult *result = nil;
-    result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-    [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
-}
 - (void)SendLocation22:(CDVInvokedUrlCommand*)command
 {
     [self.commandDelegate runInBackground:^{
         CDVPluginResult *result = nil;
         @try {
+            //self.locationManager = [CLLocationManager new];
+            self.locationManager = [[CLLocationManager alloc] init];
+            [self.locationManager setDelegate:self];
+            [self.locationManager setDistanceFilter:kCLDistanceFilterNone];
+            [self.locationManager setHeadingFilter:kCLHeadingFilterNone];
+            [self.locationManager requestAlwaysAuthorization];
+            [self.locationManager requestWhenInUseAuthorization];
+            // Allow background Update
+            if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 9) {
+                _locationManager.allowsBackgroundLocationUpdates = YES;
+            }
+            [self.locationManager startUpdatingLocation];
+            // [_locationManager startMonitoringSignificantLocationChanges];
             double lat = self.locationManager.location.coordinate.latitude;
             double lngt = self.locationManager.location.coordinate.longitude;
             NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
