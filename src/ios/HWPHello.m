@@ -97,6 +97,7 @@
         } @catch (NSException *exception) {
             NSString *fail_reason = [NSString stringWithFormat:@"%@\n%@\n%@",exception.name, exception.reason, exception.description ];
             result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:fail_reason];
+            [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
             NSLog(@"Exception name : %@",exception.name);
             NSLog(@"Exception Reason: %@",exception.reason);
             NSLog(@"Exception is : %@", exception.description);
