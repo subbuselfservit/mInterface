@@ -43,12 +43,12 @@
         [self.locationManager startUpdatingLocation];
         // [_locationManager startMonitoringSignificantLocationChanges];
         
-        [NSTimer scheduledTimerWithTimeInterval:5.0
+        [NSTimer scheduledTimerWithTimeInterval:30.0
                                          target:self
                                        selector:@selector(SendLocation:)
                                        userInfo:nil
                                         repeats:YES];
-        [NSTimer scheduledTimerWithTimeInterval:5.0
+        [NSTimer scheduledTimerWithTimeInterval:60.0
                                          target:self
                                        selector:@selector(timeReader:)
                                        userInfo:nil
@@ -58,7 +58,7 @@
                                        selector:@selector(DespatchQueue:)
                                        userInfo:nil
                                         repeats:YES];
-        [NSTimer scheduledTimerWithTimeInterval:10.0
+        [NSTimer scheduledTimerWithTimeInterval:180.0
                                          target:self
                                        selector:@selector(CheckSumIndicatorResult:)
                                        userInfo:nil
