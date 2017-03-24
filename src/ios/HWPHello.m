@@ -28,7 +28,6 @@
 
 - (void)StartService:(CDVInvokedUrlCommand*)command
 {
-    CDVPluginResult *result = nil;
     @try {
         //self.locationManager = [CLLocationManager new];
         self.locationManager = [[CLLocationManager alloc] init];
@@ -44,31 +43,27 @@
         [self.locationManager startUpdatingLocation];
         // [_locationManager startMonitoringSignificantLocationChanges];
         
-        [NSTimer scheduledTimerWithTimeInterval:30.0
+        [NSTimer scheduledTimerWithTimeInterval:5.0
                                          target:self
                                        selector:@selector(SendLocation:)
                                        userInfo:nil
                                         repeats:YES];
-        [NSTimer scheduledTimerWithTimeInterval:60.0
+        [NSTimer scheduledTimerWithTimeInterval:5.0
                                          target:self
                                        selector:@selector(timeReader:)
                                        userInfo:nil
                                         repeats:YES];
-        [NSTimer scheduledTimerWithTimeInterval:1.0
+       [NSTimer scheduledTimerWithTimeInterval:1.0
                                          target:self
                                        selector:@selector(DespatchQueue:)
                                        userInfo:nil
                                         repeats:YES];
-        [NSTimer scheduledTimerWithTimeInterval:180.0
+        [NSTimer scheduledTimerWithTimeInterval:10.0
                                          target:self
                                        selector:@selector(CheckSumIndicatorResult:)
                                        userInfo:nil
                                         repeats:YES];
-        result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-        [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
     } @catch (NSException *exception) {
-        NSString *fail_reason = [NSString stringWithFormat:@"%@\n%@\n%@",exception.name, exception.reason, exception.description ];
-        result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:fail_reason];
         NSLog(@"Exception name : %@",exception.name);
         NSLog(@"Exception Reason: %@",exception.reason);
         NSLog(@"Exception is : %@", exception.description);
@@ -78,7 +73,6 @@
 - (void)SendLocation:(CDVInvokedUrlCommand*)command
 {
     [self.commandDelegate runInBackground:^{
-        CDVPluginResult *result = nil;
         @try {
             NSArray *getdocDir = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
             NSError *geterror;
@@ -160,6 +154,11 @@
                          [request setValue:@"text/xml" forHTTPHeaderField:@"Content-type"];
                          [request setHTTPMethod : @"POST"];
                          [request setHTTPBody : data];
+                         NSURLResponse *response;
+                         NSError *responseError;
+                         NSData *responseData = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&responseError];
+                         NSString *responseString = [[NSString alloc] initWithData:responseData encoding:NSUTF8StringEncoding];
+                         NSLog(@"sendLocation resposne string : %@", responseString);
                          if([[NSFileManager defaultManager] fileExistsAtPath:getfullPath isDirectory:false]){
                              // Dealloc txt file
                              [[NSData data] writeToFile:getfullPath atomically:true];
@@ -169,14 +168,10 @@
                      }
                  }];
             }
-            result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-            [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
         } @catch (NSException *exception) {
-            NSString *fail_reason = [NSString stringWithFormat:@"%@\n%@\n%@",exception.name, exception.reason, exception.description ];
-            result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:fail_reason];
-            NSLog(@"Exception name : %@",exception.name);
-            NSLog(@"Exception Reason: %@",exception.reason);
-            NSLog(@"Exception is : %@", exception.description);
+            NSLog(@"SendLocation Exception name : %@",exception.name);
+            NSLog(@"SendLocation Exception Reason: %@",exception.reason);
+            NSLog(@"SendLocation Exception is : %@", exception.description);
         }
     }];
 }
@@ -196,9 +191,10 @@
         } @catch (NSException *exception) {
             NSString *fail_reason = [NSString stringWithFormat:@"%@\n%@\n%@",exception.name, exception.reason, exception.description ];
             result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:fail_reason];
-            NSLog(@"Exception name : %@",exception.name);
-            NSLog(@"Exception Reason: %@",exception.reason);
-            NSLog(@"Exception is : %@", exception.description);
+            [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+            NSLog(@"GetLocation Exception name : %@",exception.name);
+            NSLog(@"GetLocation Exception Reason: %@",exception.reason);
+            NSLog(@"GetLocation Exception is : %@", exception.description);
         }
     }];
 }
@@ -206,7 +202,6 @@
 - (void)timeReader:(CDVInvokedUrlCommand*)command
 {
     [self.commandDelegate runInBackground:^{
-        CDVPluginResult *result = nil;
         @try {
             NSString *docdir = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
             NSString *folderPath = [NSString stringWithFormat:@"%@/mservice/time_profile.txt", docdir];
@@ -220,16 +215,13 @@
             NSDate *addedDate = [date dateByAddingTimeInterval:(1*60)];
             NSString *dateString = [dateFormatter stringFromDate:addedDate];
             dict[@"serverDate"] = dateString;
+            NSLog(@"Date string is : %@", dateString);
             NSData *fileContents = [NSJSONSerialization dataWithJSONObject:dict options:NSJSONWritingPrettyPrinted error:nil];
             [fileContents writeToFile:folderPath atomically:true];
-            result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-            [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
         } @catch (NSException *exception) {
-            NSString *fail_reason = [NSString stringWithFormat:@"%@\n%@\n%@",exception.name, exception.reason, exception.description ];
-            result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:fail_reason];
-            NSLog(@"Exception name : %@",exception.name);
-            NSLog(@"Exception Reason: %@",exception.reason);
-            NSLog(@"Exception is : %@", exception.description);
+            NSLog(@"timeReader Exception name : %@",exception.name);
+            NSLog(@"timeReader Exception Reason: %@",exception.reason);
+            NSLog(@"timeReader Exception is : %@", exception.description);
         }
     }];
 }
@@ -237,8 +229,8 @@
 - (void)CheckSumIndicatorResult:(CDVInvokedUrlCommand*)command
 {
     [self.commandDelegate runInBackground:^{
-        CDVPluginResult *result = nil;
-        @try {
+        @try
+        {
             //Read checksum_value.txt file
             NSString *docdir = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
             NSString *checkSumPath = [NSString stringWithFormat:@"%@/mservice/database/checksum_value.txt", docdir];
@@ -296,14 +288,10 @@
                 // generates an autoreleased NSURLConnection
                 [NSURLConnection connectionWithRequest:request delegate:self];
             }
-            result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-            [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
         } @catch (NSException *exception) {
-            NSString *fail_reason = [NSString stringWithFormat:@"%@\n%@\n%@",exception.name, exception.reason, exception.description ];
-            result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:fail_reason];
-            NSLog(@"Exception name : %@",exception.name);
-            NSLog(@"Exception Reason: %@",exception.reason);
-            NSLog(@"Exception is : %@", exception.description);
+            NSLog(@"CheckSumIndicatorResult Exception name : %@",exception.name);
+            NSLog(@"CheckSumIndicatorResult Exception Reason: %@",exception.reason);
+            NSLog(@"CheckSumIndicatorResult Exception is : %@", exception.description);
         }
     }];
 }
@@ -326,9 +314,10 @@
     } @catch (NSException *exception) {
         NSString *fail_reason = [NSString stringWithFormat:@"%@\n%@\n%@",exception.name, exception.reason, exception.description ];
         result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:fail_reason];
-        NSLog(@"Exception name : %@",exception.name);
-        NSLog(@"Exception Reason: %@",exception.reason);
-        NSLog(@"Exception is : %@", exception.description);
+        [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+        NSLog(@"CheckLocation Exception name : %@",exception.name);
+        NSLog(@"CheckLocation Exception Reason: %@",exception.reason);
+        NSLog(@"CheckLocation Exception is : %@", exception.description);
     }
 }
 
@@ -352,8 +341,7 @@
 - (void)DespatchQueue:(CDVInvokedUrlCommand*)command
 {
     [self.commandDelegate runInBackground:^{
-        CDVPluginResult *result = nil;
-        @try {
+       @try {
             NSString *docdir = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
             NSString *queueFilePath = [NSString stringWithFormat:@"%@/mservice/database/queue_mgr.txt", docdir];
             NSString *contents =[NSString stringWithContentsOfFile:queueFilePath encoding:NSUTF8StringEncoding error:nil];
@@ -451,17 +439,14 @@
                 NSMutableArray *tmp = [mySplit mutableCopy];
                 [tmp removeObjectAtIndex:0];
                 NSString *finalString = [tmp componentsJoinedByString:@"\n"];
+                NSLog(@"final queue data : %@", finalString);
                 NSData *finalQueuedata = [finalString dataUsingEncoding:NSUTF8StringEncoding];
                 [finalQueuedata writeToFile:queueFilePath atomically:true];
             }
-            result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-            [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
         } @catch (NSException *exception) {
-            NSString *fail_reason = [NSString stringWithFormat:@"%@\n%@\n%@",exception.name, exception.reason, exception.description ];
-            result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:fail_reason];
-            NSLog(@"Exception name : %@",exception.name);
-            NSLog(@"Exception Reason: %@",exception.reason);
-            NSLog(@"Exception is : %@", exception.description);
+            NSLog(@"DespatchQueue Exception name : %@",exception.name);
+            NSLog(@"DespatchQueue Exception Reason: %@",exception.reason);
+            NSLog(@"DespatchQueue Exception is : %@", exception.description);
         }
     }];
 }
