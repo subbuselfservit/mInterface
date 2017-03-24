@@ -483,7 +483,8 @@ public class mInterfaceService extends Service {
 								writerObj.flush();
 								writerObj.close();
 							} catch (Exception e) {
-								try {
+								e.printStackTrace();
+								/*try {
 									errorLogData += "Time:" + new SimpleDateFormat("HH:mm:ss").format(new Date()) + "\n";
 									errorLogData += "url:" + requesturl + "\n";
 									errorLogData += "data:" + e.getMessage() + "\n";
@@ -499,13 +500,13 @@ public class mInterfaceService extends Service {
 									errorFileWriterObj.close();
 								} catch (Exception ex) {
 									ex.printStackTrace();
-								}
+								}*/
 							}
 						} else {
 							if (fileType.equals("file")) {
 								requestFilepath = baseDirectory + "/" + sendFileBasePath + "/" + sendFileName;
 								fileInputStream = new FileInputStream(new File(requestFilepath));
-								requestPath = new URL(requesturl + "&filename=" + sendFileName);
+								requestPath = new URL((requesturl + "&filename=" + sendFileName).replaceAll(" ", "%20"));
 								urlConObj = (HttpURLConnection)requestPath.openConnection();
 								urlConObj.setDoInput(true); // Allow Inputs
 								urlConObj.setDoOutput(true); // Allow Outputs
@@ -614,7 +615,8 @@ public class mInterfaceService extends Service {
 					}
 				}
 			} catch (Exception e) {
-				try {
+				e.printStackTrace();
+				/*try {
 					errorLogData += "Time:" + new SimpleDateFormat("HH:mm:ss").format(new Date()) + "\n";
 					errorLogData += "url:" + requesturl + "\n";
 					errorLogData += "data:" + e.getMessage() + "\n";
@@ -630,7 +632,7 @@ public class mInterfaceService extends Service {
 					errorFileWriterObj.close();
 				} catch (Exception ex) {
 					ex.printStackTrace();
-				}
+				}*/
 			}
 			return null;
 		}
