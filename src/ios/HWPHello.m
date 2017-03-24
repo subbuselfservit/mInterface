@@ -29,26 +29,12 @@
 - (void)StartService:(CDVInvokedUrlCommand*)command
 {
     @try {
-        //self.locationManager = [CLLocationManager new];
-        self.locationManager = [[CLLocationManager alloc] init];
-        [self.locationManager setDelegate:self];
-        [self.locationManager setDistanceFilter:kCLDistanceFilterNone];
-        [self.locationManager setHeadingFilter:kCLHeadingFilterNone];
-        [self.locationManager requestAlwaysAuthorization];
-        [self.locationManager requestWhenInUseAuthorization];
-        // Allow background Update
-        if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 9) {
-            _locationManager.allowsBackgroundLocationUpdates = YES;
-        }
-        [self.locationManager startUpdatingLocation];
-        // [_locationManager startMonitoringSignificantLocationChanges];
-        
-        [NSTimer scheduledTimerWithTimeInterval:30.0
+        [NSTimer scheduledTimerWithTimeInterval:5.0
                                          target:self
                                        selector:@selector(SendLocation:)
                                        userInfo:nil
                                         repeats:YES];
-        [NSTimer scheduledTimerWithTimeInterval:60.0
+        [NSTimer scheduledTimerWithTimeInterval:5.0
                                          target:self
                                        selector:@selector(timeReader:)
                                        userInfo:nil
@@ -58,7 +44,7 @@
                                        selector:@selector(DespatchQueue:)
                                        userInfo:nil
                                         repeats:YES];
-        [NSTimer scheduledTimerWithTimeInterval:180.0
+        [NSTimer scheduledTimerWithTimeInterval:10.0
                                          target:self
                                        selector:@selector(CheckSumIndicatorResult:)
                                        userInfo:nil
@@ -74,6 +60,19 @@
 {
     [self.commandDelegate runInBackground:^{
         @try {
+            //self.locationManager = [CLLocationManager new];
+            self.locationManager = [[CLLocationManager alloc] init];
+            [self.locationManager setDelegate:self];
+            [self.locationManager setDistanceFilter:kCLDistanceFilterNone];
+            [self.locationManager setHeadingFilter:kCLHeadingFilterNone];
+            [self.locationManager requestAlwaysAuthorization];
+            [self.locationManager requestWhenInUseAuthorization];
+            // Allow background Update
+            if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 9) {
+                _locationManager.allowsBackgroundLocationUpdates = YES;
+            }
+            [self.locationManager startUpdatingLocation];
+            // [_locationManager startMonitoringSignificantLocationChanges];
             NSArray *getdocDir = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
             NSError *geterror;
             NSString *parentfolder = [[getdocDir objectAtIndex:0] stringByAppendingPathComponent:@"/mservice"];
