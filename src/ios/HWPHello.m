@@ -34,8 +34,7 @@
                 NSString *content = @"hi i'm plugin...";
                 result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:content];
                 [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
-            }
-        } @catch (NSException *exception) {
+            }  @catch (NSException *exception) {
             NSString *fail_reason = [NSString stringWithFormat:@"%@\n%@\n%@",exception.name, exception.reason, exception.description ];
             result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:fail_reason];
             [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
