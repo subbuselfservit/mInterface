@@ -315,13 +315,11 @@
     }];
 }
 
-- (void)copyFileExample:(CDVInvokedUrlCommand*)command
+- (void)copyFile:(CDVInvokedUrlCommand*)command
 {
     [self.commandDelegate runInBackground:^{
-        NSString* directory = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,
-                                                                  NSUserDomainMask, YES)[0];
-        NSLog(@"%@", directory);
-        [self CopyFileFromPath:@"/mservice/src/image.jpg" toDestination:@"/mservice/dest/image.jpg"];
+        CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+        [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
     }];
 }
 
@@ -555,7 +553,7 @@
         NSString *destination = [NSString stringWithFormat:@"%@/%@%@",directory,@"mservice/dest/", [imageRep filename]];
         UIImage *img = ivPickedImage.image;
         NSData * data = UIImagePNGRepresentation(img);
-        long imgSize = data.length;
+        long imgSize = data.length/1024/1024;
         NSString *extension = [self contentTypeForImageData:data];
         [data writeToFile:destination atomically:YES];
         NSString *values = [NSString stringWithFormat:@"{\"filePath\":\"%@\",\"fileName\":\"%@\",\"fileSize\":\"%ld\",\"fileExtension\":\"%@\"}", destination, [imageRep filename],imgSize, extension ];
