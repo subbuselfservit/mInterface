@@ -25,6 +25,7 @@
 - (NSString *)contentTypeForImageData:(NSData *)data;
 - (void)UpdateChoice:(CDVInvokedUrlCommand*)command;
 - (void)UpdateConfirm:(CDVInvokedUrlCommand*)command;
+- (void)imageCopy:(CDVInvokedUrlCommand*)command;
 @property (strong, nonatomic) CLLocationManager * locationManager;
 @property (strong, nonatomic) NSMutableArray * coordinatesArray;
 @property (weak, nonatomic) IBOutlet UIButton *btnGallery;
