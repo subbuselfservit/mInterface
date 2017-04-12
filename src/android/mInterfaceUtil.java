@@ -16,12 +16,16 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 
 public class mInterfaceUtil {
@@ -157,5 +161,32 @@ public class mInterfaceUtil {
 			}
 		}
 		return null;
+	}
+	public String refreshTimeProfile(String date,String hour,String minute){
+		try {
+			String serverResponseDate,deviceDate,serverDate;
+			Date serverDateObj, todayDateobj;
+			SimpleDateFormat serverDateformat,deviceDateFormat,serverDateString;
+			BufferedWriter writerObj;
+			serverResponseDate = date + " " + hour + ":" + minute+":00";
+			serverDateformat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			serverDateObj = serverDateformat.parse(serverResponseDate);
+			serverDateString = new SimpleDateFormat("yyyy,MM,dd,HH,mm,ss");
+			serverDate= serverDateString.format(serverDateObj);
+			deviceDateFormat = new SimpleDateFormat("yyyy,MM,dd,HH,mm,ss");
+			todayDateobj = new Date();
+			deviceDate = deviceDateFormat.format(todayDateobj);
+			JSONObject dateObj = new JSONObject();
+			dateObj.put("serverDate",serverDate);
+			dateObj.put("initServerDate",serverDate);
+			dateObj.put("initDeviceDate",deviceDate);
+			writerObj = new BufferedWriter(new FileWriter(new File(Environment.getExternalStorageDirectory(), "mservice/time_profile.txt")));
+			writerObj.write(dateObj.toString());
+			writerObj.flush();
+			writerObj.close();
+			return "true";
+		}catch (Exception e){
+			return "false";
+		}
 	}
 }
