@@ -55,6 +55,18 @@ public class mInterface extends CordovaPlugin {
 		} else if (action.equals("CopyFile")) {
 			arguments = args;
 			new mInterfaceUtil().copyFile(callbackContext, arguments);
+		}else if(action.equals("RefreshTimeProfile")) {
+			JSONObject timeObj = args.getJSONObject(0);
+			String date,hour,minute;
+			date = timeObj.optString("serverDate").toString();
+			hour = timeObj.optString("serverHour").toString();
+			minute = timeObj.optString("serverMinute").toString();
+			String returnStatus=new mInterfaceUtil().refreshTimeProfile(date,hour,minute);
+			if(returnStatus.equals("true")){
+				callbackContext.success("success");
+			}else {
+				callbackContext.error("failure");
+			}
 		}else if (action.equals("UpdateChoice")) {
 			/* OPEN THE PLAYSTORE MSERVICE APP */
 			String appVersion,softwareProductVersion,softwareProductSubVersion;
