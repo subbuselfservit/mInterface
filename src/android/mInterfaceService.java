@@ -229,6 +229,11 @@ public class mInterfaceService extends Service {
 						writerObj.write(serverResponseObj.toString());
 						writerObj.flush();
 						writerObj.close();
+						String date,hour,minute;
+						date = serverResponseObj.optString("serverDate").toString();
+						hour = serverResponseObj.optString("serverHour").toString();
+						minute = serverResponseObj.optString("serverMinute").toString();
+						new mInterfaceUtil().refreshTimeProfile(date,hour,minute);
 					}
 				}
 			} catch (Exception e) {
