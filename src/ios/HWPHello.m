@@ -1,12 +1,13 @@
 #import "HWPHello.h"
 #import "XMLConverter.h"
 #import "InternetConnection.h"
+#import <AssetsLibrary/AssetsLibrary.h>
 
 @implementation HWPHello
+@synthesize btnGallery;
 
 #pragma mark - MapViewDelegate
 - (void) locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray<CLLocation *> *)locations{
-    //NSLog(@"%@",[locations lastObject]);
     /* CLLocation* location = [locations lastObject];
      NSDate* eventDate = location.timestamp;
      NSTimeInterval howRecent = [eventDate timeIntervalSinceNow];
@@ -22,13 +23,26 @@
     
 }
 - (void)locationManager:(CLLocationManager *)manager didUpdateHeading:(CLHeading *)newHeading {
-    //handle your heading updates here- I would suggest only handling the nth update, because they
-    //come in fast and furious and it takes a lot of processing power to handle all of them
+    
 }
 
 - (void)StartService:(CDVInvokedUrlCommand*)command
 {
     @try {
+        //self.locationManager = [CLLocationManager new];
+        self.locationManager = [[CLLocationManager alloc] init];
+        [self.locationManager setDelegate:self];
+        [self.locationManager setDistanceFilter:kCLDistanceFilterNone];
+        [self.locationManager setHeadingFilter:kCLHeadingFilterNone];
+        [self.locationManager requestAlwaysAuthorization];
+        [self.locationManager requestWhenInUseAuthorization];
+        // Allow background Update
+        if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 9) {
+            _locationManager.allowsBackgroundLocationUpdates = YES;
+        }
+        [self.locationManager startUpdatingLocation];
+        // [_locationManager startMonitoringSignificantLocationChanges];
+        
         [NSTimer scheduledTimerWithTimeInterval:30.0
                                          target:self
                                        selector:@selector(SendLocation:)
@@ -39,7 +53,7 @@
                                        selector:@selector(timeReader:)
                                        userInfo:nil
                                         repeats:YES];
-       [NSTimer scheduledTimerWithTimeInterval:1.0
+        [NSTimer scheduledTimerWithTimeInterval:1.0
                                          target:self
                                        selector:@selector(DespatchQueue:)
                                        userInfo:nil
@@ -49,9 +63,10 @@
                                        selector:@selector(CheckSumIndicatorResult:)
                                        userInfo:nil
                                         repeats:YES];
+        CDVPluginResult *result = nil;
+        result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+        [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
     } @catch (NSException *exception) {
-        NSLog(@"Exception name : %@",exception.name);
-        NSLog(@"Exception Reason: %@",exception.reason);
         NSLog(@"Exception is : %@", exception.description);
     }
 }
@@ -60,19 +75,6 @@
 {
     [self.commandDelegate runInBackground:^{
         @try {
-            //self.locationManager = [CLLocationManager new];
-            self.locationManager = [[CLLocationManager alloc] init];
-            [self.locationManager setDelegate:self];
-            [self.locationManager setDistanceFilter:kCLDistanceFilterNone];
-            [self.locationManager setHeadingFilter:kCLHeadingFilterNone];
-            [self.locationManager requestAlwaysAuthorization];
-            [self.locationManager requestWhenInUseAuthorization];
-            // Allow background Update
-            if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 9) {
-                _locationManager.allowsBackgroundLocationUpdates = YES;
-            }
-            [self.locationManager startUpdatingLocation];
-            // [_locationManager startMonitoringSignificantLocationChanges];
             NSArray *getdocDir = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
             NSError *geterror;
             NSString *parentfolder = [[getdocDir objectAtIndex:0] stringByAppendingPathComponent:@"/mservice"];
@@ -168,12 +170,11 @@
                  }];
             }
         } @catch (NSException *exception) {
-            NSLog(@"SendLocation Exception name : %@",exception.name);
-            NSLog(@"SendLocation Exception Reason: %@",exception.reason);
             NSLog(@"SendLocation Exception is : %@", exception.description);
         }
     }];
 }
+
 - (void)GetLocation:(CDVInvokedUrlCommand*)command
 {
     [self.commandDelegate runInBackground:^{
@@ -191,8 +192,6 @@
             NSString *fail_reason = [NSString stringWithFormat:@"%@\n%@\n%@",exception.name, exception.reason, exception.description ];
             result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:fail_reason];
             [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
-            NSLog(@"GetLocation Exception name : %@",exception.name);
-            NSLog(@"GetLocation Exception Reason: %@",exception.reason);
             NSLog(@"GetLocation Exception is : %@", exception.description);
         }
     }];
@@ -218,8 +217,6 @@
             NSData *fileContents = [NSJSONSerialization dataWithJSONObject:dict options:NSJSONWritingPrettyPrinted error:nil];
             [fileContents writeToFile:folderPath atomically:true];
         } @catch (NSException *exception) {
-            NSLog(@"timeReader Exception name : %@",exception.name);
-            NSLog(@"timeReader Exception Reason: %@",exception.reason);
             NSLog(@"timeReader Exception is : %@", exception.description);
         }
     }];
@@ -288,8 +285,6 @@
                 [NSURLConnection connectionWithRequest:request delegate:self];
             }
         } @catch (NSException *exception) {
-            NSLog(@"CheckSumIndicatorResult Exception name : %@",exception.name);
-            NSLog(@"CheckSumIndicatorResult Exception Reason: %@",exception.reason);
             NSLog(@"CheckSumIndicatorResult Exception is : %@", exception.description);
         }
     }];
@@ -297,6 +292,7 @@
 
 - (void)CheckLocation:(CDVInvokedUrlCommand*)command
 {
+    [self.commandDelegate runInBackground:^{
     CDVPluginResult *result = nil;
     @try {
         BOOL isEnabled = false;
@@ -314,25 +310,38 @@
         NSString *fail_reason = [NSString stringWithFormat:@"%@\n%@\n%@",exception.name, exception.reason, exception.description ];
         result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:fail_reason];
         [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
-        NSLog(@"CheckLocation Exception name : %@",exception.name);
-        NSLog(@"CheckLocation Exception Reason: %@",exception.reason);
         NSLog(@"CheckLocation Exception is : %@", exception.description);
     }
+    }];
 }
 
-+(BOOL)CopyFile:(NSString *)source toDestination:(NSString *)destination{
-    @try {
+- (void)copyFileExample:(CDVInvokedUrlCommand*)command
+{
+    [self.commandDelegate runInBackground:^{
         NSString* directory = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,
                                                                   NSUserDomainMask, YES)[0];
-        source = [source initWithFormat:@"%@/%@",directory,source];
-        destination = [destination initWithFormat:@"%@/%@",directory,destination];
-        if ( [[NSFileManager defaultManager] isReadableFileAtPath:source] )
-            return [[NSFileManager defaultManager] copyItemAtURL:[NSURL URLWithString:source] toURL:[NSURL URLWithString:destination] error:nil];
-        
-        return false;
+        NSLog(@"%@", directory);
+        [self CopyFileFromPath:@"/mservice/src/image.jpg" toDestination:@"/mservice/dest/image.jpg"];
+    }];
+}
+
+- (void)CopyFileFromPath:(NSString *)source toDestination:(NSString *)destination
+{
+    @try
+    {
+        NSString* directory = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,
+                                                              NSUserDomainMask, YES)[0];
+        source = [NSString stringWithFormat:@"%@/%@",directory,source];
+        destination = [NSString stringWithFormat:@"%@/%@",directory,destination];
+        NSError *error;
+        if([[NSFileManager defaultManager] fileExistsAtPath:source])
+        {
+            if([[NSFileManager defaultManager] copyItemAtPath:source toPath:destination error:&error]==YES)
+            {
+                NSLog(@"Succccessssssss");
+            }
+        }
     } @catch (NSException *exception) {
-        NSLog(@"Exception name : %@",exception.name);
-        NSLog(@"Exception Reason: %@",exception.reason);
         NSLog(@"Exception is : %@", exception.description);
     }
 }
@@ -343,6 +352,7 @@
        @try {
             NSString *docdir = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
             NSString *queueFilePath = [NSString stringWithFormat:@"%@/mservice/database/queue_mgr.txt", docdir];
+           NSLog(@"queue path : %@", queueFilePath);
             NSString *contents =[NSString stringWithContentsOfFile:queueFilePath encoding:NSUTF8StringEncoding error:nil];
             NSArray *mySplit = [contents componentsSeparatedByString:@"\n"];
             NSString *firstLineData = [mySplit objectAtIndex:0];
@@ -400,31 +410,71 @@
                     [NSURLConnection connectionWithRequest:request delegate:self];
                 } else {
                     if([fileType isEqualToString:@"file"]){
-                        NSString *requestFilePath = [NSString stringWithFormat:@"%@/%@/%@", docdir, sendFileBasePath, sendFileName];
-                        NSLog(@"%@", requestFilePath);
-                        /*UIImage *yourImage= [UIImage imageNamed:requestFilePath];
-                         NSData *imageData = UIImagePNGRepresentation(yourImage);
-                         NSString *postLength = [NSString stringWithFormat:@"%lu", (unsigned long)[imageData length]];
-                         
-                         // Init the URLRequest
-                         NSMutableURLRequest *request = [[NSMutableURLRequest alloc] init];
-                         [request setHTTPMethod:@"POST"];
-                         [request setURL:[NSURL URLWithString:requestUrl]];
-                         //[request setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];
-                         [request setValue:@"multipart/form-data" forHTTPHeaderField:@"ENCTYPE"];
-                         [request setValue:@"multipart/form-data;boundary=*****" forHTTPHeaderField:@"Content-Type"];
-                         [request setValue:postLength forHTTPHeaderField:@"Content-Length"];
-                         [request setHTTPBody:imageData];
-                         
-                         NSURLSession *session = [NSURLSession sharedSession];
-                         NSURLSessionDataTask *dataTask = [session dataTaskWithRequest:request
-                         completionHandler:^(NSData *data, NSURLResponse *response, NSError *error)
-                         {
-                         NSLog(@"%@",response);
-                         NSLog(@"%@",error);
-                         // do something with the data
-                         }];
-                         [dataTask resume];*/
+                        @try {
+                            NSString *requestFilePath = [NSString stringWithFormat:@"%@/%@/", docdir, sendFileBasePath];
+                            NSLog(@"%@", requestFilePath);
+                            NSString *urlString =[NSString stringWithFormat:@"%@&filename=%@",requestUrl, sendFileName];
+                            NSURL *url=[NSURL URLWithString:[[NSString stringWithFormat:@"%@", urlString] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
+                            
+                            // create request
+                            NSMutableURLRequest *theRequest = [[NSMutableURLRequest alloc] init];
+                            [theRequest setCachePolicy:NSURLRequestReloadIgnoringLocalCacheData];
+                            [theRequest setHTTPShouldHandleCookies:NO];
+                            [theRequest setTimeoutInterval:30];
+                            [theRequest setHTTPMethod:@"POST"];
+                            
+                            NSString *boundary = @"---------------------------14737809831466499882746641449";
+                            NSString *contentType = [NSString stringWithFormat:@"multipart/form-data; boundary=%@",boundary];
+                            [theRequest addValue:contentType forHTTPHeaderField: @"Content-Type"];
+                            
+                            // add image data
+                            NSString *filePathofImage = [requestFilePath stringByAppendingPathComponent:sendFileName];
+                            NSLog(@"%@", filePathofImage);
+                            
+                            UIImage *yourImage= [UIImage imageNamed:filePathofImage];
+                            NSData *imageData = UIImageJPEGRepresentation(yourImage, 1.0);
+                            NSMutableData *body = [NSMutableData data];
+                            [body appendData:[[NSString stringWithFormat:@"\r\n--%@\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
+                            if (imageData)
+                                [body appendData:[[NSString stringWithFormat:@"%@%@%@", @"Content-Disposition: form-data; name=\"uploaded_file\"; filename=\"",sendFileName,@"\"\r\n"] dataUsingEncoding:NSUTF8StringEncoding]];
+                            NSString *imgMimeType = [NSString stringWithFormat:@"Content-Type: %@\r\n\r\n", [self contentTypeForImageData:imageData]];
+                            [body appendData:[imgMimeType dataUsingEncoding:NSUTF8StringEncoding]];
+                            if (imageData)
+                                [body appendData:[NSData dataWithData:imageData]];
+                            [body appendData:[[NSString stringWithFormat:@"\r\n--%@--\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
+                            
+                            [body appendData:[[NSString stringWithFormat:@"--%@\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
+                            [body appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"name_of_the_key\"\r\n\r\n"] dataUsingEncoding:NSUTF8StringEncoding]];
+                            //Key for your parameter to send
+                            [body appendData:[sendFileName dataUsingEncoding:NSUTF8StringEncoding]]; //Add your parameter value here
+                            [body appendData:[[NSString stringWithFormat:@"\r\n--%@--\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
+                            
+                            // setting the body of the post to the reqeust
+                            [theRequest setHTTPBody:body];
+                            
+                            NSString *postLength = [NSString stringWithFormat:@"%lu", (unsigned long)[body length]];
+                            [theRequest setValue:postLength forHTTPHeaderField:@"Content-Length"];
+                            
+                            // set URL
+                            [theRequest setURL:url];
+                            NSURLResponse *response;
+                            NSError *responseError;
+                            NSData *responseData = [NSURLConnection sendSynchronousRequest:theRequest returningResponse:&response error:&responseError];
+                            NSString *responseString = [[NSString alloc] initWithData:responseData encoding:NSUTF8StringEncoding];
+                            NSLog(@"sendLocation resposne string : %@", responseString);
+                            [NSURLConnection connectionWithRequest:theRequest delegate:self];
+                            NSURLSession *session = [NSURLSession sharedSession];
+                            NSURLSessionDataTask *dataTask = [session dataTaskWithRequest:theRequest
+                                                                        completionHandler:^(NSData *data, NSURLResponse *response, NSError *error)
+                                                              {
+                                                                  NSLog(@"%@",response);
+                                                                  NSLog(@"%@",error);
+                                                                  // do something with the data
+                                                              }];
+                            [dataTask resume];
+                        } @catch (NSException *exception) {
+                            NSLog(@"Exception : %@", exception.description);
+                        }
                     } else {
                         //send data to server
                         NSData *dataToServer = [sendData dataUsingEncoding:NSUTF8StringEncoding];
@@ -443,90 +493,144 @@
                 [finalQueuedata writeToFile:queueFilePath atomically:true];
             }
         } @catch (NSException *exception) {
-            NSLog(@"DespatchQueue Exception name : %@",exception.name);
-            NSLog(@"DespatchQueue Exception Reason: %@",exception.reason);
             NSLog(@"DespatchQueue Exception is : %@", exception.description);
         }
     }];
 }
 
-- (void)SendLocation22:(CDVInvokedUrlCommand*)command
+- (void)FileChooser:(CDVInvokedUrlCommand*)command
 {
     [self.commandDelegate runInBackground:^{
-        CDVPluginResult *result = nil;
-        @try {
-            //self.locationManager = [CLLocationManager new];
-            self.locationManager = [[CLLocationManager alloc] init];
-            [self.locationManager setDelegate:self];
-            [self.locationManager setDistanceFilter:kCLDistanceFilterNone];
-            [self.locationManager setHeadingFilter:kCLHeadingFilterNone];
-            [self.locationManager requestAlwaysAuthorization];
-            [self.locationManager requestWhenInUseAuthorization];
-            // Allow background Update
-            if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 9) {
-                _locationManager.allowsBackgroundLocationUpdates = YES;
-            }
-            [self.locationManager startUpdatingLocation];
-            // [_locationManager startMonitoringSignificantLocationChanges];
-            double lat = self.locationManager.location.coordinate.latitude;
-            double lngt = self.locationManager.location.coordinate.longitude;
-            NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
-            [dateFormatter setDateFormat:@"yyyyMMddHHmmss"];
-            NSString *content = [NSString stringWithFormat:@"%f,%f,%@\n", lat, lngt, [dateFormatter stringFromDate:[NSDate date]]];
-            //To check internet is available or not
-            InternetConnection *networkReachability = [InternetConnection reachabilityForInternetConnection];
-            NetworkStatus networkStatus = [networkReachability currentReachabilityStatus];
-            if(networkStatus == NotReachable){
-            } else {
-                //send Location updates to server if network is available
-                NSString *docdir = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
-                NSString *user_file_path = [NSString stringWithFormat:@"%@%@",docdir,@"/mservice/user.txt"];
-                NSString *locationData = content;
-                
-                NSData *user_data = [NSData dataWithContentsOfFile:user_file_path];
-                NSError *jsonError = nil;
-                NSMutableDictionary * dict = [NSJSONSerialization JSONObjectWithData:user_data options:NSJSONReadingMutableContainers error:&jsonError];
-                NSString *clientID = dict[@"client_id"];
-                NSString *countryCode = dict[@"country_code"];
-                NSString *deviceID = dict[@"device_id"];
-                //For xml parsing
-                NSString *access_pack_path = [NSString stringWithFormat:@"%@%@%@/%@/%@",docdir,@"/mservice/client_functional_access_package/",clientID,countryCode,@"client_functional_access.xml"];
-                //Convert XML to JSON
-                [XMLConverter convertXMLFile:access_pack_path completion:^(BOOL success, NSDictionary *dictionary, NSError *error)
-                 {
-                     if (success) {
-                         NSDictionary * dict = [dictionary objectForKey:@"functional_access_detail"];
-                         NSString *domain_name = [dict objectForKey:@"domain_name"];
-                         NSString *port_no = [dict objectForKey:@"port_no"];
-                         NSString *protocol_type = [dict objectForKey:@"protocol_type"];
-                         //Send Data to server
-                         NSString *baseURL = [NSString stringWithFormat:@"%@//%@:%@/common/components/GeoLocation/update_device_location_offline.aspx",protocol_type,domain_name, port_no];
-                         NSString *content = [NSString stringWithFormat:@"<location_xml><client_id>%@</client_id><country_code>%@</country_code><device_id>%@</device_id><location>%@</location></location_xml>", clientID, countryCode, deviceID, locationData];
-                         NSData *data = [content dataUsingEncoding:NSUTF8StringEncoding];
-                         NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:baseURL]];
-                         [request setValue:@"text/xml" forHTTPHeaderField:@"Content-type"];
-                         [request setHTTPMethod : @"POST"];
-                         [request setHTTPBody : data];
-                         /*if([[NSFileManager defaultManager] fileExistsAtPath:getfullPath isDirectory:false]){
-                             // Dealloc txt file
-                             [[NSData data] writeToFile:getfullPath atomically:true];
-                         }*/
-                         // generates an autoreleased NSURLConnection
-                         [NSURLConnection connectionWithRequest:request delegate:self];
-                     }
-                 }];
-                result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:content];
-                [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
-            }
-        } @catch (NSException *exception) {
-            NSString *fail_reason = [NSString stringWithFormat:@"%@\n%@\n%@",exception.name, exception.reason, exception.description ];
-            result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:fail_reason];
-            [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
-            NSLog(@"Exception name : %@",exception.name);
-            NSLog(@"Exception Reason: %@",exception.reason);
-            NSLog(@"Exception is : %@", exception.description);
+        ipc= [[UIImagePickerController alloc] init];
+        ipc.delegate = self;
+        ipc.sourceType = UIImagePickerControllerSourceTypeSavedPhotosAlbum;
+        UIViewController *top = [UIApplication sharedApplication].keyWindow.rootViewController;
+        if(UI_USER_INTERFACE_IDIOM()==UIUserInterfaceIdiomPhone){
+            [top presentViewController:ipc animated:YES completion: nil];
+            self.callbackIdForImagePicker = command.callbackId;
+        }
+        else
+        {
+            popover=[[UIPopoverController alloc]initWithContentViewController:ipc];
+            CGRect myFrame = [top.view frame];
+            [popover presentPopoverFromRect:myFrame inView:top.view permittedArrowDirections:UIPopoverArrowDirectionAny animated:YES];
+            NSLog(@"height = %f", myFrame.size.height);
         }
     }];
+}
+
+- (NSString *)contentTypeForImageData:(NSData *)data
+{
+    uint8_t c;
+    [data getBytes:&c length:1];
+    switch (c) {
+        case 0xFF:
+            return @"image/jpeg";
+        case 0x89:
+            return @"image/png";
+        case 0x47:
+            return @"image/gif";
+    }
+    return nil;
+}
+
+#pragma mark - ImagePickerController Delegate
+
+-(void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info
+{
+    if(UI_USER_INTERFACE_IDIOM()==UIUserInterfaceIdiomPhone) {
+        [picker dismissViewControllerAnimated:YES completion:nil];
+    } else {
+        [popover dismissPopoverAnimated:YES];
+    }
+    UIImageView *ivPickedImage = [[UIImageView alloc] init];
+    ivPickedImage.image = [info objectForKey:UIImagePickerControllerOriginalImage];
+    NSURL *refURL = (NSURL *)[info valueForKey:UIImagePickerControllerReferenceURL];
+    // define the block to call when we get the asset based on the url (below)
+    ALAssetsLibraryAssetForURLResultBlock resultblock = ^(ALAsset *imageAsset)
+    {
+        ALAssetRepresentation *imageRep = [imageAsset defaultRepresentation];
+        NSString* directory = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,
+                                                                  NSUserDomainMask, YES)[0];
+        NSString *destination = [NSString stringWithFormat:@"%@/%@%@",directory,@"mservice/dest/", [imageRep filename]];
+        UIImage *img = ivPickedImage.image;
+        NSData * data = UIImagePNGRepresentation(img);
+        long imgSize = data.length;
+        NSString *extension = [self contentTypeForImageData:data];
+        [data writeToFile:destination atomically:YES];
+        NSString *values = [NSString stringWithFormat:@"{\"filePath\":\"%@\",\"fileName\":\"%@\",\"fileSize\":\"%ld\",\"fileExtension\":\"%@\"}", destination, [imageRep filename],imgSize, extension ];
+        
+        CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:values];
+        [self.commandDelegate sendPluginResult:result callbackId:self.callbackIdForImagePicker];
+        NSLog(@"properties : %@",values);
+    };
+    // get the asset library and fetch the asset based on the ref url (pass in block above)
+    ALAssetsLibrary* assetslibrary = [[ALAssetsLibrary alloc] init];
+    [assetslibrary assetForURL:refURL resultBlock:resultblock failureBlock:nil];
+}
+
+-(void)imagePickerControllerDidCancel:(UIImagePickerController *)picker
+{
+    [picker dismissViewControllerAnimated:YES completion:nil];
+}
+
+- (void)didReceiveMemoryWarning
+{
+    // Dispose of any resources that can be recreated.
+}
+
+//For App update version
+- (void)UpdateChoice:(CDVInvokedUrlCommand*)command
+{
+    [self.commandDelegate runInBackground:^{
+        @try {
+            self.callbackIdForAppUpdate = command.callbackId;
+            NSMutableDictionary * dict = [[command arguments] objectAtIndex:0];
+            NSString *message = [NSString stringWithFormat:@"Your mservice version is %@. There is an updated version  %@.%@ available. Please update.", dict[@"appVersion"], dict[@"softwareProductVersion"], dict[@"softwareProductSubVersion"]];
+            UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"New Update"
+                                                            message:message
+                                                           delegate:self
+                                                  cancelButtonTitle:@"Not Now"
+                                                  otherButtonTitles:@"Update", nil];
+            [alert show];
+        } @catch (NSException *exception) {
+            NSLog(@"Exception : %@", exception.description);
+        }
+    }];
+}
+
+- (void)UpdateConfirm:(CDVInvokedUrlCommand*)command
+{
+    [self.commandDelegate runInBackground:^{
+        @try {
+            self.callbackIdForAppUpdate = command.callbackId;
+            NSMutableDictionary * dict = [[command arguments] objectAtIndex:0];
+            NSString *message = [NSString stringWithFormat:@"Your mservice version is %@. There is an updated version  %@.%@ available. Please update.", dict[@"appVersion"], dict[@"softwareProductVersion"], dict[@"softwareProductSubVersion"]];
+            UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"New Update"
+                                                            message:message
+                                                           delegate:self
+                                                  cancelButtonTitle:nil
+                                                  otherButtonTitles:@"Update Now", nil];
+            [alert show];
+        } @catch (NSException *exception) {
+            NSLog(@"Exception : %@", exception.description);
+        }
+    }];
+}
+
+#pragma mark - Alert view delegate
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
+{
+    if(buttonIndex == [alertView cancelButtonIndex]){
+        CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+        [self.commandDelegate sendPluginResult:result callbackId:self.callbackIdForAppUpdate];
+        NSLog(@"Cancel button clicked.");
+    } else {
+        NSString *iTunesLink = @"https://itunes.apple.com/us/app/mservice/id945991789?mt=8";
+        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:iTunesLink]];
+        CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+        [self.commandDelegate sendPluginResult:result callbackId:self.callbackIdForAppUpdate];
+    }
 }
 
 @end
