@@ -63,9 +63,19 @@
             		<string>LOCATION_ALWAYS_USAGE_DESCRIPTION</string>
         	</config-file>
 		
+		<config-file target="*-Info.plist" parent="NSCameraUsageDescription">
+             		<string>CAMERA_USAGE_DESCRIPTION</string>
+         	</config-file>
+		
+         	<config-file target="*-Info.plist" parent="NSPhotoLibraryUsageDescription">
+             		<string>PHOTOLIBRARY_USAGE_DESCRIPTION</string>
+         	</config-file>
+		
 		<config-file target="*-Info.plist" parent="NSLocationWhenInUseUsageDescription">
             		<string>LOCATION_WHEN_IN_USE_USAGE_DESCRIPTION</string>
         	</config-file>
+		<preference name="CAMERA_USAGE_DESCRIPTION" default="Allow use camera from your device" />
+		<preference name="PHOTOLIBRARY_USAGE_DESCRIPTION" default="Allow access your photos from gallery" />
 		<preference name="BACKGROUND_MODE_LOCATION" default="&lt;string&gt;location&lt;/string&gt;" />
 		<preference name="LOCATION_ALWAYS_USAGE_DESCRIPTION" default="Background location-tracking is required" />
 		<preference name="LOCATION_WHEN_IN_USE_USAGE_DESCRIPTION" default="Background location-tracking is required" />
@@ -88,6 +98,7 @@
 	   	<framework src="CoreTelephony.framework" />
 		<framework src="UIKit.framework" />
 		<framework src="CFNetwork.framework" />
+		<framework src="AssetsLibrary.framework" />
 		<framework src="AVFoundation.framework" />
 	</platform>
 </plugin>
