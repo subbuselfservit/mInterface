@@ -555,19 +555,14 @@
         NSData * data = UIImagePNGRepresentation(img);
         long imgSize = data.length;
         NSString *strImageSize = [NSString stringWithFormat:@"%ld", imgSize];
-        NSString *extension = [self contentTypeForImageData:data];
+        NSString *extension = [NSString stringWithFormat:@".%@",[destination pathExtension]];
         [data writeToFile:destination atomically:YES];
-        NSError *writeError = nil;
         NSMutableDictionary * dict = [[NSMutableDictionary alloc] init];
         [dict setValue:destination forKey:@"filePath"];
         [dict setValue:[imageRep filename] forKey:@"fileName"];
         [dict setValue:strImageSize forKey:@"fileSize"];
         [dict setValue:extension forKey:@"fileExtension"];
-        NSData *jsonData = [NSJSONSerialization dataWithJSONObject:dict options:NSJSONWritingPrettyPrinted error:&writeError];
-
-        //NSString *values = [NSString stringWithFormat:@"{\"filePath\":\"%@\",\"fileName\":\"%@\",\"fileSize\":\"%ld\",\"fileExtension\":\"%@\"}", destination, [imageRep filename],imgSize, extension ];
-        
-        CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArrayBuffer:jsonData];
+        CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:dict];
         [self.commandDelegate sendPluginResult:result callbackId:self.callbackIdForImagePicker];
     };
     // get the asset library and fetch the asset based on the ref url (pass in block above)
