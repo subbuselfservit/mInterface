@@ -553,14 +553,22 @@
         NSString *destination = [NSString stringWithFormat:@"%@/%@%@",directory,@"mservice/dest/", [imageRep filename]];
         UIImage *img = ivPickedImage.image;
         NSData * data = UIImagePNGRepresentation(img);
-        long imgSize = data.length/1024/1024;
+        long imgSize = data.length;
+        NSString *strImageSize = [NSString stringWithFormat:@"%ld", imgSize];
         NSString *extension = [self contentTypeForImageData:data];
         [data writeToFile:destination atomically:YES];
-        NSString *values = [NSString stringWithFormat:@"{\"filePath\":\"%@\",\"fileName\":\"%@\",\"fileSize\":\"%ld\",\"fileExtension\":\"%@\"}", destination, [imageRep filename],imgSize, extension ];
+        NSError *writeError = nil;
+        NSMutableDictionary * dict = [[NSMutableDictionary alloc] init];
+        [dict setValue:destination forKey:@"filePath"];
+        [dict setValue:[imageRep filename] forKey:@"fileName"];
+        [dict setValue:strImageSize forKey:@"fileSize"];
+        [dict setValue:extension forKey:@"fileExtension"];
+        NSData *jsonData = [NSJSONSerialization dataWithJSONObject:dict options:NSJSONWritingPrettyPrinted error:&writeError];
+
+        //NSString *values = [NSString stringWithFormat:@"{\"filePath\":\"%@\",\"fileName\":\"%@\",\"fileSize\":\"%ld\",\"fileExtension\":\"%@\"}", destination, [imageRep filename],imgSize, extension ];
         
-        CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:values];
+        CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArrayBuffer:jsonData];
         [self.commandDelegate sendPluginResult:result callbackId:self.callbackIdForImagePicker];
-        NSLog(@"properties : %@",values);
     };
     // get the asset library and fetch the asset based on the ref url (pass in block above)
     NSLog(@"refURL : %@", refURL);
