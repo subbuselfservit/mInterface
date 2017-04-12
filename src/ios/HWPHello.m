@@ -563,6 +563,7 @@
         NSLog(@"properties : %@",values);
     };
     // get the asset library and fetch the asset based on the ref url (pass in block above)
+    NSLog(@"refURL : %@", refURL);
     ALAssetsLibrary* assetslibrary = [[ALAssetsLibrary alloc] init];
     [assetslibrary assetForURL:refURL resultBlock:resultblock failureBlock:nil];
 }
@@ -577,6 +578,24 @@
     // Dispose of any resources that can be recreated.
 }
 
+//file copying example using URL
+- (void)imageCopy:(CDVInvokedUrlCommand*)command
+{
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    NSURL *directoryURL = [fileManager URLForDirectory:NSDocumentDirectory inDomain:NSUserDomainMask appropriateForURL:nil create:NO error:nil];
+    NSURL *actualFileURL = [directoryURL URLByAppendingPathComponent:@"mservice/dest/IMG_0001.JPG"];
+    //NSURL *actualFileURL = refURL;
+    NSURL *copyFileURL = [directoryURL URLByAppendingPathComponent:@"mservice/src/imggggssssssss.jpg"];
+    NSLog(@"%@", copyFileURL);
+    NSError *error2;
+    if ([fileManager copyItemAtURL:actualFileURL toURL:copyFileURL error:&error2]){
+        NSLog(@"Copy Success");
+    }
+    else{
+        NSLog(@"Copy error: %@", error2);
+    }
+}
+
 //For App update version
 - (void)UpdateChoice:(CDVInvokedUrlCommand*)command
 {
@@ -585,7 +604,7 @@
             self.callbackIdForAppUpdate = command.callbackId;
             NSMutableDictionary * dict = [[command arguments] objectAtIndex:0];
             NSString *message = [NSString stringWithFormat:@"Your mservice version is %@. There is an updated version  %@.%@ available. Please update.", dict[@"appVersion"], dict[@"softwareProductVersion"], dict[@"softwareProductSubVersion"]];
-            UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"New Update"
+           UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"New Update"
                                                             message:message
                                                            delegate:self
                                                   cancelButtonTitle:@"Not Now"
