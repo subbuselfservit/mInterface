@@ -579,7 +579,12 @@
         ALAssetRepresentation *imageRep = [imageAsset defaultRepresentation];
         NSString* directory = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,
                                                                   NSUserDomainMask, YES)[0];
-        NSString *destination = [NSString stringWithFormat:@"%@/%@%@",directory,@"mservice/dest/", [imageRep filename]];
+        NSString *dest = [NSString stringWithFormat:@"%@/%@",directory,@"mservice/dest"];
+        if (![[NSFileManager defaultManager] fileExistsAtPath:dest]){
+            // Create folder if not exists
+            [[NSFileManager defaultManager] createDirectoryAtPath:dest withIntermediateDirectories:YES attributes:nil error:nil];
+        }
+        NSString *destination = [NSString stringWithFormat:@"%@/%@", dest, [imageRep filename]];
         UIImage *img = ivPickedImage.image;
         NSData * data = UIImagePNGRepresentation(img);
         long imgSize = data.length;
