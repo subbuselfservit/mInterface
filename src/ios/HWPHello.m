@@ -332,15 +332,20 @@
             NSString *srcFilePath = [NSString stringWithFormat:@"%@/%@", fromPath, dict[@"srcFile"]];
             NSString *destFilePath = [NSString stringWithFormat:@"%@/%@", toPath, dict[@"desFile"]];
             NSError *error;
-            if([[NSFileManager defaultManager] fileExistsAtPath:destFilePath])
+            if([[NSFileManager defaultManager] fileExistsAtPath:srcFilePath])
             {
-                if([[NSFileManager defaultManager] copyItemAtPath:srcFilePath toPath:destFilePath error:&error]==YES)
-                {
-                    NSLog(@"Succccessssssss");
+                if(![[NSFileManager defaultManager] fileExistsAtPath:destFilePath]){
+                    if([[NSFileManager defaultManager] copyItemAtPath:srcFilePath toPath:destFilePath error:&error]==YES)
+                    {
+                        NSLog(@"File copied..");
+                    }
                 }
+                CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+                [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+            } else {
+                CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+                [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
             }
-            CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-            [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
         } @catch (NSException *exception) {
             NSLog(@"CopyFile Exception is : %@", exception.description);
         }
