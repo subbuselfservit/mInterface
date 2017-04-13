@@ -20,7 +20,7 @@
 - (void)CheckLocation:(CDVInvokedUrlCommand*)command;
 - (void)DespatchQueue:(CDVInvokedUrlCommand*)command;
 - (void)CopyFileFromPath:(NSString *)source toDestination:(NSString *)destination;
-- (void)copyFile:(CDVInvokedUrlCommand*)command;
+- (void)CopyFile:(CDVInvokedUrlCommand*)command;
 - (void)FileChooser:(CDVInvokedUrlCommand*)command;
 - (NSString *)contentTypeForImageData:(NSData *)data;
 - (void)UpdateChoice:(CDVInvokedUrlCommand*)command;
