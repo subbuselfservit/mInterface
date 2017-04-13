@@ -315,7 +315,7 @@
     }];
 }
 
-- (void)copyFile:(CDVInvokedUrlCommand*)command
+- (void)CopyFile:(CDVInvokedUrlCommand*)command
 {
     [self.commandDelegate runInBackground:^{
         CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
