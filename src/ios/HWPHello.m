@@ -441,11 +441,11 @@
                                 [body appendData:[NSData dataWithData:imageData]];
                             [body appendData:[[NSString stringWithFormat:@"\r\n--%@--\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
                             
-                            [body appendData:[[NSString stringWithFormat:@"--%@\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
+                            /*[body appendData:[[NSString stringWithFormat:@"--%@\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
                             [body appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"name_of_the_key\"\r\n\r\n"] dataUsingEncoding:NSUTF8StringEncoding]];
                             //Key for your parameter to send
                             [body appendData:[sendFileName dataUsingEncoding:NSUTF8StringEncoding]]; //Add your parameter value here
-                            [body appendData:[[NSString stringWithFormat:@"\r\n--%@--\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
+                            [body appendData:[[NSString stringWithFormat:@"\r\n--%@--\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];*/
                             
                             // setting the body of the post to the reqeust
                             [theRequest setHTTPBody:body];
