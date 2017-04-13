@@ -318,8 +318,32 @@
 - (void)CopyFile:(CDVInvokedUrlCommand*)command
 {
     [self.commandDelegate runInBackground:^{
-        CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-        [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+        @try {
+            NSMutableDictionary * dict = [[command arguments] objectAtIndex:0];
+            NSString* directory = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,
+                                                                      NSUserDomainMask, YES)[0];
+            NSString *fromPath = [NSString stringWithFormat:@"%@/%@", directory, dict[@"srcPath"]];
+            NSString *toPath = [NSString stringWithFormat:@"%@/%@", directory, dict[@"desPath"]];
+            // Check if destination folder is exists
+            if (![[NSFileManager defaultManager] fileExistsAtPath:toPath]){
+                // Create folder if not exists
+                [[NSFileManager defaultManager] createDirectoryAtPath:toPath withIntermediateDirectories:YES attributes:nil error:nil];
+            }
+            NSString *srcFilePath = [NSString stringWithFormat:@"%@/%@", fromPath, dict[@"srcFile"]];
+            NSString *destFilePath = [NSString stringWithFormat:@"%@/%@", toPath, dict[@"desFile"]];
+            NSError *error;
+            if([[NSFileManager defaultManager] fileExistsAtPath:destFilePath])
+            {
+                if([[NSFileManager defaultManager] copyItemAtPath:srcFilePath toPath:destFilePath error:&error]==YES)
+                {
+                    NSLog(@"Succccessssssss");
+                }
+            }
+            CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+            [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+        } @catch (NSException *exception) {
+            NSLog(@"CopyFile Exception is : %@", exception.description);
+        }
     }];
 }
 
