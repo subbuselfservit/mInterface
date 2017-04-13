@@ -555,7 +555,7 @@
         NSData * data = UIImagePNGRepresentation(img);
         long imgSize = data.length;
         NSString *strImageSize = [NSString stringWithFormat:@"%ld", imgSize];
-        NSString *extension = [NSString stringWithFormat:@".%@",[destination pathExtension]];
+        NSString *extension = [[NSString stringWithFormat:@".%@",[destination pathExtension]] lowercaseString];
         [data writeToFile:destination atomically:YES];
         NSMutableDictionary * dict = [[NSMutableDictionary alloc] init];
         [dict setValue:destination forKey:@"filePath"];
