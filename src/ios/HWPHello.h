@@ -13,19 +13,17 @@
     UIPopoverController *popover;
 }
 - (void)StartService:(CDVInvokedUrlCommand*)command;
-- (void)SendLocation:(CDVInvokedUrlCommand*)command;
+- (void)SendLocation;
 - (void)GetLocation:(CDVInvokedUrlCommand*)command;
-- (void)timeReader:(CDVInvokedUrlCommand*)command;
-- (void)CheckSumIndicatorResult:(CDVInvokedUrlCommand*)command;
+- (void)timeReader;
+- (void)CheckSumIndicatorResult;
 - (void)CheckLocation:(CDVInvokedUrlCommand*)command;
-- (void)DespatchQueue:(CDVInvokedUrlCommand*)command;
-- (void)CopyFileFromPath:(NSString *)source toDestination:(NSString *)destination;
+- (void)DespatchQueue;
 - (void)CopyFile:(CDVInvokedUrlCommand*)command;
 - (void)FileChooser:(CDVInvokedUrlCommand*)command;
 - (NSString *)contentTypeForImageData:(NSData *)data;
 - (void)UpdateChoice:(CDVInvokedUrlCommand*)command;
 - (void)UpdateConfirm:(CDVInvokedUrlCommand*)command;
-- (void)imageCopy:(CDVInvokedUrlCommand*)command;
 @property (strong, nonatomic) CLLocationManager * locationManager;
 @property (strong, nonatomic) NSMutableArray * coordinatesArray;
 @property (weak, nonatomic) IBOutlet UIButton *btnGallery;
