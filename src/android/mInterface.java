@@ -55,7 +55,9 @@ public class mInterface extends CordovaPlugin {
 		} else if (action.equals("CopyFile")) {
 			arguments = args;
 			new mInterfaceUtil().copyFile(callbackContext, arguments);
-		}else if(action.equals("RefreshTimeProfile")) {
+		}else if(action.equals("GetNewDate")){
+			new mInterfaceUtil().getNewDate(callbackContext);
+		} else if(action.equals("RefreshTimeProfile")) {
 			JSONObject timeObj = args.getJSONObject(0);
 			String date,hour,minute;
 			date = timeObj.optString("serverDate").toString();
