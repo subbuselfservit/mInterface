@@ -358,7 +358,7 @@
        @try {
             NSString *docdir = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
             NSString *queueFilePath = [NSString stringWithFormat:@"%@/mservice/database/queue_mgr.txt", docdir];
-           NSLog(@"queue path : %@", queueFilePath);
+            NSLog(@"queue path : %@", queueFilePath);
             NSString *contents =[NSString stringWithContentsOfFile:queueFilePath encoding:NSUTF8StringEncoding error:nil];
             NSArray *mySplit = [contents componentsSeparatedByString:@"\n"];
             NSString *firstLineData = [mySplit objectAtIndex:0];
@@ -392,26 +392,30 @@
                     NSData *responseData = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&responseError];
                     NSString *responseString = [[NSString alloc] initWithData:responseData encoding:NSUTF8StringEncoding];
                     NSFileManager *filemanager = [NSFileManager defaultManager];
+                    /*NSData *fileData = [[NSData alloc] init];
+                    //check if file is not exists
+                    if([filemanager fileExistsAtPath:backupFilePath] == YES){
+                        NSLog(@"backupFilePath File Exsists");
+                    } else {
+                        //create if file is not exsits
+                        [fileData writeToFile:backupFilePath atomically:true];
+                    }*/
                     //check if file is not exists
                     if([filemanager fileExistsAtPath:backupFilePath] == YES){
                         //Read backp + keyValue file and convert it to a JSON object
                         NSString *backupDataObj =[NSString stringWithContentsOfFile:backupFilePath encoding:NSUTF8StringEncoding error:nil];
-                        NSData *dataBackupDataObj = [backupDataObj dataUsingEncoding:NSUTF8StringEncoding];
-                        NSMutableDictionary *dictBackupDataObj = [NSJSONSerialization JSONObjectWithData:dataBackupDataObj options:NSJSONReadingMutableContainers error:&jsonError];
-                        NSData *jsonData = [NSJSONSerialization dataWithJSONObject:dictBackupDataObj options:NSJSONWritingPrettyPrinted error:nil];
-                        NSMutableDictionary *dictBackupDataObj111 = [NSJSONSerialization JSONObjectWithData:jsonData options:NSJSONReadingMutableContainers error:&jsonError];
-                        bckpDataFullContent = dictBackupDataObj111;
+                        bckpDataFullContent = [NSJSONSerialization JSONObjectWithData:[backupDataObj dataUsingEncoding:NSUTF8StringEncoding] options:0 error:nil];
+                       // stringToWrite = [NSString stringWithFormat:@"%@", bckpDataFullContent];
                     } else {
                         //make empty JSON
-                        NSMutableDictionary * blankJSON = [[NSMutableDictionary alloc] init];
-                        NSData *jsonData = [NSJSONSerialization dataWithJSONObject:blankJSON options:NSJSONWritingPrettyPrinted error:nil];
-                        NSMutableDictionary *dictBackupDataObj111 = [NSJSONSerialization JSONObjectWithData:jsonData options:NSJSONReadingMutableContainers error:&jsonError];
-                        bckpDataFullContent = dictBackupDataObj111;
+                        bckpDataFullContent = [[NSMutableDictionary alloc] init];
+                       // stringToWrite = [NSString stringWithFormat:@"%@", bckpDataFullContent];
                     }
                     //write response to backup file where subkey matches in queue mngr file.
-                    bckpDataFullContent[subKeyValue] = responseString;
-                    NSData *fileContents = [NSJSONSerialization dataWithJSONObject:bckpDataFullContent options:NSJSONWritingPrettyPrinted error:nil];
-                    [fileContents writeToFile:backupFilePath atomically:true];
+                    //bckpDataFullContent[subKeyValue] = responseString;
+                    [bckpDataFullContent setValue:responseString forKey:subKeyValue];
+                    NSData *bbbbb = [NSJSONSerialization dataWithJSONObject:bckpDataFullContent options:NSJSONWritingPrettyPrinted error:nil];
+                    [bbbbb writeToFile:backupFilePath atomically:true];
                     // generates an autoreleased NSURLConnection
                     [NSURLConnection connectionWithRequest:request delegate:self];
                 } else {
@@ -448,12 +452,6 @@
                             if (imageData)
                                 [body appendData:[NSData dataWithData:imageData]];
                             [body appendData:[[NSString stringWithFormat:@"\r\n--%@--\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
-                            
-                            /*[body appendData:[[NSString stringWithFormat:@"--%@\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
-                            [body appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"name_of_the_key\"\r\n\r\n"] dataUsingEncoding:NSUTF8StringEncoding]];
-                            //Key for your parameter to send
-                            [body appendData:[sendFileName dataUsingEncoding:NSUTF8StringEncoding]]; //Add your parameter value here
-                            [body appendData:[[NSString stringWithFormat:@"\r\n--%@--\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];*/
                             
                             // setting the body of the post to the reqeust
                             [theRequest setHTTPBody:body];
