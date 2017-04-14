@@ -67,7 +67,7 @@ public class mInterfaceService extends Service {
 				}
 			}
 		};
-		setQueueInterval.schedule(setQueueIntervalObj, 0, 1000);
+		setQueueInterval.schedule(setQueueIntervalObj, 1000, 1000);
 
 		// **** TimeReader Interval Timer ***** //
 		setTimerIntervel = new Timer();
@@ -80,7 +80,7 @@ public class mInterfaceService extends Service {
 				}
 			}
 		};
-		setTimerIntervel.schedule(setTimerIntervelObj, 0, 60000);
+		setTimerIntervel.schedule(setTimerIntervelObj, 60000, 60000);
 
 		// *** CheckSum value Indicator Timer *** //
 		setChecksumTimerInterval = new Timer();
@@ -95,7 +95,7 @@ public class mInterfaceService extends Service {
 				}
 			}
 		};
-		setChecksumTimerInterval.schedule(setChecksumTimerIntervalObj, 0, 180000);
+		setChecksumTimerInterval.schedule(setChecksumTimerIntervalObj, 180000, 180000);
 		LocationManager locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
 		LocationListener locationListener = new MyLocationListener(locationManager);
 		locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 200, locationListener);
@@ -393,7 +393,6 @@ public class mInterfaceService extends Service {
 					keyValue,
 					subKeyValue,
 					requesturl = "",
-					errorLogData = "",
 					receiveData = "";
 			StringBuilder queueData,
 					serverResponseObj,
@@ -403,8 +402,6 @@ public class mInterfaceService extends Service {
 			File responseFileName,
 					backUpFilePath,
 					appDirectory,
-					errorLogDirectory,
-					errorLogFilename,
 					baseDirectory = Environment.getExternalStorageDirectory();
 			FileInputStream fileInputStream;
 			int bytesRead,
@@ -421,8 +418,7 @@ public class mInterfaceService extends Service {
 			URL requestPath;
 			HttpURLConnection urlConObj;
 			OutputStreamWriter oStreamObj;
-			FileWriter fileWriterObj,
-					errorFileWriterObj;
+			FileWriter fileWriterObj;
 
 			try {
 				/* FETCH CURRENT REQUEST FROM QUEUE MANAGER */
@@ -621,23 +617,6 @@ public class mInterfaceService extends Service {
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
-				/*try {
-					errorLogData += "Time:" + new SimpleDateFormat("HH:mm:ss").format(new Date()) + "\n";
-					errorLogData += "url:" + requesturl + "\n";
-					errorLogData += "data:" + e.getMessage() + "\n";
-					errorLogData += "------------------\n";
-					errorLogDirectory = new File(baseDirectory.getAbsolutePath() + "/mservice/database/Log");
-					errorLogFilename = new File(errorLogDirectory, new SimpleDateFormat("yyyyMMdd").format(new Date()) + ".txt");
-					if (!errorLogDirectory.exists()) {
-						errorLogDirectory.mkdirs();
-					}
-					errorFileWriterObj = new FileWriter(errorLogFilename, true);
-					errorFileWriterObj.write(errorLogData);
-					errorFileWriterObj.flush();
-					errorFileWriterObj.close();
-				} catch (Exception ex) {
-					ex.printStackTrace();
-				}*/
 			}
 			return null;
 		}
