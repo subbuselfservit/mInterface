@@ -189,4 +189,31 @@ public class mInterfaceUtil {
 			return "false";
 		}
 	}
+	public void getNewDate(CallbackContext callbackContext){
+		String currentLine;
+		StringBuilder timeObj= new StringBuilder();
+		try {
+			Date mobileDate = new Date();
+			File baseDirectory = Environment.getExternalStorageDirectory();
+			BufferedReader readerObj = new BufferedReader(new FileReader(new File(baseDirectory, "mservice/time_profile.txt")));
+			while ((currentLine = readerObj.readLine()) != null) {
+				timeObj.append(currentLine);
+			}
+			readerObj.close();
+			JSONObject serverDateObj = new JSONObject(timeObj.toString());
+			String serverTimeObj = serverDateObj.optString("serverDate").toString();
+			SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy,MM,dd,HH,mm,ss");
+			Date serverDate = simpleDateFormat.parse(serverTimeObj);
+			long timeDiff = mobileDate.getTime()-serverDate.getTime();
+			if(timeDiff >0){
+				serverDate.setTime(serverDate.getTime()+timeDiff);
+			}
+			SimpleDateFormat simpleDateFormat1 = new SimpleDateFormat("yyyy,MM,dd,HH,mm,ss");
+			String serverDate1 = simpleDateFormat1.format(serverDate);
+			callbackContext.success(serverDate1);
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+
+	}
 }
