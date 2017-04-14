@@ -45,22 +45,22 @@
         
         [NSTimer scheduledTimerWithTimeInterval:30.0
                                          target:self
-                                       selector:@selector(SendLocation:)
+                                       selector:@selector(SendLocation)
                                        userInfo:nil
                                         repeats:YES];
         [NSTimer scheduledTimerWithTimeInterval:60.0
                                          target:self
-                                       selector:@selector(timeReader:)
+                                       selector:@selector(timeReader)
                                        userInfo:nil
                                         repeats:YES];
         [NSTimer scheduledTimerWithTimeInterval:1.0
                                          target:self
-                                       selector:@selector(DespatchQueue:)
+                                       selector:@selector(DespatchQueue)
                                        userInfo:nil
                                         repeats:YES];
         [NSTimer scheduledTimerWithTimeInterval:180.0
                                          target:self
-                                       selector:@selector(CheckSumIndicatorResult:)
+                                       selector:@selector(CheckSumIndicatorResult)
                                        userInfo:nil
                                         repeats:YES];
         CDVPluginResult *result = nil;
@@ -71,7 +71,7 @@
     }
 }
 
-- (void)SendLocation:(CDVInvokedUrlCommand*)command
+- (void)SendLocation
 {
     [self.commandDelegate runInBackground:^{
         @try {
@@ -197,7 +197,7 @@
     }];
 }
 
-- (void)timeReader:(CDVInvokedUrlCommand*)command
+- (void)timeReader
 {
     [self.commandDelegate runInBackground:^{
         @try {
@@ -222,7 +222,7 @@
     }];
 }
 
-- (void)CheckSumIndicatorResult:(CDVInvokedUrlCommand*)command
+- (void)CheckSumIndicatorResult
 {
     [self.commandDelegate runInBackground:^{
         @try
@@ -352,28 +352,7 @@
     }];
 }
 
-- (void)CopyFileFromPath:(NSString *)source toDestination:(NSString *)destination
-{
-    @try
-    {
-        NSString* directory = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,
-                                                              NSUserDomainMask, YES)[0];
-        source = [NSString stringWithFormat:@"%@/%@",directory,source];
-        destination = [NSString stringWithFormat:@"%@/%@",directory,destination];
-        NSError *error;
-        if([[NSFileManager defaultManager] fileExistsAtPath:source])
-        {
-            if([[NSFileManager defaultManager] copyItemAtPath:source toPath:destination error:&error]==YES)
-            {
-                NSLog(@"Succccessssssss");
-            }
-        }
-    } @catch (NSException *exception) {
-        NSLog(@"Exception is : %@", exception.description);
-    }
-}
-
-- (void)DespatchQueue:(CDVInvokedUrlCommand*)command
+- (void)DespatchQueue
 {
     [self.commandDelegate runInBackground:^{
        @try {
@@ -613,24 +592,6 @@
 - (void)didReceiveMemoryWarning
 {
     // Dispose of any resources that can be recreated.
-}
-
-//file copying example using URL
-- (void)imageCopy:(CDVInvokedUrlCommand*)command
-{
-    NSFileManager *fileManager = [NSFileManager defaultManager];
-    NSURL *directoryURL = [fileManager URLForDirectory:NSDocumentDirectory inDomain:NSUserDomainMask appropriateForURL:nil create:NO error:nil];
-    NSURL *actualFileURL = [directoryURL URLByAppendingPathComponent:@"mservice/dest/IMG_0001.JPG"];
-    //NSURL *actualFileURL = refURL;
-    NSURL *copyFileURL = [directoryURL URLByAppendingPathComponent:@"mservice/src/imggggssssssss.jpg"];
-    NSLog(@"%@", copyFileURL);
-    NSError *error2;
-    if ([fileManager copyItemAtURL:actualFileURL toURL:copyFileURL error:&error2]){
-        NSLog(@"Copy Success");
-    }
-    else{
-        NSLog(@"Copy error: %@", error2);
-    }
 }
 
 //For App update version
