@@ -377,7 +377,7 @@
                 NSString *sendFileName = dict[@"filename"];
                 NSString *method = dict[@"method"];
                 NSString *keyValue = dict[@"key"];
-                NSString *subKeyValue = dict[@"subkey"];
+                //NSString *subKeyValue = dict[@"subkey"];
                 if([method isEqualToString:@"read"]){
                     NSString *backupFilePath = [NSString stringWithFormat:@"%@/mservice/database/bckp_%@.txt",docdir, keyValue];
                     //send data to server
@@ -392,28 +392,18 @@
                     NSData *responseData = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&responseError];
                     NSString *responseString = [[NSString alloc] initWithData:responseData encoding:NSUTF8StringEncoding];
                     NSFileManager *filemanager = [NSFileManager defaultManager];
-                    /*NSData *fileData = [[NSData alloc] init];
-                    //check if file is not exists
-                    if([filemanager fileExistsAtPath:backupFilePath] == YES){
-                        NSLog(@"backupFilePath File Exsists");
-                    } else {
-                        //create if file is not exsits
-                        [fileData writeToFile:backupFilePath atomically:true];
-                    }*/
                     //check if file is not exists
                     if([filemanager fileExistsAtPath:backupFilePath] == YES){
                         //Read backp + keyValue file and convert it to a JSON object
                         NSString *backupDataObj =[NSString stringWithContentsOfFile:backupFilePath encoding:NSUTF8StringEncoding error:nil];
-                        bckpDataFullContent = [NSJSONSerialization JSONObjectWithData:[backupDataObj dataUsingEncoding:NSUTF8StringEncoding] options:0 error:nil];
-                       // stringToWrite = [NSString stringWithFormat:@"%@", bckpDataFullContent];
+                        bckpDataFullContent = [NSJSONSerialization JSONObjectWithData:[backupDataObj dataUsingEncoding:NSUTF8StringEncoding] options:NSJSONReadingMutableContainers error:&jsonError];
                     } else {
                         //make empty JSON
                         bckpDataFullContent = [[NSMutableDictionary alloc] init];
-                       // stringToWrite = [NSString stringWithFormat:@"%@", bckpDataFullContent];
                     }
                     //write response to backup file where subkey matches in queue mngr file.
                     //bckpDataFullContent[subKeyValue] = responseString;
-                    [bckpDataFullContent setValue:responseString forKey:subKeyValue];
+                    [bckpDataFullContent setValue:responseString forKey:dict[@"subkey"]];
                     NSData *bbbbb = [NSJSONSerialization dataWithJSONObject:bckpDataFullContent options:NSJSONWritingPrettyPrinted error:nil];
                     [bbbbb writeToFile:backupFilePath atomically:true];
                     // generates an autoreleased NSURLConnection
