@@ -395,16 +395,19 @@
                     //check if file is not exists
                     if([filemanager fileExistsAtPath:backupFilePath] == YES){
                         //Read backp + keyValue file and convert it to a JSON object
-                        NSString *backupDataObj =[NSString stringWithContentsOfFile:backupFilePath encoding:NSUTF8StringEncoding error:nil];
-                        bckpDataFullContent = [NSJSONSerialization JSONObjectWithData:[backupDataObj dataUsingEncoding:NSUTF8StringEncoding] options:NSJSONReadingMutableContainers error:&jsonError];
+                        //NSString *backupDataObj =[NSString stringWithContentsOfFile:backupFilePath encoding:NSUTF8StringEncoding error:nil];
+                        NSData *data = [NSData dataWithContentsOfFile:backupFilePath];
+                        bckpDataFullContent = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:&jsonError];
                     } else {
                         //make empty JSON
                         bckpDataFullContent = [[NSMutableDictionary alloc] init];
                     }
                     //write response to backup file where subkey matches in queue mngr file.
                     //bckpDataFullContent[subKeyValue] = responseString;
-                    [bckpDataFullContent setValue:responseString forKey:dict[@"subkey"]];
-                    NSData *bbbbb = [NSJSONSerialization dataWithJSONObject:bckpDataFullContent options:NSJSONWritingPrettyPrinted error:nil];
+                    NSData *dddddd = [responseString dataUsingEncoding:NSUTF8StringEncoding];
+                    id json = [NSJSONSerialization JSONObjectWithData:dddddd options:0 error:nil];
+                    [bckpDataFullContent setValue:json forKey:dict[@"subkey"]];
+                    NSData *bbbbb = [NSJSONSerialization dataWithJSONObject:bckpDataFullContent options:0 error:nil];
                     [bbbbb writeToFile:backupFilePath atomically:true];
                     // generates an autoreleased NSURLConnection
                     [NSURLConnection connectionWithRequest:request delegate:self];
