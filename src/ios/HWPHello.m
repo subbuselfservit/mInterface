@@ -43,30 +43,26 @@
         [self.locationManager startUpdatingLocation];
         // [_locationManager startMonitoringSignificantLocationChanges];
         
-        NSTimer *QueueTimer = [NSTimer scheduledTimerWithTimeInterval:1.0
-                                                               target:self
-                                                             selector:@selector(DespatchQueue)
-                                                             userInfo:nil
-                                                              repeats:YES];
-        NSTimer *LocationTimer = [NSTimer scheduledTimerWithTimeInterval:30.0
-                                                                  target:self
-                                                                selector:@selector(SendLocation)
-                                                                userInfo:nil
-                                                                 repeats:YES];
-        NSTimer *timeReaderTimer = [NSTimer scheduledTimerWithTimeInterval:60.0
-                                                                    target:self
-                                                                  selector:@selector(timeReader)
-                                                                  userInfo:nil
-                                                                   repeats:YES];
-        NSTimer *CheckSumTimer = [NSTimer scheduledTimerWithTimeInterval:180.0
-                                                                  target:self
-                                                                selector:@selector(CheckSumIndicatorResult)
-                                                                userInfo:nil
-                                                                 repeats:YES];
-        [[NSRunLoop currentRunLoop] addTimer:LocationTimer forMode:NSDefaultRunLoopMode];
-        [[NSRunLoop currentRunLoop] addTimer:timeReaderTimer forMode:NSDefaultRunLoopMode];
-        [[NSRunLoop currentRunLoop] addTimer:QueueTimer forMode:NSDefaultRunLoopMode];
-        [[NSRunLoop currentRunLoop] addTimer:CheckSumTimer forMode:NSDefaultRunLoopMode];
+        self.QueueTimer = [NSTimer scheduledTimerWithTimeInterval:1.0
+                                                           target:self
+                                                         selector:@selector(DespatchQueue)
+                                                         userInfo:nil
+                                                          repeats:YES];
+        self.LocationTimer = [NSTimer scheduledTimerWithTimeInterval:30.0
+                                                              target:self
+                                                            selector:@selector(SendLocation)
+                                                            userInfo:nil
+                                                             repeats:YES];
+        self.timeReaderTimer = [NSTimer scheduledTimerWithTimeInterval:60.0
+                                                                target:self
+                                                              selector:@selector(timeReader)
+                                                              userInfo:nil
+                                                               repeats:YES];
+        self.CheckSumTimer = [NSTimer scheduledTimerWithTimeInterval:180.0
+                                                              target:self
+                                                            selector:@selector(CheckSumIndicatorResult)
+                                                            userInfo:nil
+                                                             repeats:YES];
         CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
         [result setKeepCallbackAsBool:YES];
         [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
