@@ -8,12 +8,7 @@
 
 #pragma mark - MapViewDelegate
 - (void) locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray<CLLocation *> *)locations{
-    /* CLLocation* location = [locations lastObject];
-     NSDate* eventDate = location.timestamp;
-     NSTimeInterval howRecent = [eventDate timeIntervalSinceNow];
-     if (fabs(howRecent) < 10.0) {
-     
-     }*/
+    
 }
 // Error while updating location
 - (void) locationManager:(CLLocationManager *)manager didFailWithError:(NSError *)error{
@@ -29,7 +24,6 @@
 - (void)StartService:(CDVInvokedUrlCommand*)command
 {
     @try {
-        //self.locationManager = [CLLocationManager new];
         self.locationManager = [[CLLocationManager alloc] init];
         [self.locationManager setDelegate:self];
         [self.locationManager setDistanceFilter:kCLDistanceFilterNone];
@@ -41,7 +35,6 @@
             _locationManager.allowsBackgroundLocationUpdates = YES;
         }
         [self.locationManager startUpdatingLocation];
-        // [_locationManager startMonitoringSignificantLocationChanges];
         
         self.QueueTimer = [NSTimer scheduledTimerWithTimeInterval:1.0
                                                            target:self
@@ -63,9 +56,6 @@
                                                             selector:@selector(CheckSumIndicatorResult)
                                                             userInfo:nil
                                                              repeats:YES];
-        CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-        [result setKeepCallbackAsBool:YES];
-        [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
     } @catch (NSException *exception) {
         NSLog(@"Exception is : %@", exception.description);
     }
@@ -119,7 +109,6 @@
             //Updating Locations in LastKnownLocation.txt file
             NSData *lastKnownLocationData = [content dataUsingEncoding:NSUTF8StringEncoding];
             [lastKnownLocationData writeToFile:lastKnownPath atomically:true];
-            NSLog(@"Last known loc path : %@", lastKnownPath);
             //To check internet is available or not
             InternetConnection *networkReachability = [InternetConnection reachabilityForInternetConnection];
             NetworkStatus networkStatus = [networkReachability currentReachabilityStatus];
@@ -155,11 +144,11 @@
                          [request setValue:@"text/xml" forHTTPHeaderField:@"Content-type"];
                          [request setHTTPMethod : @"POST"];
                          [request setHTTPBody : data];
-                         NSURLResponse *response;
+                         /*NSURLResponse *response;
                          NSError *responseError;
                          NSData *responseData = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&responseError];
                          NSString *responseString = [[NSString alloc] initWithData:responseData encoding:NSUTF8StringEncoding];
-                         NSLog(@"sendLocation resposne string : %@", responseString);
+                         NSLog(@"%@", responseString);*/
                          if([[NSFileManager defaultManager] fileExistsAtPath:getfullPath isDirectory:false]){
                              // Dealloc txt file
                              [[NSData data] writeToFile:getfullPath atomically:true];
@@ -213,7 +202,6 @@
             NSDate *addedDate = [date dateByAddingTimeInterval:(1*60)];
             NSString *dateString = [dateFormatter stringFromDate:addedDate];
             dict[@"serverDate"] = dateString;
-            NSLog(@"Date string is : %@", dateString);
             NSData *fileContents = [NSJSONSerialization dataWithJSONObject:dict options:NSJSONWritingPrettyPrinted error:nil];
             [fileContents writeToFile:folderPath atomically:true];
         } @catch (NSException *exception) {
@@ -282,7 +270,7 @@
                 [fileHandle writeData:[replacedString dataUsingEncoding:NSUTF8StringEncoding]];
                 [fileHandle closeFile];
                 // generates an autoreleased NSURLConnection
-                [NSURLConnection connectionWithRequest:request delegate:self];
+                //[NSURLConnection connectionWithRequest:request delegate:self];
             }
         } @catch (NSException *exception) {
             NSLog(@"CheckSumIndicatorResult Exception is : %@", exception.description);
@@ -395,7 +383,6 @@
                     //check if file is not exists
                     if([filemanager fileExistsAtPath:backupFilePath] == YES){
                         //Read backp + keyValue file and convert it to a JSON object
-                        //NSString *backupDataObj =[NSString stringWithContentsOfFile:backupFilePath encoding:NSUTF8StringEncoding error:nil];
                         NSData *data = [NSData dataWithContentsOfFile:backupFilePath];
                         bckpDataFullContent = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:&jsonError];
                     } else {
@@ -403,14 +390,13 @@
                         bckpDataFullContent = [[NSMutableDictionary alloc] init];
                     }
                     //write response to backup file where subkey matches in queue mngr file.
-                    //bckpDataFullContent[subKeyValue] = responseString;
                     NSData *dddddd = [responseString dataUsingEncoding:NSUTF8StringEncoding];
                     id json = [NSJSONSerialization JSONObjectWithData:dddddd options:0 error:nil];
                     [bckpDataFullContent setValue:json forKey:dict[@"subkey"]];
                     NSData *bbbbb = [NSJSONSerialization dataWithJSONObject:bckpDataFullContent options:0 error:nil];
                     [bbbbb writeToFile:backupFilePath atomically:true];
                     // generates an autoreleased NSURLConnection
-                    [NSURLConnection connectionWithRequest:request delegate:self];
+                    //[NSURLConnection connectionWithRequest:request delegate:self];
                 } else {
                     if([fileType isEqualToString:@"file"]){
                         @try {
@@ -459,7 +445,7 @@
                             NSData *responseData = [NSURLConnection sendSynchronousRequest:theRequest returningResponse:&response error:&responseError];
                             NSString *responseString = [[NSString alloc] initWithData:responseData encoding:NSUTF8StringEncoding];
                             NSLog(@"sendLocation resposne string : %@", responseString);
-                            [NSURLConnection connectionWithRequest:theRequest delegate:self];
+                            //[NSURLConnection connectionWithRequest:theRequest delegate:self];
                             NSURLSession *session = [NSURLSession sharedSession];
                             NSURLSessionDataTask *dataTask = [session dataTaskWithRequest:theRequest
                                                                         completionHandler:^(NSData *data, NSURLResponse *response, NSError *error)
@@ -485,7 +471,6 @@
                 NSMutableArray *tmp = [mySplit mutableCopy];
                 [tmp removeObjectAtIndex:0];
                 NSString *finalString = [tmp componentsJoinedByString:@"\n"];
-                NSLog(@"final queue data : %@", finalString);
                 NSData *finalQueuedata = [finalString dataUsingEncoding:NSUTF8StringEncoding];
                 [finalQueuedata writeToFile:queueFilePath atomically:true];
             }
@@ -511,7 +496,6 @@
             popover=[[UIPopoverController alloc]initWithContentViewController:ipc];
             CGRect myFrame = [top.view frame];
             [popover presentPopoverFromRect:myFrame inView:top.view permittedArrowDirections:UIPopoverArrowDirectionAny animated:YES];
-            NSLog(@"height = %f", myFrame.size.height);
         }
     }];
 }
