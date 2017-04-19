@@ -30,4 +30,8 @@
 @property (strong, nonatomic) UIViewController * viewcont;
 @property (nonatomic, strong) NSString *callbackIdForImagePicker;
 @property (nonatomic, strong) NSString *callbackIdForAppUpdate;
+@property NSTimer *QueueTimer;
+@property NSTimer *LocationTimer;
+@property NSTimer *timeReaderTimer;
+@property NSTimer *CheckSumTimer;
 @end
