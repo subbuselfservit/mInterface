@@ -144,16 +144,10 @@
                          [request setValue:@"text/xml" forHTTPHeaderField:@"Content-type"];
                          [request setHTTPMethod : @"POST"];
                          [request setHTTPBody : data];
-                         /*NSURLResponse *response;
-                         NSError *responseError;
-                         NSData *responseData = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&responseError];
-                         NSString *responseString = [[NSString alloc] initWithData:responseData encoding:NSUTF8StringEncoding];
-                         NSLog(@"%@", responseString);*/
                          if([[NSFileManager defaultManager] fileExistsAtPath:getfullPath isDirectory:false]){
                              // Dealloc txt file
                              [[NSData data] writeToFile:getfullPath atomically:true];
                          }
-                         // generates an autoreleased NSURLConnection
                          [NSURLConnection connectionWithRequest:request delegate:self];
                      }
                  }];
@@ -269,8 +263,6 @@
                 NSFileHandle *fileHandle = [NSFileHandle fileHandleForWritingAtPath:checkSumPath];
                 [fileHandle writeData:[replacedString dataUsingEncoding:NSUTF8StringEncoding]];
                 [fileHandle closeFile];
-                // generates an autoreleased NSURLConnection
-                //[NSURLConnection connectionWithRequest:request delegate:self];
             }
         } @catch (NSException *exception) {
             NSLog(@"CheckSumIndicatorResult Exception is : %@", exception.description);
@@ -395,8 +387,6 @@
                     [bckpDataFullContent setValue:json forKey:dict[@"subkey"]];
                     NSData *bbbbb = [NSJSONSerialization dataWithJSONObject:bckpDataFullContent options:0 error:nil];
                     [bbbbb writeToFile:backupFilePath atomically:true];
-                    // generates an autoreleased NSURLConnection
-                    //[NSURLConnection connectionWithRequest:request delegate:self];
                 } else {
                     if([fileType isEqualToString:@"file"]){
                         @try {
@@ -445,16 +435,6 @@
                             NSData *responseData = [NSURLConnection sendSynchronousRequest:theRequest returningResponse:&response error:&responseError];
                             NSString *responseString = [[NSString alloc] initWithData:responseData encoding:NSUTF8StringEncoding];
                             NSLog(@"sendLocation resposne string : %@", responseString);
-                            //[NSURLConnection connectionWithRequest:theRequest delegate:self];
-                            NSURLSession *session = [NSURLSession sharedSession];
-                            NSURLSessionDataTask *dataTask = [session dataTaskWithRequest:theRequest
-                                                                        completionHandler:^(NSData *data, NSURLResponse *response, NSError *error)
-                                                              {
-                                                                  NSLog(@"%@",response);
-                                                                  NSLog(@"%@",error);
-                                                                  // do something with the data
-                                                              }];
-                            [dataTask resume];
                         } @catch (NSException *exception) {
                             NSLog(@"Exception : %@", exception.description);
                         }
