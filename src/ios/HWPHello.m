@@ -263,10 +263,71 @@
                 NSFileHandle *fileHandle = [NSFileHandle fileHandleForWritingAtPath:checkSumPath];
                 [fileHandle writeData:[replacedString dataUsingEncoding:NSUTF8StringEncoding]];
                 [fileHandle closeFile];
+                NSString *date, *hour, *minute;
+                NSData *responseJson = [replacedString dataUsingEncoding:NSUTF8StringEncoding];
+                NSMutableDictionary * dictionary = [NSJSONSerialization JSONObjectWithData:responseJson options:NSJSONReadingMutableContainers error:&jsonError];
+                date = [NSString stringWithFormat:@"%@", dictionary[@"serverDate"]];
+                hour = [NSString stringWithFormat:@"%@", dictionary[@"serverHour"]];
+                minute = [NSString stringWithFormat:@"%@", dictionary[@"serverMinute"]];
+                [self timeValues:date hour:hour minute:minute];
             }
         } @catch (NSException *exception) {
             NSLog(@"CheckSumIndicatorResult Exception is : %@", exception.description);
         }
+    }];
+}
+
+- (void)RefreshTimeProfile:(CDVInvokedUrlCommand*)command
+{
+    [self.commandDelegate runInBackground:^{
+        NSMutableDictionary * dict = [[command arguments] objectAtIndex:0];
+        NSString *date = dict[@"serverDate"];
+        NSString *hour = dict[@"serverHour"];
+        NSString *minute = dict[@"serverMinute"];
+        [self timeValues:date hour:hour minute:minute];
+    }];
+}
+
+-(void)timeValues:(NSString *)date hour:(NSString *)hour minute:(NSString *)minute
+{
+    NSString *serverDate = [NSString stringWithFormat:@"%@,%@,%@", date, hour, minute];
+    NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+    [dateFormatter setDateFormat:@"yyyy,MM,dd,HH,mm"];
+    NSDate *getDate = [dateFormatter dateFromString:serverDate];
+    NSString *deviceDate = [dateFormatter stringFromDate:[NSDate date]];
+    NSString *finalServerDate = [dateFormatter stringFromDate:getDate];
+    NSMutableDictionary * dictionary = [[NSMutableDictionary alloc] init];
+    [dictionary setValue:finalServerDate forKey:@"serverDate"];
+    [dictionary setValue:finalServerDate forKey:@"initServerDate"];
+    [dictionary setValue:deviceDate forKey:@"initDeviceDate"];
+    NSString *docdir = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
+    NSString *time_profile = [NSString stringWithFormat:@"%@/mservice/time_profile.txt", docdir];
+    NSData *fileContents = [NSJSONSerialization dataWithJSONObject:dictionary options:0 error:nil];
+    [fileContents writeToFile:time_profile atomically:true];
+}
+
+- (void)GetNewDate:(CDVInvokedUrlCommand*)command
+{
+    [self.commandDelegate runInBackground:^{
+        NSDate *final = nil;
+        NSString *docdir = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
+        NSString *time_profile = [NSString stringWithFormat:@"%@/mservice/time_profile.txt", docdir];
+        NSData *user_data = [NSData dataWithContentsOfFile:time_profile];
+        NSError *jsonError = nil;
+        NSMutableDictionary * dict = [NSJSONSerialization JSONObjectWithData:user_data options:NSJSONReadingMutableContainers error:&jsonError];
+        NSString *serverDate = dict[@"serverDate"];
+        NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+        [dateFormatter setDateFormat:@"yyyy,MM,dd,HH,mm,ss"];
+        NSDate *deviceDate = [NSDate date];
+        NSDate *getDate = [dateFormatter dateFromString:serverDate];
+        //NSTimeInterval diff = [deviceDate timeIntervalSinceDate:getDate];
+        NSTimeInterval timeDiff = [deviceDate timeIntervalSinceReferenceDate] - [getDate timeIntervalSinceReferenceDate];
+        if(timeDiff > 0){
+            final = [getDate dateByAddingTimeInterval:timeDiff];
+        }
+        NSString *finalServerDate = [dateFormatter stringFromDate:final];
+        CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:finalServerDate];
+        [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
     }];
 }
 
