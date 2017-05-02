@@ -285,14 +285,16 @@
         NSString *hour = dict[@"serverHour"];
         NSString *minute = dict[@"serverMinute"];
         [self timeValues:date hour:hour minute:minute];
+        CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+        [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
     }];
 }
 
 -(void)timeValues:(NSString *)date hour:(NSString *)hour minute:(NSString *)minute
 {
-    NSString *serverDate = [NSString stringWithFormat:@"%@,%@,%@", date, hour, minute];
+    NSString *serverDate = [NSString stringWithFormat:@"%@,%@,%@,00", date, hour, minute];
     NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
-    [dateFormatter setDateFormat:@"yyyy,MM,dd,HH,mm"];
+    [dateFormatter setDateFormat:@"yyyy,MM,dd,HH,mm,ss"];
     NSDate *getDate = [dateFormatter dateFromString:serverDate];
     NSString *deviceDate = [dateFormatter stringFromDate:[NSDate date]];
     NSString *finalServerDate = [dateFormatter stringFromDate:getDate];
@@ -302,6 +304,7 @@
     [dictionary setValue:deviceDate forKey:@"initDeviceDate"];
     NSString *docdir = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
     NSString *time_profile = [NSString stringWithFormat:@"%@/mservice/time_profile.txt", docdir];
+    NSLog(@"time profile path : %@", time_profile);
     NSData *fileContents = [NSJSONSerialization dataWithJSONObject:dictionary options:0 error:nil];
     [fileContents writeToFile:time_profile atomically:true];
 }
