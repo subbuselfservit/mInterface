@@ -331,13 +331,56 @@
             [dateFormatter setDateFormat:@"yyyy,MM,dd,HH,mm,ss"];
             NSDate *deviceDate = [NSDate date];
             NSDate *serverDate = [dateFormatter dateFromString:serverDateString];
+            UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"time_profile"
+                                                            message:time_profile
+                                                           delegate:self
+                                                  cancelButtonTitle:@"ok"
+                                                  otherButtonTitles:nil, nil];
+            [alert show];
             NSTimeInterval timeDifference = [deviceDate timeIntervalSinceDate:serverDate];
             NSLog(@"%f", timeDifference);
             //NSTimeInterval timeDiff = [deviceDate timeIntervalSinceReferenceDate] - [getDate timeIntervalSinceReferenceDate];
+            
+            UIAlertView *alert1 = [[UIAlertView alloc] initWithTitle:@"dict"
+                                                             message:[NSString stringWithFormat:@"%@", dict]
+                                                            delegate:self
+                                                   cancelButtonTitle:@"ok"
+                                                   otherButtonTitles:nil, nil];
+            [alert1 show];
+            UIAlertView *alert2 = [[UIAlertView alloc] initWithTitle:@"serverDateString"
+                                                             message:serverDateString
+                                                            delegate:self
+                                                   cancelButtonTitle:@"ok"
+                                                   otherButtonTitles:nil, nil];
+            [alert2 show];
+            UIAlertView *alert3 = [[UIAlertView alloc] initWithTitle:@"deviceDate"
+                                                             message:[NSString stringWithFormat:@"%@", deviceDate]
+                                                            delegate:self
+                                                   cancelButtonTitle:@"ok"
+                                                   otherButtonTitles:nil, nil];
+            [alert3 show];
+            UIAlertView *alert4 = [[UIAlertView alloc] initWithTitle:@"serverDate"
+                                                             message:[NSString stringWithFormat:@"%@", serverDate]
+                                                            delegate:self
+                                                   cancelButtonTitle:@"ok"
+                                                   otherButtonTitles:nil, nil];
+            [alert4 show];
+            UIAlertView *alert5 = [[UIAlertView alloc] initWithTitle:@"timeDifference"
+                                                             message:[NSString stringWithFormat:@"%f", timeDifference]
+                                                            delegate:self
+                                                   cancelButtonTitle:@"ok"
+                                                   otherButtonTitles:nil, nil];
+            [alert5 show];
             if(timeDifference > 0){
                 serverDate = [serverDate dateByAddingTimeInterval:timeDifference];
             }
             NSString *finalServerDate = [dateFormatter stringFromDate:serverDate];
+            UIAlertView *alert6 = [[UIAlertView alloc] initWithTitle:@"finalServerDate"
+                                                             message:finalServerDate
+                                                            delegate:self
+                                                   cancelButtonTitle:@"ok"
+                                                   otherButtonTitles:nil, nil];
+            [alert6 show];
             NSLog(@"finalServerDate : %@", finalServerDate);
             CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:finalServerDate];
             [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
