@@ -321,23 +321,24 @@
 {
     @try {
         [self.commandDelegate runInBackground:^{
-            NSDate *final = nil;
             NSString *docdir = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
             NSString *time_profile = [NSString stringWithFormat:@"%@/mservice/time_profile.txt", docdir];
             NSData *user_data = [NSData dataWithContentsOfFile:time_profile];
             NSError *jsonError = nil;
             NSMutableDictionary * dict = [NSJSONSerialization JSONObjectWithData:user_data options:NSJSONReadingMutableContainers error:&jsonError];
-            NSString *serverDate = dict[@"serverDate"];
+            NSString *serverDateString = dict[@"serverDate"];
             NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
             [dateFormatter setDateFormat:@"yyyy,MM,dd,HH,mm,ss"];
             NSDate *deviceDate = [NSDate date];
-            NSDate *getDate = [dateFormatter dateFromString:serverDate];
-            NSTimeInterval diff = [deviceDate timeIntervalSinceDate:getDate];
+            NSDate *serverDate = [dateFormatter dateFromString:serverDateString];
+            NSTimeInterval timeDifference = [deviceDate timeIntervalSinceDate:serverDate];
+            NSLog(@"%f", timeDifference);
             //NSTimeInterval timeDiff = [deviceDate timeIntervalSinceReferenceDate] - [getDate timeIntervalSinceReferenceDate];
-            if(diff > 0){
-                final = [getDate dateByAddingTimeInterval:diff];
+            if(timeDifference > 0){
+                serverDate = [serverDate dateByAddingTimeInterval:timeDifference];
             }
-            NSString *finalServerDate = [dateFormatter stringFromDate:final];
+            NSString *finalServerDate = [dateFormatter stringFromDate:serverDate];
+            NSLog(@"finalServerDate : %@", finalServerDate);
             CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:finalServerDate];
             [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
         }];
