@@ -41,17 +41,17 @@
                                                          selector:@selector(DespatchQueue)
                                                          userInfo:nil
                                                           repeats:YES];
-        self.LocationTimer = [NSTimer scheduledTimerWithTimeInterval:5.0
+        self.LocationTimer = [NSTimer scheduledTimerWithTimeInterval:30.0
                                                               target:self
                                                             selector:@selector(SendLocation)
                                                             userInfo:nil
                                                              repeats:YES];
-        self.timeReaderTimer = [NSTimer scheduledTimerWithTimeInterval:10.0
+        self.timeReaderTimer = [NSTimer scheduledTimerWithTimeInterval:60.0
                                                                 target:self
                                                               selector:@selector(timeReader)
                                                               userInfo:nil
                                                                repeats:YES];
-        self.CheckSumTimer = [NSTimer scheduledTimerWithTimeInterval:10.0
+        self.CheckSumTimer = [NSTimer scheduledTimerWithTimeInterval:180.0
                                                               target:self
                                                             selector:@selector(CheckSumIndicatorResult)
                                                             userInfo:nil
