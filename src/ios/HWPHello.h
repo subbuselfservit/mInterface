@@ -26,6 +26,7 @@
 - (void)UpdateConfirm:(CDVInvokedUrlCommand*)command;
 - (void)RefreshTimeProfile:(CDVInvokedUrlCommand*)command;
 - (void)GetNewDate:(CDVInvokedUrlCommand*)command;
+- (void)KillTimers:(CDVInvokedUrlCommand*)command;
 -(void)timeValues:(NSString *)date hour:(NSString *)hour minute:(NSString *)minute;
 @property (strong, nonatomic) CLLocationManager * locationManager;
 @property (strong, nonatomic) NSMutableArray * coordinatesArray;
