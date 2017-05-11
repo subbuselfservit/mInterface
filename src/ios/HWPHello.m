@@ -225,67 +225,75 @@
     [self.commandDelegate runInBackground:^{
         @try
         {
-            //Read checksum_value.txt file
-            NSString *docdir = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
-            NSString *checkSumPath = [NSString stringWithFormat:@"%@/mservice/database/checksum_value.txt", docdir];
-            NSData *data = [NSData dataWithContentsOfFile:checkSumPath];
-            NSString *checksum_value;
-            NSString *refresh_ind;
-            NSFileManager *filemanager = [NSFileManager defaultManager];
-            //To check checksum_value.txt file is exist or not
-            if([filemanager fileExistsAtPath:checkSumPath] == YES){
-                NSError *jsonError = nil;
-                NSMutableDictionary *dict = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:&jsonError];
-                checksum_value = dict[@"checksum_value"];
-                refresh_ind = dict[@"refresh_ind"];
-            } else {
-                checksum_value = @"";
-                refresh_ind = @"";
-            }
-            //get login_profile data and send it to server
-            if([refresh_ind isEqual: @""] || [refresh_ind isEqual:@"false"]){
-                NSString *user_profile_path = [NSString stringWithFormat:@"%@/mservice/user_profile.txt", docdir];
-                NSData *user_data = [NSData dataWithContentsOfFile:user_profile_path];
-                NSError *jsonError = nil;
-                NSMutableDictionary * dict = [NSJSONSerialization JSONObjectWithData:user_data options:NSJSONReadingMutableContainers error:&jsonError];
-                NSString *user_profile_value = @"login_profile";
-                NSArray *protocol = [[dict objectForKey:user_profile_value] valueForKey:@"protocol"];
-                NSArray *domain_name = [[dict objectForKey:user_profile_value] valueForKey:@"domain_name"];
-                NSArray *portno = [[dict objectForKey:user_profile_value] valueForKey:@"portno"];
-                NSString *request_path = [NSString stringWithFormat:@"%@//%@:%@/JSONServiceEndpoint.aspx?appName=common_modules&serviceName=retrieve_listof_values_for_searchcondition&path=context/outputparam",protocol, domain_name, portno];
-                
-                NSArray *guid_val = [[dict objectForKey:user_profile_value] valueForKey:@"guid_val"];
-                NSArray *user_id = [[dict objectForKey:user_profile_value] valueForKey:@"user_id"];
-                NSArray *client_id = [[dict objectForKey:user_profile_value] valueForKey:@"client_id"];
-                NSArray *locale_id = [[dict objectForKey:user_profile_value] valueForKey:@"locale_id"];
-                NSArray *country_code = [[dict objectForKey:user_profile_value] valueForKey:@"country_code"];
-                NSArray *emp_id = [[dict objectForKey:user_profile_value] valueForKey:@"emp_id"];
-                NSString *content = [NSString stringWithFormat:@"{\"context\":{\"sessionId\":\"%@\",\"userId\":\"%@\",\"client_id\":\"%@\",\"locale_id\":\"%@\",\"country_code\":\"%@\",\"inputparam\":{\"p_inputparam_xml\":\"<inputparam><lov_code_type>VALIDATE_CHECKSUM</lov_code_type><search_field_1>%@</search_field_1><search_field_2>%@</search_field_2><search_field_3>MOBILE</search_field_3></inputparam>\"}}}",guid_val, user_id, client_id, locale_id, country_code, checksum_value, emp_id];
-                NSData *data = [content dataUsingEncoding:NSUTF8StringEncoding];
-                NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:request_path]];
-                [request setValue:@"text/json" forHTTPHeaderField:@"Content-type"];
-                [request setHTTPMethod : @"POST"];
-                [request setHTTPBody : data];
-                NSURLResponse *response;
-                NSError *responseError;
-                //send it synchronous
-                NSData *responseData = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&responseError];
-                NSString *responseString = [[NSString alloc] initWithData:responseData encoding:NSUTF8StringEncoding];
-                //Replacing resopnse from Array of object to json object
-                NSString *replacedString = responseString;
-                replacedString = [replacedString stringByReplacingOccurrencesOfString:@"[" withString:@""];
-                replacedString = [replacedString stringByReplacingOccurrencesOfString:@"]" withString:@""];
-                //Write response into checksum.txt file
-                NSFileHandle *fileHandle = [NSFileHandle fileHandleForWritingAtPath:checkSumPath];
-                [fileHandle writeData:[replacedString dataUsingEncoding:NSUTF8StringEncoding]];
-                [fileHandle closeFile];
-                NSString *date, *hour, *minute;
-                NSData *responseJson = [replacedString dataUsingEncoding:NSUTF8StringEncoding];
-                NSMutableDictionary * dictionary = [NSJSONSerialization JSONObjectWithData:responseJson options:NSJSONReadingMutableContainers error:&jsonError];
-                date = [NSString stringWithFormat:@"%@", dictionary[@"serverDate"]];
-                hour = [NSString stringWithFormat:@"%@", dictionary[@"serverHour"]];
-                minute = [NSString stringWithFormat:@"%@", dictionary[@"serverMinute"]];
-                [self timeValues:date hour:hour minute:minute];
+            //To check Internet connection
+            InternetConnection *networkReachability = [InternetConnection reachabilityForInternetConnection];
+            NetworkStatus networkStatus = [networkReachability currentReachabilityStatus];
+            if(networkStatus != NotReachable){
+                //Read checksum_value.txt file
+                NSString *docdir = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
+                NSString *checkSumPath = [NSString stringWithFormat:@"%@/mservice/database/checksum_value.txt", docdir];
+                NSLog(@"checkSum Path %@", checkSumPath);
+                NSData *data = [NSData dataWithContentsOfFile:checkSumPath];
+                NSString *checksum_value;
+                NSString *refresh_ind;
+                NSFileManager *filemanager = [NSFileManager defaultManager];
+                //To check checksum_value.txt file is exist or not
+                if([filemanager fileExistsAtPath:checkSumPath] == YES){
+                    NSError *jsonError = nil;
+                    NSMutableDictionary *dict = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:&jsonError];
+                    checksum_value = dict[@"checksum_value"];
+                    refresh_ind = dict[@"refresh_ind"];
+                } else {
+                    checksum_value = @"";
+                    refresh_ind = @"";
+                }
+                //get login_profile data and send it to server
+                if([refresh_ind isEqual: @""] || [refresh_ind isEqual:@"false"]){
+                    NSString *user_profile_path = [NSString stringWithFormat:@"%@/mservice/user_profile.txt", docdir];
+                    NSData *user_data = [NSData dataWithContentsOfFile:user_profile_path];
+                    NSError *jsonError = nil;
+                    NSMutableDictionary * dict = [NSJSONSerialization JSONObjectWithData:user_data options:NSJSONReadingMutableContainers error:&jsonError];
+                    NSString *user_profile_value = @"login_profile";
+                    NSArray *protocol = [[dict objectForKey:user_profile_value] valueForKey:@"protocol"];
+                    NSArray *domain_name = [[dict objectForKey:user_profile_value] valueForKey:@"domain_name"];
+                    NSArray *portno = [[dict objectForKey:user_profile_value] valueForKey:@"portno"];
+                    NSString *request_path = [NSString stringWithFormat:@"%@//%@:%@/JSONServiceEndpoint.aspx?appName=common_modules&serviceName=retrieve_listof_values_for_searchcondition&path=context/outputparam",protocol, domain_name, portno];
+                    
+                    NSArray *guid_val = [[dict objectForKey:user_profile_value] valueForKey:@"guid_val"];
+                    NSArray *user_id = [[dict objectForKey:user_profile_value] valueForKey:@"user_id"];
+                    NSArray *client_id = [[dict objectForKey:user_profile_value] valueForKey:@"client_id"];
+                    NSArray *locale_id = [[dict objectForKey:user_profile_value] valueForKey:@"locale_id"];
+                    NSArray *country_code = [[dict objectForKey:user_profile_value] valueForKey:@"country_code"];
+                    NSArray *emp_id = [[dict objectForKey:user_profile_value] valueForKey:@"emp_id"];
+                    NSString *content = [NSString stringWithFormat:@"{\"context\":{\"sessionId\":\"%@\",\"userId\":\"%@\",\"client_id\":\"%@\",\"locale_id\":\"%@\",\"country_code\":\"%@\",\"inputparam\":{\"p_inputparam_xml\":\"<inputparam><lov_code_type>VALIDATE_CHECKSUM</lov_code_type><search_field_1>%@</search_field_1><search_field_2>%@</search_field_2><search_field_3>MOBILE</search_field_3></inputparam>\"}}}",guid_val, user_id, client_id, locale_id, country_code, checksum_value, emp_id];
+                    NSData *data = [content dataUsingEncoding:NSUTF8StringEncoding];
+                    NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:request_path]];
+                    [request setValue:@"text/json" forHTTPHeaderField:@"Content-type"];
+                    [request setHTTPMethod : @"POST"];
+                    [request setHTTPBody : data];
+                    NSURLResponse *response;
+                    NSError *responseError;
+                    //send it synchronous
+                    NSData *responseData = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&responseError];
+                    NSString *responseString = [[NSString alloc] initWithData:responseData encoding:NSUTF8StringEncoding];
+                    //Replacing resopnse from Array of object to json object
+                    NSString *replacedString = responseString;
+                    replacedString = [replacedString stringByReplacingOccurrencesOfString:@"[" withString:@""];
+                    replacedString = [replacedString stringByReplacingOccurrencesOfString:@"]" withString:@""];
+                    //Write response into checksum.txt file
+                    NSFileHandle *fileHandle = [NSFileHandle fileHandleForWritingAtPath:checkSumPath];
+                    [fileHandle writeData:[replacedString dataUsingEncoding:NSUTF8StringEncoding]];
+                    [fileHandle closeFile];
+                    NSString *date, *hour, *minute;
+                    NSData *responseJson = [replacedString dataUsingEncoding:NSUTF8StringEncoding];
+                    NSMutableDictionary * dictionary = [NSJSONSerialization JSONObjectWithData:responseJson options:NSJSONReadingMutableContainers error:&jsonError];
+                    date = [NSString stringWithFormat:@"%@", dictionary[@"serverDate"]];
+                    hour = [NSString stringWithFormat:@"%@", dictionary[@"serverHour"]];
+                    minute = [NSString stringWithFormat:@"%@", dictionary[@"serverMinute"]];
+                    [self timeValues:date hour:hour minute:minute];
+                }
+            } else{
+                NSLog(@"There is no internet connection.");
             }
         } @catch (NSException *exception) {
             NSLog(@"CheckSumIndicatorResult Exception is : %@", exception.description);
@@ -523,11 +531,7 @@
                             
                             // set URL
                             [theRequest setURL:url];
-                            NSURLResponse *response;
-                            NSError *responseError;
-                            NSData *responseData = [NSURLConnection sendSynchronousRequest:theRequest returningResponse:&response error:&responseError];
-                            NSString *responseString = [[NSString alloc] initWithData:responseData encoding:NSUTF8StringEncoding];
-                            NSLog(@"sendLocation resposne string : %@", responseString);
+                            [NSURLConnection connectionWithRequest:theRequest delegate:self];
                         } @catch (NSException *exception) {
                             NSLog(@"Exception : %@", exception.description);
                         }
