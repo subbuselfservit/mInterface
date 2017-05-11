@@ -35,23 +35,23 @@
             _locationManager.allowsBackgroundLocationUpdates = YES;
         }
         [self.locationManager startUpdatingLocation];
-        
+        [self KillTimers];
         self.QueueTimer = [NSTimer scheduledTimerWithTimeInterval:1.0
                                                            target:self
                                                          selector:@selector(DespatchQueue)
                                                          userInfo:nil
                                                           repeats:YES];
-        self.LocationTimer = [NSTimer scheduledTimerWithTimeInterval:30.0
+        self.LocationTimer = [NSTimer scheduledTimerWithTimeInterval:5.0
                                                               target:self
                                                             selector:@selector(SendLocation)
                                                             userInfo:nil
                                                              repeats:YES];
-        self.timeReaderTimer = [NSTimer scheduledTimerWithTimeInterval:60.0
+        self.timeReaderTimer = [NSTimer scheduledTimerWithTimeInterval:10.0
                                                                 target:self
                                                               selector:@selector(timeReader)
                                                               userInfo:nil
                                                                repeats:YES];
-        self.CheckSumTimer = [NSTimer scheduledTimerWithTimeInterval:180.0
+        self.CheckSumTimer = [NSTimer scheduledTimerWithTimeInterval:10.0
                                                               target:self
                                                             selector:@selector(CheckSumIndicatorResult)
                                                             userInfo:nil
@@ -61,7 +61,7 @@
     }
 }
 
-- (void)KillTimers:(CDVInvokedUrlCommand*)command
+- (void)KillTimers
 {
     if([self.QueueTimer isValid]){
         [self.QueueTimer invalidate];
@@ -212,6 +212,7 @@
             NSDate *addedDate = [date dateByAddingTimeInterval:(1*60)];
             NSString *dateString = [dateFormatter stringFromDate:addedDate];
             dict[@"serverDate"] = dateString;
+            NSLog(@"Time from timeReader : %@", dict[@"serverDate"]);
             NSData *fileContents = [NSJSONSerialization dataWithJSONObject:dict options:NSJSONWritingPrettyPrinted error:nil];
             [fileContents writeToFile:folderPath atomically:true];
         } @catch (NSException *exception) {
@@ -374,25 +375,25 @@
 - (void)CheckLocation:(CDVInvokedUrlCommand*)command
 {
     [self.commandDelegate runInBackground:^{
-    CDVPluginResult *result = nil;
-    @try {
-        BOOL isEnabled = false;
-        if([CLLocationManager locationServicesEnabled] &&
-           [CLLocationManager authorizationStatus] != kCLAuthorizationStatusDenied)
-        {
-            isEnabled = true;
-        } else {
-            isEnabled = false;
+        CDVPluginResult *result = nil;
+        @try {
+            BOOL isEnabled = false;
+            if([CLLocationManager locationServicesEnabled] &&
+               [CLLocationManager authorizationStatus] != kCLAuthorizationStatusDenied)
+            {
+                isEnabled = true;
+            } else {
+                isEnabled = false;
+            }
+            NSString *serviceResult = [NSString stringWithFormat:@"%s", isEnabled ? "true" : "false"];
+            result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:serviceResult];
+            [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+        } @catch (NSException *exception) {
+            NSString *fail_reason = [NSString stringWithFormat:@"%@\n%@\n%@",exception.name, exception.reason, exception.description ];
+            result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:fail_reason];
+            [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+            NSLog(@"CheckLocation Exception is : %@", exception.description);
         }
-        NSString *serviceResult = [NSString stringWithFormat:@"%s", isEnabled ? "true" : "false"];
-        result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:serviceResult];
-        [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
-    } @catch (NSException *exception) {
-        NSString *fail_reason = [NSString stringWithFormat:@"%@\n%@\n%@",exception.name, exception.reason, exception.description ];
-        result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:fail_reason];
-        [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
-        NSLog(@"CheckLocation Exception is : %@", exception.description);
-    }
     }];
 }
 
@@ -436,7 +437,7 @@
 - (void)DespatchQueue
 {
     [self.commandDelegate runInBackground:^{
-       @try {
+        @try {
             NSString *docdir = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
             NSString *queueFilePath = [NSString stringWithFormat:@"%@/mservice/database/queue_mgr.txt", docdir];
             NSLog(@"queue path : %@", queueFilePath);
@@ -656,7 +657,7 @@
             self.callbackIdForAppUpdate = command.callbackId;
             NSMutableDictionary * dict = [[command arguments] objectAtIndex:0];
             NSString *message = [NSString stringWithFormat:@"Your mservice version is %@. There is an updated version  %@.%@ available. Please update.", dict[@"appVersion"], dict[@"softwareProductVersion"], dict[@"softwareProductSubVersion"]];
-           UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"New Update"
+            UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"New Update"
                                                             message:message
                                                            delegate:self
                                                   cancelButtonTitle:@"Not Now"
