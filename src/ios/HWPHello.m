@@ -61,6 +61,22 @@
     }
 }
 
+- (void)KillTimers:(CDVInvokedUrlCommand*)command
+{
+    if([self.QueueTimer isValid]){
+        [self.QueueTimer invalidate];
+    }
+    if([self.LocationTimer isValid]){
+        [self.LocationTimer invalidate];
+    }
+    if([self.timeReaderTimer isValid]){
+        [self.timeReaderTimer invalidate];
+    }
+    if([self.CheckSumTimer isValid]){
+        [self.CheckSumTimer invalidate];
+    }
+}
+
 - (void)SendLocation
 {
     [self.commandDelegate runInBackground:^{
