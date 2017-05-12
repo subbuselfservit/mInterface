@@ -282,9 +282,8 @@
                     replacedString = [replacedString stringByReplacingOccurrencesOfString:@"[" withString:@""];
                     replacedString = [replacedString stringByReplacingOccurrencesOfString:@"]" withString:@""];
                     //Write response into checksum.txt file
-                    NSFileHandle *fileHandle = [NSFileHandle fileHandleForWritingAtPath:checkSumPath];
-                    [fileHandle writeData:[replacedString dataUsingEncoding:NSUTF8StringEncoding]];
-                    [fileHandle closeFile];
+                    NSData *finalCheckSumData = [replacedString dataUsingEncoding:NSUTF8StringEncoding];
+                    [finalCheckSumData writeToFile:checkSumPath atomically:true];
                     NSString *date, *hour, *minute;
                     NSData *responseJson = [replacedString dataUsingEncoding:NSUTF8StringEncoding];
                     NSMutableDictionary * dictionary = [NSJSONSerialization JSONObjectWithData:responseJson options:NSJSONReadingMutableContainers error:&jsonError];
