@@ -506,56 +506,58 @@ public class mInterfaceService extends Service {
 						} else {
 							if (fileType.equals("file")) {
 								requestFilepath = baseDirectory + "/" + sendFileBasePath + "/" + sendFileName;
-								fileInputStream = new FileInputStream(new File(requestFilepath));
-								requestPath = new URL((requesturl + "&filename=" + sendFileName).replaceAll(" ", "%20"));
-								urlConObj = (HttpURLConnection)requestPath.openConnection();
-								urlConObj.setDoInput(true); // Allow Inputs
-								urlConObj.setDoOutput(true); // Allow Outputs
-								urlConObj.setUseCaches(false); // Don't use a Cached Copy
-								urlConObj.setRequestMethod("POST");
-								urlConObj.setRequestProperty("Connection", "Keep-Alive");
-								urlConObj.setRequestProperty("ENCTYPE", "multipart/form-data");
-								urlConObj.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
-								urlConObj.setRequestProperty("uploaded_file", sendFileName);
+								if(new File(requestFilepath).exists()){
+									fileInputStream = new FileInputStream(new File(requestFilepath));
+									requestPath = new URL((requesturl + "&filename=" + sendFileName).replaceAll(" ", "%20"));
+									urlConObj = (HttpURLConnection)requestPath.openConnection();
+									urlConObj.setDoInput(true); // Allow Inputs
+									urlConObj.setDoOutput(true); // Allow Outputs
+									urlConObj.setUseCaches(false); // Don't use a Cached Copy
+									urlConObj.setRequestMethod("POST");
+									urlConObj.setRequestProperty("Connection", "Keep-Alive");
+									urlConObj.setRequestProperty("ENCTYPE", "multipart/form-data");
+									urlConObj.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
+									urlConObj.setRequestProperty("uploaded_file", sendFileName);
 
-								dos = new DataOutputStream(urlConObj.getOutputStream());
-								dos.writeBytes(twoHyphens + boundary + lineEnd);
-								dos.writeBytes("Content-Disposition: form-data; name=\"uploaded_file\";filename=\""
-										+ sendFileName + "\"" + lineEnd);
-								dos.writeBytes(lineEnd);
-								// create a buffer of  maximum size
-								bytesAvailable = fileInputStream.available();
-
-								bufferSize = Math.min(bytesAvailable, maxBufferSize);
-								buffer = new byte[bufferSize];
-
-								// read file and write it into form...
-								bytesRead = fileInputStream.read(buffer, 0, bufferSize);
-								while (bytesRead > 0) {
-									dos.write(buffer, 0, bufferSize);
+									dos = new DataOutputStream(urlConObj.getOutputStream());
+									dos.writeBytes(twoHyphens + boundary + lineEnd);
+									dos.writeBytes("Content-Disposition: form-data; name=\"uploaded_file\";filename=\""
+											+ sendFileName + "\"" + lineEnd);
+									dos.writeBytes(lineEnd);
+									// create a buffer of  maximum size
 									bytesAvailable = fileInputStream.available();
-									bufferSize = Math.min(bytesAvailable, maxBufferSize);
-									bytesRead = fileInputStream.read(buffer, 0, bufferSize);
 
+									bufferSize = Math.min(bytesAvailable, maxBufferSize);
+									buffer = new byte[bufferSize];
+
+									// read file and write it into form...
+									bytesRead = fileInputStream.read(buffer, 0, bufferSize);
+									while (bytesRead > 0) {
+										dos.write(buffer, 0, bufferSize);
+										bytesAvailable = fileInputStream.available();
+										bufferSize = Math.min(bytesAvailable, maxBufferSize);
+										bytesRead = fileInputStream.read(buffer, 0, bufferSize);
+
+									}
+									// send multipart form data necesssary after file data...
+									dos.writeBytes(lineEnd);
+									dos.writeBytes(twoHyphens + boundary + twoHyphens + lineEnd);
+									urlConObj.getResponseCode();
+									//close the streams //
+									fileInputStream.close();
+									dos.flush();
+									dos.close();
+									serverResponseObj = new StringBuilder();
+									readerObj = new BufferedReader(new InputStreamReader(urlConObj.getInputStream()));
+									while ((currentLine = readerObj.readLine()) != null) {
+										serverResponseObj.append(currentLine + "\n");
+									}
+									readerObj.close();
+									receiveData += "Time:" + new SimpleDateFormat("HH:mm:ss").format(new Date()) + "\n";
+									receiveData += "url:" + requestPath + "\n";
+									receiveData += "------------------\n";
+									urlConObj.disconnect();
 								}
-								// send multipart form data necesssary after file data...
-								dos.writeBytes(lineEnd);
-								dos.writeBytes(twoHyphens + boundary + twoHyphens + lineEnd);
-								urlConObj.getResponseCode();
-								//close the streams //
-								fileInputStream.close();
-								dos.flush();
-								dos.close();
-								serverResponseObj = new StringBuilder();
-								readerObj = new BufferedReader(new InputStreamReader(urlConObj.getInputStream()));
-								while ((currentLine = readerObj.readLine()) != null) {
-									serverResponseObj.append(currentLine + "\n");
-								}
-								readerObj.close();
-								receiveData += "Time:" + new SimpleDateFormat("HH:mm:ss").format(new Date()) + "\n";
-								receiveData += "url:" + requestPath + "\n";
-								receiveData += "------------------\n";
-								urlConObj.disconnect();
 							} else {
 								/* SEND JSON DATA TO SERVER*/
 								requestPath = new URL(requesturl);
