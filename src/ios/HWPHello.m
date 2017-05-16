@@ -492,46 +492,44 @@
                     if([fileType isEqualToString:@"file"]){
                         @try {
                             NSString *requestFilePath = [NSString stringWithFormat:@"%@/%@/", docdir, sendFileBasePath];
-                            NSLog(@"%@", requestFilePath);
-                            NSString *urlString =[NSString stringWithFormat:@"%@&filename=%@",requestUrl, sendFileName];
-                            NSURL *url=[NSURL URLWithString:[[NSString stringWithFormat:@"%@", urlString] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
-                            
-                            // create request
-                            NSMutableURLRequest *theRequest = [[NSMutableURLRequest alloc] init];
-                            [theRequest setCachePolicy:NSURLRequestReloadIgnoringLocalCacheData];
-                            [theRequest setHTTPShouldHandleCookies:NO];
-                            [theRequest setTimeoutInterval:30];
-                            [theRequest setHTTPMethod:@"POST"];
-                            
-                            NSString *boundary = @"---------------------------14737809831466499882746641449";
-                            NSString *contentType = [NSString stringWithFormat:@"multipart/form-data; boundary=%@",boundary];
-                            [theRequest addValue:contentType forHTTPHeaderField: @"Content-Type"];
-                            
-                            // add image data
                             NSString *filePathofImage = [requestFilePath stringByAppendingPathComponent:sendFileName];
-                            NSLog(@"%@", filePathofImage);
-                            
-                            UIImage *yourImage= [UIImage imageNamed:filePathofImage];
-                            NSData *imageData = UIImageJPEGRepresentation(yourImage, 1.0);
-                            NSMutableData *body = [NSMutableData data];
-                            [body appendData:[[NSString stringWithFormat:@"\r\n--%@\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
-                            if (imageData)
-                                [body appendData:[[NSString stringWithFormat:@"%@%@%@", @"Content-Disposition: form-data; name=\"uploaded_file\"; filename=\"",sendFileName,@"\"\r\n"] dataUsingEncoding:NSUTF8StringEncoding]];
-                            NSString *imgMimeType = [NSString stringWithFormat:@"Content-Type: %@\r\n\r\n", [self contentTypeForImageData:imageData]];
-                            [body appendData:[imgMimeType dataUsingEncoding:NSUTF8StringEncoding]];
-                            if (imageData)
-                                [body appendData:[NSData dataWithData:imageData]];
-                            [body appendData:[[NSString stringWithFormat:@"\r\n--%@--\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
-                            
-                            // setting the body of the post to the reqeust
-                            [theRequest setHTTPBody:body];
-                            
-                            NSString *postLength = [NSString stringWithFormat:@"%lu", (unsigned long)[body length]];
-                            [theRequest setValue:postLength forHTTPHeaderField:@"Content-Length"];
-                            
-                            // set URL
-                            [theRequest setURL:url];
-                            [NSURLConnection connectionWithRequest:theRequest delegate:self];
+                            if ([[NSFileManager defaultManager] fileExistsAtPath:filePathofImage]){
+                                NSString *urlString =[NSString stringWithFormat:@"%@&filename=%@",requestUrl, sendFileName];
+                                NSURL *url=[NSURL URLWithString:[[NSString stringWithFormat:@"%@", urlString] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
+                                
+                                // create request
+                                NSMutableURLRequest *theRequest = [[NSMutableURLRequest alloc] init];
+                                [theRequest setCachePolicy:NSURLRequestReloadIgnoringLocalCacheData];
+                                [theRequest setHTTPShouldHandleCookies:NO];
+                                [theRequest setTimeoutInterval:30];
+                                [theRequest setHTTPMethod:@"POST"];
+                                
+                                NSString *boundary = @"---------------------------14737809831466499882746641449";
+                                NSString *contentType = [NSString stringWithFormat:@"multipart/form-data; boundary=%@",boundary];
+                                [theRequest addValue:contentType forHTTPHeaderField: @"Content-Type"];
+                                
+                                UIImage *yourImage= [UIImage imageNamed:filePathofImage];
+                                NSData *imageData = UIImageJPEGRepresentation(yourImage, 1.0);
+                                NSMutableData *body = [NSMutableData data];
+                                [body appendData:[[NSString stringWithFormat:@"\r\n--%@\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
+                                if (imageData)
+                                    [body appendData:[[NSString stringWithFormat:@"%@%@%@", @"Content-Disposition: form-data; name=\"uploaded_file\"; filename=\"",sendFileName,@"\"\r\n"] dataUsingEncoding:NSUTF8StringEncoding]];
+                                NSString *imgMimeType = [NSString stringWithFormat:@"Content-Type: %@\r\n\r\n", [self contentTypeForImageData:imageData]];
+                                [body appendData:[imgMimeType dataUsingEncoding:NSUTF8StringEncoding]];
+                                if (imageData)
+                                    [body appendData:[NSData dataWithData:imageData]];
+                                [body appendData:[[NSString stringWithFormat:@"\r\n--%@--\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
+                                
+                                // setting the body of the post to the reqeust
+                                [theRequest setHTTPBody:body];
+                                
+                                NSString *postLength = [NSString stringWithFormat:@"%lu", (unsigned long)[body length]];
+                                [theRequest setValue:postLength forHTTPHeaderField:@"Content-Length"];
+                                
+                                // set URL
+                                [theRequest setURL:url];
+                                [NSURLConnection connectionWithRequest:theRequest delegate:self];
+                            }
                         } @catch (NSException *exception) {
                             NSLog(@"Exception : %@", exception.description);
                         }
