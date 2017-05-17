@@ -281,16 +281,31 @@
                     NSString *replacedString = responseString;
                     replacedString = [replacedString stringByReplacingOccurrencesOfString:@"[" withString:@""];
                     replacedString = [replacedString stringByReplacingOccurrencesOfString:@"]" withString:@""];
-                    //Write response into checksum.txt file
                     NSData *finalCheckSumData = [replacedString dataUsingEncoding:NSUTF8StringEncoding];
-                    [finalCheckSumData writeToFile:checkSumPath atomically:true];
-                    NSString *date, *hour, *minute;
-                    NSData *responseJson = [replacedString dataUsingEncoding:NSUTF8StringEncoding];
-                    NSMutableDictionary * dictionary = [NSJSONSerialization JSONObjectWithData:responseJson options:NSJSONReadingMutableContainers error:&jsonError];
-                    date = [NSString stringWithFormat:@"%@", dictionary[@"serverDate"]];
-                    hour = [NSString stringWithFormat:@"%@", dictionary[@"serverHour"]];
-                    minute = [NSString stringWithFormat:@"%@", dictionary[@"serverMinute"]];
-                    [self timeValues:date hour:hour minute:minute];
+                    NSDictionary *json = [[NSDictionary alloc] init];
+                    json = [NSJSONSerialization JSONObjectWithData:finalCheckSumData options:kNilOptions error:&jsonError];
+                    //Check if it is valid JSON or not
+                    if ([NSJSONSerialization JSONObjectWithData:finalCheckSumData
+                                                        options:kNilOptions
+                                                          error:&jsonError] == nil)
+                    {
+                        // If it not a valid JSON can Handle error here..
+                    } else {
+                        //Check given response is valid Checksum data or Exception..
+                        if([json objectForKey:@"refresh_ind"]){
+                            //Write response into Checksum.txt file..
+                            [finalCheckSumData writeToFile:checkSumPath atomically:true];
+                            NSString *date, *hour, *minute;
+                            NSData *responseJson = [replacedString dataUsingEncoding:NSUTF8StringEncoding];
+                            NSMutableDictionary * dictionary = [NSJSONSerialization JSONObjectWithData:responseJson options:NSJSONReadingMutableContainers error:&jsonError];
+                            date = [NSString stringWithFormat:@"%@", dictionary[@"serverDate"]];
+                            hour = [NSString stringWithFormat:@"%@", dictionary[@"serverHour"]];
+                            minute = [NSString stringWithFormat:@"%@", dictionary[@"serverMinute"]];
+                            [self timeValues:date hour:hour minute:minute];
+                        } else {
+                            NSLog(@"yes its giving exception...");
+                        }
+                    }
                 }
             } else{
                 NSLog(@"There is no internet connection.");
