@@ -94,7 +94,7 @@ public class mInterfaceUtil {
 			inputFileObj = arguments.getJSONObject(0);
 			srcFilePath = inputFileObj.optString("srcPath").toString();
 			srcFileName = inputFileObj.optString("srcFile").toString();
-			desFilePath = inputFileObj.optString("desPath").toString();
+			desFilePath = "/sdcard/" + inputFileObj.optString("desPath").toString();
 			desFileName = inputFileObj.optString("desFile").toString();
 			sourceFileObj = new File(srcFilePath + "/" + srcFileName);
 			desFileObj = new File(desFilePath + "/" + desFileName);
