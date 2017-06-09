@@ -122,6 +122,8 @@ public class mInterfaceService extends Service {
 		serverTimeObj = serverDateObj.optString("serverDate").toString();
 
 		// ******SERVER TIME ******//
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy,MM,dd,HH,mm,ss");
+		String currentDateandTime = sdf.format(new Date());
 		simpleDateFormat = new SimpleDateFormat("yyyy,MM,dd,HH,mm,ss");
 		Date date = simpleDateFormat.parse(serverTimeObj);
 		long a = date.getTime() + 60000;
@@ -132,6 +134,10 @@ public class mInterfaceService extends Service {
 		writerObj.write(serverDateObj.toString());
 		writerObj.flush();
 		writerObj.close();
+		BufferedWriter writerObj1 = new BufferedWriter(new FileWriter(new File(baseDirectory, "mservice/time.txt"),true));
+		writerObj1.write("device_time: "+currentDateandTime +"  Servertime: "+ serverTimeObj +"\n");
+		writerObj1.flush();
+		writerObj1.close();
 	}
 	private class CheckSumIndicatorResult extends AsyncTask < String,
 			Void,
@@ -447,7 +453,7 @@ public class mInterfaceService extends Service {
 						if (method.equals("read")) {
 							backUpFilePath = new File(baseDirectory.getAbsolutePath() + "/mservice/database/" + "bckp_" + keyValue + ".txt");
 							requestPath = new URL(requesturl);
-							urlConObj = (HttpURLConnection)requestPath.openConnection();
+							urlConObj = (HttpURLConnection) requestPath.openConnection();
 							urlConObj.setDoOutput(true);
 							urlConObj.setRequestMethod("POST");
 							urlConObj.setRequestProperty("CONTENT-TYPE", "application/json");
@@ -509,7 +515,7 @@ public class mInterfaceService extends Service {
 								if(new File(requestFilepath).exists()){
 									fileInputStream = new FileInputStream(new File(requestFilepath));
 									requestPath = new URL((requesturl + "&filename=" + sendFileName).replaceAll(" ", "%20"));
-									urlConObj = (HttpURLConnection)requestPath.openConnection();
+									urlConObj = (HttpURLConnection) requestPath.openConnection();
 									urlConObj.setDoInput(true); // Allow Inputs
 									urlConObj.setDoOutput(true); // Allow Outputs
 									urlConObj.setUseCaches(false); // Don't use a Cached Copy
@@ -561,7 +567,7 @@ public class mInterfaceService extends Service {
 							} else {
 								/* SEND JSON DATA TO SERVER*/
 								requestPath = new URL(requesturl);
-								urlConObj = (HttpURLConnection)requestPath.openConnection();
+								urlConObj = (HttpURLConnection) requestPath.openConnection();
 								urlConObj.setDoOutput(true);
 								urlConObj.setRequestMethod("POST");
 								urlConObj.setRequestProperty("CONTENT-TYPE", "application/json");
